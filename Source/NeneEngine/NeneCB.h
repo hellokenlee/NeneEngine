@@ -27,6 +27,8 @@ struct PerFrameCBDS {
 	NNFloat _padding2;
 	//
 	NNMat4 shadowlight_space;
+	NNMat4 shadowlight_view;
+	NNMat4 shadowlight_proj;
 };
 
 // 每物体更新的常量缓冲结构

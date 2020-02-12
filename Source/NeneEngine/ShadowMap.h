@@ -17,15 +17,20 @@
 class ShadowMap : public Texture, RenderTarget {
 public:
 	//
-	static std::shared_ptr<ShadowMap> Create(const NNFloat& volume, const NNUInt& width, const NNUInt& height);
+	static std::shared_ptr<ShadowMap> Create(const NNFloat& radius, const NNUInt& width, const NNUInt& height);
 	//
 	void SetLight(std::shared_ptr<Light> shadowlight);
+	void SetRadius(const NNFloat rad);
+	void SetDistance(const NNFloat dis);
 	//
 	virtual void Use(const NNUInt& slot = 0) override;
 	virtual void Begin() override;
 	virtual void End() override;
 protected:
-	NNFloat m_volume;
+	// 阴影贴图的正方形半径
+	NNFloat m_radius;
+	// 阴影贴图到摄像机的距离
+	NNFloat m_distance;
 	NNMat4 m_light_view_mat;
 	NNMat4 m_light_proj_mat;
 	std::shared_ptr<Light> m_light;

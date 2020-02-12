@@ -12,9 +12,9 @@ class Texture2D : public Texture {
 public:
 	// 创造一个2D纹理
 	static std::shared_ptr<Texture2D> Create(const NNChar* filePath);
-	static std::shared_ptr<Texture2D> createFromMemory(const NNUInt& width, const NNUInt& height,
+	static std::shared_ptr<Texture2D> CreateFromMemory(const NNUInt& width, const NNUInt& height,
 		const NNUInt& iformat, const NNUInt& format, const NNUInt& type, const void *pInitData = nullptr);
-	static std::shared_ptr<Texture2D> createMultisample(const NNUInt& width, const NNUInt& height, const NNUInt& samples, const NNUInt& iformat);
+	static std::shared_ptr<Texture2D> CreateMultisample(const NNUInt& width, const NNUInt& height, const NNUInt& samples, const NNUInt& iformat);
 	// 析构函数
 	~Texture2D();
 	// 使用该纹理

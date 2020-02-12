@@ -242,6 +242,14 @@
     <ClInclude Include="..\..\Source\NeneEngine\Event.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Geometry.h" />
     <ClInclude Include="..\..\Source\NeneEngine\GUI.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\ImGui\imconfig.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\ImGui\imgui.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\ImGui\imgui_impl_dx11.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\ImGui\imgui_impl_glfw_gl3.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\ImGui\imgui_internal.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_rect_pack.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_textedit.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_truetype.h" />
     <ClInclude Include="..\..\Source\NeneEngine\IO.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Keyboard.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Light.h" />
@@ -285,6 +293,10 @@
     <ClCompile Include="..\..\Source\NeneEngine\Geometry.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\GUI_DX.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\GUI_GL.cpp" />
+    <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui.cpp" />
+    <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\IO.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\Keyboard_DX.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\Keyboard_GL.cpp" />

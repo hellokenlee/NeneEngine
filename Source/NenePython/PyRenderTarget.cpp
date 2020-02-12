@@ -7,7 +7,7 @@ void BindRenderTarget(py::module& mod)
 {
 	auto shape = py::class_<RenderTarget, std::shared_ptr<RenderTarget>>(mod, "RenderTarget")
 		.def(py::init(&RenderTarget::Create))
-		.def(py::init(&RenderTarget::createMultisample))
+		.def(py::init(&RenderTarget::CreateMultisample))
 		.def("end", &RenderTarget::end)
 		.def("begin", &RenderTarget::begin)
 		.def("get_color_texture", &RenderTarget::getColorTex)

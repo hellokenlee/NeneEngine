@@ -17,10 +17,10 @@ RenderTarget::RenderTarget(const NNUInt& width, const NNUInt& height, const NNUI
 	glGenFramebuffers(1, &m_fbo);
 	// 颜色附件
 	for (NNUInt i = 0; i < count; ++i) {
-		m_color_texes.push_back(Texture2D::createFromMemory(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE));
+		m_color_texes.push_back(Texture2D::CreateFromMemory(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE));
 	}
 	// 深度模板附件
-	m_depthstencil_tex = Texture2D::createFromMemory(width, height, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
+	m_depthstencil_tex = Texture2D::CreateFromMemory(width, height, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
 	// 绑定附件到帧缓冲
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 		vector<unsigned int> attachments;

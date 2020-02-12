@@ -19,8 +19,8 @@ public:
 	NNVec3 mColorSpecular;
 private:
 	Light();
-	Light(const Light& rhs);
-	Light& operator=(const Light& rhs);
+	Light(const Light& rhs) = delete;
+	Light& operator=(const Light& rhs) = delete;
 };
 
-#endif // SHADOW_MAP_H
+#endif // LIGHT_H

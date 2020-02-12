@@ -14,9 +14,11 @@ void myCallback(shared_ptr<BaseEvent> eve) {
 
 int main() {
 	// 初始化
-	Utils::Init("Sample1", 800, 600);
+	Utils::Init("NeneSample", 800, 600);
 	// 背景色
 	Utils::ClearColor(0.1f, 0.1f, 0.1f);
+	//
+	auto ui = GUI::Create();
 	// 增加回调
 	Keyboard::Instance().OnPress().AddCallbackFunc(myCallback);
 	//
@@ -27,11 +29,21 @@ int main() {
 	//
 	auto cube = Geometry::CreateCube();
 	auto quad = Geometry::CreateQuad();
-	auto shader = Shader::Create("../../Resource/Shader/GLSL/Common.vert", "../../Resource/Shader/GLSL/Common.frag", POSITION_NORMAL_TEXTURE, true);
-	auto shadowed_shader = Shader::Create("../../Resource/Shader/GLSL/ShadowedCommon.vert", "../../Resource/Shader/GLSL/ShadowedCommon.frag", POSITION_NORMAL_TEXTURE, true);
+	
+	auto shader_shadow = Shader::Create("../../Resource/Shader/GLSL/Shadow.vert", "../../Resource/Shader/GLSL/Shadow.frag", POSITION_NORMAL_TEXTURE, true);
+	auto shader_forward = Shader::Create("../../Resource/Shader/GLSL/ShadowedCommon.vert", "../../Resource/Shader/GLSL/ShadowedCommon.frag", POSITION_NORMAL_TEXTURE, true);
 	auto tx = Texture2D::Create("../../Resource/Texture/snow.jpg");
 	//
+	auto light = Light::Create();
+	light->mDirection = NNVec3(10.0f, 10.0f, 10.0f);
 	auto sm = ShadowMap::Create(10.0f, 512, 512);
+	sm->SetLight(light);
+	quad->RotateX(M_PI_OVER_2);
+	quad->ScaleTo(50.0f);
+	cube->ScaleTo(0.5f);
+	quad->MoveTo(NNVec3(0.0f, -0.1f, 0.0f));
+	cube->MoveTo(NNVec3(0.0f, 0.6f, 0.0f));
+	cc->SetSpeed(2.0f);
 	// 主循环
 	while (!Utils::WindowShouldClose()) {
 		// 处理 IO
@@ -40,22 +52,25 @@ int main() {
 		cc->Update();
 		cc->GetCamera()->Use();
 		NeneCB::Instance().PerFrame().Update(PER_FRAME_SLOT);
-		//
-		//sm->Begin();
-		//{
-		//	Utils::Clear();
-		//	cube->Draw(shader);
-		//	quad->Draw(shader);
-		//}
-		//sm->End();
-		//
+		// Shadow Pass
+		sm->Begin();
 		{
 			Utils::Clear();
-			tx->Use(0);
-			ca->Draw();
-			//cube->Draw(shader);
-			quad->Draw(shader);
+			cube->Draw(shader_shadow);
+			quad->Draw(shader_shadow);
 		}
+		sm->End();
+		// Forward Pass
+		{
+			Utils::Clear();
+			ca->Draw();
+			tx->Use(0);
+			sm->Use(1);
+			cube->Draw(shader_forward);
+			quad->Draw(shader_forward);
+		}
+		//
+		ui->Draw();
 		// 交换缓冲
 		Utils::SwapBuffers();
 	}

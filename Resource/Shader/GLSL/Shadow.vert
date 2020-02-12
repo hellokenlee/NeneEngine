@@ -22,7 +22,5 @@ out vec2 texcoord_VS_out;
 out vec4 lightspace_position_VS_out;
 
 void main() {
-	gl_Position = proj * view * model * vec4(position_VS_in, 1.0);
-	lightspace_position_VS_out = light_proj * light_view * model * vec4(position_VS_in, 1.0);
-	texcoord_VS_out = texcoord_VS_in;
+	gl_Position = light_proj * light_view * model * vec4(position_VS_in, 1.0);
 }

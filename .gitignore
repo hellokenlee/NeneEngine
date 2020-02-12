@@ -44,3 +44,4 @@ Project/**/*.obj
 *.pidb
 *.svclog
 *.scc
+*.enc

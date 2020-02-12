@@ -14,7 +14,7 @@ Texture2D::~Texture2D() {
 	}
 }
 
-shared_ptr<Texture2D> Texture2D::createFromMemory(const NNUInt& width, const NNUInt& height, const NNUInt& iformat, const NNUInt& format, const NNUInt& type, const void *pInitData) {
+shared_ptr<Texture2D> Texture2D::CreateFromMemory(const NNUInt& width, const NNUInt& height, const NNUInt& iformat, const NNUInt& format, const NNUInt& type, const void *pInitData) {
 	//
 	GLuint texID = 0;
 	glGenTextures(1, &texID);
@@ -22,6 +22,8 @@ shared_ptr<Texture2D> Texture2D::createFromMemory(const NNUInt& width, const NNU
 		glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)iformat, width, height, 0, (GLenum)format, (GLenum)type, pInitData);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//
 	if (texID == 0) {
@@ -32,7 +34,7 @@ shared_ptr<Texture2D> Texture2D::createFromMemory(const NNUInt& width, const NNU
 	return shared_ptr<Texture2D>(ret);
 }
 
-shared_ptr<Texture2D> Texture2D::createMultisample(const NNUInt& width, const NNUInt& height, const NNUInt& samples, const NNUInt& iformat) {
+shared_ptr<Texture2D> Texture2D::CreateMultisample(const NNUInt& width, const NNUInt& height, const NNUInt& samples, const NNUInt& iformat) {
 	//
 	GLuint texID = 0;
 	glGenTextures(1, &texID);
