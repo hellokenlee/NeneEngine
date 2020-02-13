@@ -38,8 +38,9 @@ void ShadowMap::SetDistance(const NNFloat dis)
 
 void ShadowMap::Begin()
 {
+	// 设置视点
+	Utils::SetViewPort(0, 0, m_width, m_height);
 	// 计算光源位置
-	
 	// 计算光源空间矩阵
 	m_light_view_mat = NNCreateLookAt(NNVec3(10.0f, 10.0f, 10.0f), NNVec3(0.0f, 0.0f, 0.0f), NNVec3(0.0f, 1.0f, 0.0f));
 	m_light_proj_mat = NNCreateOrtho(-m_radius, m_radius, -m_radius, m_radius, 1.0f, 100.5f);
@@ -54,7 +55,10 @@ void ShadowMap::Begin()
 
 void ShadowMap::End()
 {
+	//
 	RenderTarget::End();
+	//
+	Utils::SetViewPort(0, 0, Utils::GetWindowWidth(), Utils::GetWindowHeight());
 }
 
 void ShadowMap::Use(const NNUInt& slot)

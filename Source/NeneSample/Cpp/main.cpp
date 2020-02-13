@@ -36,23 +36,24 @@ int main() {
 	//
 	auto light = Light::Create();
 	light->mDirection = NNVec3(10.0f, 10.0f, 10.0f);
-	auto sm = ShadowMap::Create(10.0f, 512, 512);
+	auto sm = ShadowMap::Create(3.0f, 512, 512);
 	sm->SetLight(light);
 	quad->RotateX(M_PI_OVER_2);
 	quad->ScaleTo(50.0f);
 	cube->ScaleTo(0.5f);
 	quad->MoveTo(NNVec3(0.0f, -0.1f, 0.0f));
-	cube->MoveTo(NNVec3(0.0f, 0.6f, 0.0f));
+	cube->MoveTo(NNVec3(0.0f, 0.4f, 0.0f));
 	cc->SetSpeed(2.0f);
 	// 主循环
 	while (!Utils::WindowShouldClose()) {
 		// 处理 IO
 		Utils::Update();
-		//
+		// Camera
 		cc->Update();
 		cc->GetCamera()->Use();
 		NeneCB::Instance().PerFrame().Update(PER_FRAME_SLOT);
 		// Shadow Pass
+		glViewport(0, 0, 512, 512);
 		sm->Begin();
 		{
 			Utils::Clear();
@@ -60,6 +61,7 @@ int main() {
 			quad->Draw(shader_shadow);
 		}
 		sm->End();
+		glViewport(0, 0, 800, 600);
 		// Forward Pass
 		{
 			Utils::Clear();

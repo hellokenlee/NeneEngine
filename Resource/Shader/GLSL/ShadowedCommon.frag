@@ -1,5 +1,7 @@
 #version 420 core
 
+#define BIAS 0.001
+
 layout (binding = 0) uniform sampler2D TexDiffuse;
 layout (binding = 1) uniform sampler2D TexShadow;
 
@@ -24,7 +26,7 @@ void main()
 	//
 	if(depth > 0.0 && lspos.z <= 1.0)
 	{
-		if(lspos.z > depth)
+		if(lspos.z - BIAS > depth)
 		{
 			color_FS_out = vec4(0.0, 1.0, 0.0, 1.0); // Shadowed
 		}
@@ -32,10 +34,9 @@ void main()
 		{
 			color_FS_out = vec4(1.0, 0.0, 0.0, 1.0); // Normal
 		}
-		color_FS_out = vec4(depth, 0.0, 0.0, 1.0);
 	}
 	else
 	{
-		color_FS_out = vec4(0.2, 0.2, 0.2, 1.0);
+		color_FS_out = vec4(0.9, 0.9, 0.9, 1.0);
 	}
 }
