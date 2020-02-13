@@ -3,8 +3,8 @@
 #include "Light.h"
 
 Light::Light() :
-	mType(DIRECTIONAL_LIGHT), mRange(1000.0f), mPosition(0.0f), mDirection(-1.0f),
-	mAttenuation(0.0f), mColorAmbient(1.0f), mColorDiffuse(1.0f), mColorSpecular(1.0f)
+	m_type(DIRECTIONAL_LIGHT), m_range(1000.0f), m_position(0.0f), m_direction(-1.0f),
+	m_attenuation(0.0f), m_color_ambient(1.0f), m_color_diffuse(1.0f), m_color_specular(1.0f)
 	{}
 
 std::shared_ptr<Light> Light::Create()

@@ -35,8 +35,8 @@ int main() {
 	auto tx = Texture2D::Create("../../Resource/Texture/snow.jpg");
 	//
 	auto light = Light::Create();
-	light->mDirection = NNVec3(10.0f, 10.0f, 10.0f);
-	auto sm = ShadowMap::Create(3.0f, 512, 512);
+	light->SetDirection(NNVec3(-1.0f, -1.0f, -1.0f));
+	auto sm = ShadowMap::Create(10.0f, 512, 512);
 	sm->SetLight(light);
 	quad->RotateX(M_PI_OVER_2);
 	quad->ScaleTo(50.0f);
