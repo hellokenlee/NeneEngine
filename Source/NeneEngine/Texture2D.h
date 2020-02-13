@@ -39,7 +39,8 @@ protected:
 	Texture2D(const Texture2D& rhs);
 	Texture2D& operator=(const Texture2D& rhs);
 
-friend class RenderTarget;
+	
+	friend class RenderTarget;
 };
 
 #endif // TEXTURE2D_H

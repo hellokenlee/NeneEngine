@@ -10,12 +10,11 @@
 //    CameraController: Control Your Camera
 //
 
-class CameraController : public Observer {
-public:
-
+class CameraController : public Observer 
+{
 public:
 	//
-	~CameraController();
+	virtual ~CameraController();
 	//
 	static std::shared_ptr<CameraController> Create();
 	static std::shared_ptr<CameraController> Create(std::shared_ptr<Camera> cam);
@@ -27,6 +26,14 @@ public:
 	void SetLocked(const bool& isLocked);
 	// 获取摄像机
 	inline const std::shared_ptr<Camera> GetCamera() { return m_camera; }
+
+	// 移动摄像机
+	void MoveUp(const NNFloat distance);
+	void MoveDowm(const NNFloat distance);
+	void MoveLeft(const NNFloat distance);
+	void MoveRight(const NNFloat distance);
+	void MoveBack(const NNFloat distance);
+	void MoveForward(const NNFloat distance);
 protected:
 	//
 	std::shared_ptr<Camera> m_camera;
@@ -46,8 +53,8 @@ protected:
 	// 构造函数
 	CameraController();
 	CameraController(std::shared_ptr<Camera> cam);
-	CameraController(const CameraController& rhs);
-	CameraController& operator=(const CameraController& rhs);
+	CameraController(const CameraController& rhs) = delete;
+	CameraController& operator=(const CameraController& rhs) = delete;
 	// 输入事件监听
 	virtual void OnNotify(std::shared_ptr<BaseEvent> eve);
 };

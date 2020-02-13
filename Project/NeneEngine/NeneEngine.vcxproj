@@ -262,6 +262,7 @@
     <ClInclude Include="..\..\Source\NeneEngine\Observer.h" />
     <ClInclude Include="..\..\Source\NeneEngine\ParticleSystem.h" />
     <ClInclude Include="..\..\Source\NeneEngine\RenderContext.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\Renderer.h" />
     <ClInclude Include="..\..\Source\NeneEngine\RenderTarget.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Shader.h" />
     <ClInclude Include="..\..\Source\NeneEngine\ShaderCross.h" />

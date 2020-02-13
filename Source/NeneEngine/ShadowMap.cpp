@@ -37,11 +37,8 @@ void ShadowMap::Begin()
 {
 	// 设置视点
 	Utils::SetViewPort(0, 0, m_width, m_height);
-	// 计算光源位置
-	NNVec3 cam_pos = NeneCB::Instance().PerFrame().data.camera_position;
-	NNVec3 light_target = (NNNormalize(m_light->GetDirection()) * m_distance) + cam_pos;
 	// 计算光源空间矩阵
-	m_light_view_mat = NNCreateLookAt(cam_pos, light_target, NNVec3(0.0f, 1.0f, 0.0f));
+	m_light_view_mat = NNCreateLookAt(NNVec3(1.0f), NNVec3(0.0f), NNVec3(0.0f, 1.0f, 0.0f));
 	m_light_proj_mat = NNCreateOrtho(-m_radius, m_radius, -m_radius, m_radius, 0.1f, 1000.5f);
 	//
 	NeneCB::Instance().PerFrame().data.shadowlight_view = m_light_view_mat;

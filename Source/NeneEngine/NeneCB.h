@@ -51,8 +51,8 @@ protected:
 private:
 	// 构造
 	NeneCB();
-	NeneCB(const NeneCB& rhs);
-	NeneCB& operator = (const NeneCB& rhs);
+	NeneCB(const NeneCB& rhs) = delete;
+	NeneCB& operator = (const NeneCB& rhs) = delete;
 };
 
 #endif // NENE_CB_H

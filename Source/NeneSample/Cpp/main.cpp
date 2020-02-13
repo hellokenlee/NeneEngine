@@ -53,7 +53,6 @@ int main() {
 		cc->GetCamera()->Use();
 		NeneCB::Instance().PerFrame().Update(PER_FRAME_SLOT);
 		// Shadow Pass
-		glViewport(0, 0, 512, 512);
 		sm->Begin();
 		{
 			Utils::Clear();
@@ -61,7 +60,6 @@ int main() {
 			quad->Draw(shader_shadow);
 		}
 		sm->End();
-		glViewport(0, 0, 800, 600);
 		// Forward Pass
 		{
 			Utils::Clear();

@@ -150,6 +150,9 @@
     <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_truetype.h">
       <Filter>头文件\Engine\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\NeneEngine\Renderer.h">
+      <Filter>头文件\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\NeneEngine\ConstantBuffer_DX.inl">
