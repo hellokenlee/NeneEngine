@@ -1,5 +1,6 @@
 #include "ShadowMap.h"
 #include "NeneCB.h"
+#include "RenderContext.h"
 
 using namespace std;
 
@@ -46,6 +47,8 @@ void ShadowMap::Begin()
 	NeneCB::Instance().PerFrame().data.shadowlight_space = m_light_proj_mat * m_light_view_mat;
 	NeneCB::Instance().PerFrame().Update(PER_FRAME_SLOT);
 	//
+	RenderContext::Instance().Rasterizer()->CullMode(CULL_FRONT);
+	//
 	RenderTarget::Begin();
 }
 
@@ -55,6 +58,8 @@ void ShadowMap::End()
 	RenderTarget::End();
 	//
 	Utils::SetViewPort(0, 0, Utils::GetWindowWidth(), Utils::GetWindowHeight());
+	//
+	RenderContext::Instance().Rasterizer()->CullMode(CULL_BACK);
 }
 
 void ShadowMap::Use(const NNUInt& slot)

@@ -26,7 +26,7 @@ void main()
 	//
 	if(depth > 0.0 && lspos.z <= 1.0)
 	{
-		if(lspos.z - BIAS > depth)
+		if(lspos.z > depth)
 		{
 			color_FS_out = vec4(0.0, 1.0, 0.0, 1.0); // Shadowed
 		}
@@ -39,4 +39,5 @@ void main()
 	{
 		color_FS_out = vec4(0.9, 0.9, 0.9, 1.0);
 	}
+	//color_FS_out = texture(TexDiffuse, texcoord_VS_out);
 }

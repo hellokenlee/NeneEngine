@@ -6,32 +6,34 @@
 #include "Types.h"
 
 
-class RenderContextState {
+class RenderContextState 
+{
 public:
-	RenderContextState() : mDirty(true) {}
-	virtual void commit() = 0;
-	virtual bool dirty() { return mDirty; }
+	RenderContextState() : m_dirty(true) {}
+	virtual void Commit() = 0;
+	virtual inline bool Dirty() { return m_dirty; }
 protected:
-	bool mDirty;
-private:
+	bool m_dirty;
+
 	friend class RenderContext;
 };
 
-class DepthStencilState : public RenderContextState {
+class DepthStencilState : public RenderContextState 
+{
 public:
 	//
 	DepthStencilState();
 	//
-	void depthTest(const bool& enabled);
-	void depthMask(const bool& write);
-	void depthFunc(const NNTestFunc& func);
+	void DepthTest(const bool& enabled);
+	void DepthMask(const bool& write);
+	void DepthFunc(const NNTestFunc& func);
 	//
-	void stencilTest(const bool& enabled);
-	void stencilMask(const NNUInt& mask);
-	void stencilFunc(const NNTestFunc& func, const NNUInt& ref, const NNUInt& mask);
-	void stencilOp(const NNStencilOp& sfail, const NNStencilOp& dpfail, const NNStencilOp& dppass);
+	void StencilTest(const bool& enabled);
+	void StencilMask(const NNUInt& mask);
+	void StencilFunc(const NNTestFunc& func, const NNUInt& ref, const NNUInt& mask);
+	void StencilOp(const NNStencilOp& sfail, const NNStencilOp& dpfail, const NNStencilOp& dppass);
 	//
-	virtual void commit();
+	virtual void Commit() override;
 protected:
 #if defined NENE_GL
 	;
@@ -42,35 +44,45 @@ protected:
 #endif
 };
 
-class BlendState : public RenderContextState {
+class BlendState : public RenderContextState 
+{
 public:
-	virtual void commit() {}
+	virtual void Commit() override {}
 };
 
-class RasterizerState : public RenderContextState {
+class RasterizerState : public RenderContextState 
+{
 public:
-	virtual void commit() {}
+	//
+	void FillMode(const NNFillMode mode);
+	//
+	void CullMode(const NNCullMode mode);
+	void FrontFace(const NNVertexOrder order);
+	//
+	void DepthBias(const NNFloat bias, const NNFloat slope);
+	//
+	virtual void Commit() override {}
 };
 
 class RenderContext {
 public:
 	//
-	static RenderContext& instance();
+	static RenderContext& Instance();
 	//
-	void commit();
+	void Commit();
 	//
-	inline std::shared_ptr<DepthStencilState> pDepthStencil() { return mpDepthStencil; }
-	inline void setDepthStencil(std::shared_ptr<DepthStencilState> new_state) { new_state->mDirty = true; mpDepthStencil = new_state; }
+	inline std::shared_ptr<DepthStencilState> DepthStencil() { return m_depth_stencil; }
+	inline void SetDepthStencil(std::shared_ptr<DepthStencilState> new_state) { new_state->m_dirty = true; m_depth_stencil = new_state; }
 	//
-	inline std::shared_ptr<BlendState> pBlend() { return mpBlend; }
-	inline void setBlend(std::shared_ptr<BlendState> new_state) { new_state->mDirty = true; mpBlend = new_state; }
+	inline std::shared_ptr<BlendState> Blend() { return m_blend; }
+	inline void setBlend(std::shared_ptr<BlendState> new_state) { new_state->m_dirty = true; m_blend = new_state; }
 	//
-	inline std::shared_ptr<RasterizerState> pRasterizer() { return mpRasterizer; }
-	inline void setRasterizer(std::shared_ptr<RasterizerState> new_state) { new_state->mDirty = true; mpRasterizer = new_state; }
+	inline std::shared_ptr<RasterizerState> Rasterizer() { return m_rasterizer; }
+	inline void setRasterizer(std::shared_ptr<RasterizerState> new_state) { new_state->m_dirty = true; m_rasterizer = new_state; }
 protected:
-	std::shared_ptr<BlendState> mpBlend;
-	std::shared_ptr<RasterizerState> mpRasterizer;
-	std::shared_ptr<DepthStencilState> mpDepthStencil;
+	std::shared_ptr<BlendState> m_blend;
+	std::shared_ptr<RasterizerState> m_rasterizer;
+	std::shared_ptr<DepthStencilState> m_depth_stencil;
 private:
 	//
 	RenderContext();

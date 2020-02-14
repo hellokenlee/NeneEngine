@@ -29,6 +29,8 @@ int main() {
 	//
 	auto cube = Geometry::CreateCube();
 	auto quad = Geometry::CreateQuad();
+	auto sphere0 = Geometry::CreateSphereUV();
+	auto sphere1 = Geometry::CreateSphereIco();
 	
 	auto shader_shadow = Shader::Create("../../Resource/Shader/GLSL/Shadow.vert", "../../Resource/Shader/GLSL/Shadow.frag", POSITION_NORMAL_TEXTURE, true);
 	auto shader_forward = Shader::Create("../../Resource/Shader/GLSL/ShadowedCommon.vert", "../../Resource/Shader/GLSL/ShadowedCommon.frag", POSITION_NORMAL_TEXTURE, true);
@@ -44,6 +46,8 @@ int main() {
 	quad->MoveTo(NNVec3(0.0f, -0.1f, 0.0f));
 	cube->MoveTo(NNVec3(0.0f, 0.4f, 0.0f));
 	cc->SetSpeed(2.0f);
+	sphere0->MoveTo(NNVec3(-3.0f, 1.0f, -3.0f));
+	sphere1->MoveTo(NNVec3(-5.0f, 1.0f, -5.0f));
 	// 主循环
 	while (!Utils::WindowShouldClose()) {
 		// 处理 IO
@@ -57,6 +61,8 @@ int main() {
 		{
 			Utils::Clear();
 			cube->Draw(shader_shadow);
+			sphere0->Draw(shader_shadow);
+			sphere1->Draw(shader_shadow);
 			quad->Draw(shader_shadow);
 		}
 		sm->End();
@@ -68,6 +74,8 @@ int main() {
 			sm->Use(1);
 			cube->Draw(shader_forward);
 			quad->Draw(shader_forward);
+			sphere0->Draw(shader_forward);
+			sphere1->Draw(shader_forward);
 		}
 		//
 		ui->Draw();

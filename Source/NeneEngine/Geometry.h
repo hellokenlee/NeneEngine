@@ -10,7 +10,7 @@
 class Geometry {
 public:
 	// 创建一个UV球体
-	static std::shared_ptr<Shape> CreateSphereUV(const NNUInt& latLines = 3, const NNUInt& longLines = 3, NNVertexOrder vo = COUNTER_CLOCK_WISE);
+	static std::shared_ptr<Shape> CreateSphereUV(const NNUInt& latLines = 9, const NNUInt& longLines = 9, NNVertexOrder vo = COUNTER_CLOCK_WISE);
 	// 创建一个ICO球体
 	static std::shared_ptr<Shape> CreateSphereIco(const NNUInt& level = 3, NNVertexOrder vo = COUNTER_CLOCK_WISE);
 	// 创建一个立方体

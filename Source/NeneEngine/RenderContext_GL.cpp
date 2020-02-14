@@ -9,7 +9,7 @@ DepthStencilState::DepthStencilState() {
 
 }
 
-void DepthStencilState::depthTest(const bool& enabled) {
+void DepthStencilState::DepthTest(const bool& enabled) {
 	if (enabled) {
 		glEnable(GL_DEPTH_TEST);
 	} else {
@@ -17,50 +17,90 @@ void DepthStencilState::depthTest(const bool& enabled) {
 	}
 }
 
-void DepthStencilState::depthMask(const bool& write) {
+void DepthStencilState::DepthMask(const bool& write) {
 	
 }
 
-void DepthStencilState::depthFunc(const NNTestFunc& func) {
+void DepthStencilState::DepthFunc(const NNTestFunc& func) {
 	
 }
 
-void DepthStencilState::stencilTest(const bool& enabled) {
+void DepthStencilState::StencilTest(const bool& enabled) {
 	
 }
 
-void DepthStencilState::stencilMask(const NNUInt& mask) {
+void DepthStencilState::StencilMask(const NNUInt& mask) {
 	
 }
 
-void DepthStencilState::stencilFunc(const NNTestFunc& func, const NNUInt& ref, const NNUInt& mask) {
+void DepthStencilState::StencilFunc(const NNTestFunc& func, const NNUInt& ref, const NNUInt& mask) {
 
 }
 
-void DepthStencilState::stencilOp(const NNStencilOp& sfail, const NNStencilOp& dpfail, const NNStencilOp& dppass) {
+void DepthStencilState::StencilOp(const NNStencilOp& sfail, const NNStencilOp& dpfail, const NNStencilOp& dppass) {
 
 }
 
-void DepthStencilState::commit() {
+void DepthStencilState::Commit() {
 	
 }
 
-RenderContext& RenderContext::instance() {
+
+void RasterizerState::FillMode(const NNFillMode mode)
+{
+
+}
+
+void RasterizerState::CullMode(const NNCullMode mode)
+{
+	if (mode == CULL_NONE)
+	{
+		glDisable(GL_CULL_FACE);
+	}
+	else
+	{
+		glEnable(GL_CULL_FACE);
+		switch (mode)
+		{
+		case CULL_BACK:
+			glCullFace(GL_BACK);
+			break;
+		case CULL_FRONT:
+			glCullFace(GL_FRONT);
+			break;
+		case CULL_ALL:
+			glCullFace(GL_FRONT_AND_BACK);
+			break;
+		}
+	}
+}
+void RasterizerState::FrontFace(const NNVertexOrder order)
+{
+
+}
+
+void RasterizerState::DepthBias(const NNFloat bias, const NNFloat slope)
+{
+
+}
+
+
+
+RenderContext& RenderContext::Instance() {
 	static RenderContext ins;
 	return ins;
 }
 
 RenderContext::RenderContext() :
-	mpBlend(new BlendState()),
-	mpRasterizer(new RasterizerState()),
-	mpDepthStencil(new DepthStencilState())
+	m_blend(new BlendState()),
+	m_rasterizer(new RasterizerState()),
+	m_depth_stencil(new DepthStencilState())
 {}
 
-void RenderContext::commit() {
-	//
-	mpBlend->commit();
-	mpRasterizer->commit();
-	mpDepthStencil->commit();
+void RenderContext::Commit() {
+	m_blend->Commit();
+	m_rasterizer->Commit();
+	m_depth_stencil->Commit();
 }
 
 #endif // NENE_GL
