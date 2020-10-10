@@ -1,7 +1,5 @@
 #version 420 core
 
-#define BIAS 0.001
-
 layout (binding = 0) uniform sampler2D TexDiffuse;
 layout (binding = 1) uniform sampler2D TexShadow;
 
@@ -10,34 +8,37 @@ in vec4 lightspace_position_VS_out;
 
 out vec4 color_FS_out;
 
-float CalcShadowFactor()
+#define PCF_WIDTH 2
+
+float CalcShadow(vec4 lspos)
 {
-	return 0.0;
+	// 透视除法
+	vec3 lsppos = lspos.xyz / lspos.w;
+	lsppos = lsppos * 0.5 + 0.5;
+	//
+	if(lsppos.z > 1.0)
+	{
+		return 0.0;
+	}
+	//
+	float shadow = 0.0;
+	vec2 texsize = 1.0 / textureSize(TexShadow, 0);
+	for(int x = -PCF_WIDTH; x <= PCF_WIDTH; ++x)
+	{
+		for (int y = -PCF_WIDTH; y <= PCF_WIDTH; ++y)
+		{
+			float depth = texture(TexShadow, lsppos.xy + vec2(x, y) * texsize).r;
+			shadow += lsppos.z > depth ? 1.0 : 0.0;
+		}
+	}
+	shadow /= (PCF_WIDTH + 1) * (PCF_WIDTH + 1);
+	return shadow;
 }
 
 void main() 
 {
-	//
-	vec3 lspos = lightspace_position_VS_out.xyz / lightspace_position_VS_out.w;
-	lspos = (lspos * 0.5) + 0.5;
-	//
-	float depth = texture(TexShadow, lspos.xy).r;
-	//
-	//
-	if(depth > 0.0 && lspos.z <= 1.0)
-	{
-		if(lspos.z > depth)
-		{
-			color_FS_out = vec4(0.0, 1.0, 0.0, 1.0); // Shadowed
-		}
-		else
-		{
-			color_FS_out = vec4(1.0, 0.0, 0.0, 1.0); // Normal
-		}
-	}
-	else
-	{
-		color_FS_out = vec4(0.9, 0.9, 0.9, 1.0);
-	}
-	//color_FS_out = texture(TexDiffuse, texcoord_VS_out);
+	vec3 color = texture(TexDiffuse, texcoord_VS_out).rgb;
+	float shadow = CalcShadow(lightspace_position_VS_out);
+	color = (1.0 - shadow) * color;
+	color_FS_out = vec4(color, 1.0);
 }

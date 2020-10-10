@@ -13,9 +13,44 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\Hatching">
+      <UniqueIdentifier>{7de82d05-d500-4e23-9937-46503a8ef556}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Simple">
+      <UniqueIdentifier>{86259b69-c28d-43a7-8437-55943ded51a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\AntiAliasing">
+      <UniqueIdentifier>{a99dcef8-c10c-4b90-9c43-bdaa921c7676}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\NeneSample\Cpp\main.cpp">
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoBase.h">
+      <Filter>头文件\AntiAliasing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoFXAA.hpp">
+      <Filter>头文件\AntiAliasing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoMSAA.hpp">
+      <Filter>头文件\AntiAliasing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoNOAA.hpp">
+      <Filter>头文件\AntiAliasing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoTSAA.hpp">
+      <Filter>头文件\AntiAliasing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\Main.hpp">
+      <Filter>头文件\AntiAliasing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\Main.hpp">
+      <Filter>头文件\Hatching</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Simple\Main.hpp">
+      <Filter>头文件\Simple</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\NeneSample\Cpp\Main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

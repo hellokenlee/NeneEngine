@@ -19,12 +19,6 @@
     <Filter Include="源文件\Engine">
       <UniqueIdentifier>{a8085abf-9fa6-421a-9384-f16dba0c549e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\Engine\ImGui">
-      <UniqueIdentifier>{05c15568-5247-45cf-816f-d900f2b8ac91}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Engine\ImGui">
-      <UniqueIdentifier>{890c8108-3772-4c79-abea-0452f11218ea}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\NeneEngine\Nene.h">
@@ -124,33 +118,6 @@
       <Filter>头文件\Engine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\NeneEngine\Light.h">
-      <Filter>头文件\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\NeneEngine\ImGui\imconfig.h">
-      <Filter>头文件\Engine\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\NeneEngine\ImGui\imgui.h">
-      <Filter>头文件\Engine\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\NeneEngine\ImGui\imgui_impl_dx11.h">
-      <Filter>头文件\Engine\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\NeneEngine\ImGui\imgui_impl_glfw_gl3.h">
-      <Filter>头文件\Engine\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\NeneEngine\ImGui\imgui_internal.h">
-      <Filter>头文件\Engine\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_rect_pack.h">
-      <Filter>头文件\Engine\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_textedit.h">
-      <Filter>头文件\Engine\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_truetype.h">
-      <Filter>头文件\Engine\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\NeneEngine\Renderer.h">
       <Filter>头文件\Engine</Filter>
     </ClInclude>
   </ItemGroup>
@@ -294,18 +261,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\NeneEngine\ShadowMap.cpp">
       <Filter>源文件\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui.cpp">
-      <Filter>源文件\Engine\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_draw.cpp">
-      <Filter>源文件\Engine\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_impl_dx11.cpp">
-      <Filter>源文件\Engine\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_impl_glfw_gl3.cpp">
-      <Filter>源文件\Engine\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

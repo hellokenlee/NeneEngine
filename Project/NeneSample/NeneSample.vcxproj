@@ -80,6 +80,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>NENE_GL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\Workspace\VisualStudio\NeneEngine\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;assimp.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -127,7 +128,17 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\NeneSample\Cpp\main.cpp" />
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoBase.h" />
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoFXAA.hpp" />
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoMSAA.hpp" />
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoNOAA.hpp" />
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoTSAA.hpp" />
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\Main.hpp" />
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\Main.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\NeneSample\Cpp\Main.cpp" />
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Simple\Main.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

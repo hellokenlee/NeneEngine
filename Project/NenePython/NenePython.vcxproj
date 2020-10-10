@@ -119,7 +119,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugGL|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -176,7 +176,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugGL|x64'">
     <IncludePath>$(SolutionDir)..\External\Inc\Python\pybind11;$(SolutionDir)..\External\Inc\Python\python27;$(SolutionDir)..\External\Inc\;$(IncludePath)</IncludePath>
     <TargetName>nene</TargetName>
-    <TargetExt>.pyd</TargetExt>
+    <TargetExt>.exe</TargetExt>
     <LibraryPath>$(SolutionDir)..\External\Lib\x64\windows;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDX|x64'">
