@@ -79,11 +79,6 @@ void Utils::Init(const NNChar* name, NNUInt width, NNUInt height) {
 	dCall(showEnviroment());
 }
 
-void Utils::SetViewPort(NNUInt x, NNUInt y, NNUInt width, NNUInt height)
-{
-	glViewport(x, y, width, height);
-}
-
 void Utils::Terminate() {
 	if (mpWindow != nullptr) {
 		glfwDestroyWindow(mpWindow);

@@ -9,7 +9,7 @@ void BindConstantBufferPool(py::module& mod)
 		.def(py::init<>())
 		.def("len", &ConstantBufferPool::len)
 		.def("size", &ConstantBufferPool::size)
-		.def("Update", &ConstantBufferPool::Update)
+		.def("update", &ConstantBufferPool::Update)
 		.def("write", &ConstantBufferPool::write<float>)
 		.def("append", &ConstantBufferPool::append<float>)
 		;

@@ -5,6 +5,6 @@ void BindCamera(pybind11::module& mod)
 {
 	auto cls = pybind11::class_<Camera, std::shared_ptr<Camera>>(mod, "Camera")
 		.def(pybind11::init<>())
-		.def("Use", &Camera::Use)
+		.def("use", &Camera::Use)
 	;
 }

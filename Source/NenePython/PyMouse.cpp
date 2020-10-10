@@ -9,8 +9,6 @@ void BindMouse(py::module& mod)
 {
 	auto cls_nene = py::class_<Mouse>(mod, "Mouse")
 		.def_static("instance", &Mouse::Instance, py::return_value_policy::reference)
-		.def_readonly("on_move", &Mouse::onMove)
-		.def_readonly("on_click", &Mouse::onClick)
-		.def_readonly("on_scroll", &Mouse::onScroll)
+		.def("set_cursor_show", &Mouse::SetCursorShow)
 		;
 }

@@ -13,10 +13,10 @@ void BindObserver(py::module& mod)
 		;
 
 	auto cls_osa = py::class_<Observable, std::shared_ptr<Observable>>(mod, "Obserable")
-		.def("Notify", &Observable::Notify)
+		.def("notify", &Observable::Notify)
 		.def("add_observer", &Observable::AddObserver)
 		.def("del_observer", &Observable::DelObserver)
-		.def("add_callback", &Observable::addCallbackFunc)
-		.def("del_callback", &Observable::delCallbackFunc)
+		.def("add_callback", &Observable::AddCallbackFunc)
+		.def("del_callback", &Observable::DelCallbackFunc)
 		;
 }

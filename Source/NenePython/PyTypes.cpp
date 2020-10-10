@@ -105,6 +105,28 @@ void BindTypes(pybind11::module& mod)
 
 	pybind11::enum_<NNKey>(mod, "Key")
 		.value("ESCAPE", NNKey::NN_KEY_ESCAPE)
+
+		.value("F1", NNKey::NN_KEY_F1)
+		.value("F2", NNKey::NN_KEY_F2)
+		.value("F3", NNKey::NN_KEY_F3)
+		.value("F4", NNKey::NN_KEY_F4)
+		.value("F5", NNKey::NN_KEY_F5)
+		.value("F6", NNKey::NN_KEY_F6)
+		.value("F7", NNKey::NN_KEY_F7)
+		.value("F8", NNKey::NN_KEY_F8)
+		.value("F9", NNKey::NN_KEY_F9)
+		.value("F10", NNKey::NN_KEY_F10)
+		.value("F11", NNKey::NN_KEY_F11)
+		.value("F12", NNKey::NN_KEY_F12)
+
+		.value("PRINT_SCREEN", NNKey::NN_KEY_PRINT_SCREEN)
+		.value("SCROLL_LOCK", NNKey::NN_KEY_SCROLL_LOCK)
+		.value("PAUSE", NNKey::NN_KEY_PAUSE)
+		.value("APOSTROPHE", NNKey::NN_KEY_APOSTROPHE)
+		.value("COMMA", NNKey::NN_KEY_COMMA)
+		.value("MINUS", NNKey::NN_KEY_MINUS)
+		.value("PERIOD", NNKey::NN_KEY_PERIOD)
+		.value("SLASH", NNKey::NN_KEY_SLASH)
 		.export_values()
 		;
 }

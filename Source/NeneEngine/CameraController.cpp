@@ -62,56 +62,17 @@ void CameraController::Update() {
 	static Keyboard& kb = Keyboard::Instance();
 	//
 	if (kb.GetKey(NNKeyMap(W)) == PRESSED)
-	{
-		MoveForward(m_distance);
-	}
+		m_camera->MoveForward(m_distance);
 	if (kb.GetKey(NNKeyMap(A)) == PRESSED)
-	{
-		MoveLeft(m_distance);
-	}
+		m_camera->MoveLeft(m_distance);
 	if (kb.GetKey(NNKeyMap(S)) == PRESSED)
-	{
-		MoveBack(m_distance);
-	}
+		m_camera->MoveBack(m_distance);
 	if (kb.GetKey(NNKeyMap(D)) == PRESSED)
-	{
-		MoveRight(m_distance);
-	}
+		m_camera->MoveRight(m_distance);
 }
 
-void CameraController::SetLocked(const bool& isLocked) 
-{
+void CameraController::SetLocked(const bool& isLocked) {
 	m_is_lock = isLocked;
-}
-
-void CameraController::MoveUp(const NNFloat distance)
-{
-	m_camera->m_position += distance * m_camera->m_up;
-}
-
-void CameraController::MoveDowm(const NNFloat distance)
-{
-	m_camera->m_position -= distance * m_camera->m_up;
-}
-
-void CameraController::MoveLeft(const NNFloat distance)
-{
-	m_camera->m_position -= distance * m_camera->m_right;
-}
-
-void CameraController::MoveRight(const NNFloat distance)
-{
-	m_camera->m_position += distance * m_camera->m_right;
-}
-
-void CameraController::MoveBack(const NNFloat distance)
-{
-	m_camera->m_position -= distance * m_camera->m_front;
-}
-
-void CameraController::MoveForward(const NNFloat distance)
-{
-	m_camera->m_position += distance * m_camera->m_front;
 }
 
 void CameraController::OnNotify(shared_ptr<BaseEvent> eve) {

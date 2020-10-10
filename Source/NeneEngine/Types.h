@@ -158,15 +158,6 @@ enum NNVertexOrder {
 		INCREASE_WRAP = GL_INCR_WRAP,
 		DECREASE_WRAP = GL_DECR_WRAP
 	};
-	enum NNFillMode {
-
-	};
-	enum NNCullMode {
-		CULL_ALL = 0,
-		CULL_NONE = 1,
-		CULL_BACK = 2,
-		CULL_FRONT = 3
-	};
 	//
 	#define NNWindow GLFWwindow*
 	//

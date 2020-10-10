@@ -1,68 +1,45 @@
 #include "ShadowMap.h"
 #include "NeneCB.h"
-#include "RenderContext.h"
 
 using namespace std;
 
-shared_ptr<ShadowMap> ShadowMap::Create(const NNFloat& radius, const NNUInt& width, const NNUInt& height)
+shared_ptr<ShadowMap> ShadowMap::Create(const NNFloat& volume, const NNUInt& width, const NNUInt& height)
 {
-	ShadowMap* ret = new ShadowMap(radius, width, height);
-	if (!ret->m_valid)
-	{
-		delete ret;
-		return nullptr;
-	}
+	//
+	ShadowMap* ret = new ShadowMap();
+	//
+	//ret->RenderTarget::Create(width, height, 1);
+	//
+	ret->m_volume = volume;
+	//
 	return shared_ptr<ShadowMap>(ret);
 }
 
-ShadowMap::ShadowMap(const NNFloat& radius, const NNUInt& width, const NNUInt& height) :
-	RenderTarget(width, height, 1), m_radius(radius), m_distance(1.0f)
-{}
-
 void ShadowMap::SetLight(std::shared_ptr<Light> shadowlight)
 {
-	m_light = shadowlight;
-}
-
-void ShadowMap::SetRadius(const NNFloat rad)
-{
-	m_radius = rad;
-}
-
-void ShadowMap::SetDistance(const NNFloat dis)
-{
-	m_distance = dis;
+	m_light_view_mat = NNCreateLookAt(shadowlight->mDirection, NNVec3(0.0f, 0.0f, 0.0f), NNVec3(0.0f, -1.0f, 0.0f));
+	m_light_proj_mat = NNCreateOrtho(-m_volume, m_volume, -m_volume, m_volume, 1.0f, 100.5f);
 }
 
 void ShadowMap::Begin()
 {
-	// 设置视点
-	Utils::SetViewPort(0, 0, m_width, m_height);
-	// 计算光源空间矩阵
-	m_light_view_mat = NNCreateLookAt(NNVec3(1.0f), NNVec3(0.0f), NNVec3(0.0f, 1.0f, 0.0f));
-	m_light_proj_mat = NNCreateOrtho(-m_radius, m_radius, -m_radius, m_radius, 0.1f, 1000.5f);
-	//
-	NeneCB::Instance().PerFrame().data.shadowlight_view = m_light_view_mat;
-	NeneCB::Instance().PerFrame().data.shadowlight_proj = m_light_proj_mat;
-	NeneCB::Instance().PerFrame().data.shadowlight_space = m_light_proj_mat * m_light_view_mat;
+	NeneCB::Instance().PerFrame().data.view = m_light_view_mat;
+	NeneCB::Instance().PerFrame().data.projection = m_light_proj_mat;
 	NeneCB::Instance().PerFrame().Update(PER_FRAME_SLOT);
-	//
-	RenderContext::Instance().Rasterizer()->CullMode(CULL_FRONT);
-	//
+
 	RenderTarget::Begin();
 }
 
 void ShadowMap::End()
 {
-	//
 	RenderTarget::End();
-	//
-	Utils::SetViewPort(0, 0, Utils::GetWindowWidth(), Utils::GetWindowHeight());
-	//
-	RenderContext::Instance().Rasterizer()->CullMode(CULL_BACK);
 }
 
 void ShadowMap::Use(const NNUInt& slot)
 {
+	auto& CB = NeneCB::Instance().PerFrame();
+	CB.data.shadowlight_space = m_light_view_mat * m_light_proj_mat;
+	CB.Update(PER_FRAME_SLOT);
+
 	RenderTarget::GetDepthStencilTex()->Use(slot);
 }

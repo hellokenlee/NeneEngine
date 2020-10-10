@@ -27,8 +27,6 @@ struct PerFrameCBDS {
 	NNFloat _padding2;
 	//
 	NNMat4 shadowlight_space;
-	NNMat4 shadowlight_view;
-	NNMat4 shadowlight_proj;
 };
 
 // 每物体更新的常量缓冲结构
@@ -51,8 +49,8 @@ protected:
 private:
 	// 构造
 	NeneCB();
-	NeneCB(const NeneCB& rhs) = delete;
-	NeneCB& operator = (const NeneCB& rhs) = delete;
+	NeneCB(const NeneCB& rhs);
+	NeneCB& operator = (const NeneCB& rhs);
 };
 
 #endif // NENE_CB_H

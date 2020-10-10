@@ -11,31 +11,30 @@
 //    RenderTarget: 
 //
 
-class RenderTarget : public std::enable_shared_from_this<RenderTarget> {
+class RenderTarget {
 public:
 	//
 	static std::shared_ptr<RenderTarget> Create(const NNUInt& width, const NNUInt& height, const NNUInt& count);
+	static std::shared_ptr<RenderTarget> CreateMultisample(const NNUInt& width, const NNUInt& height, const NNUInt& samples, const NNUInt& count);
 	//
 	static void Blit(const RenderTarget& src, const RenderTarget& dest, NNUInt field, NNUInt filter);
 	//
 	virtual ~RenderTarget();
 	//
-	const std::shared_ptr<Texture2D> GetColorTex(const NNUInt& idx = 0);
+	const std::shared_ptr<Texture2D> GetColorTex(const NNUInt& idx);
 	const std::shared_ptr<Texture2D> GetDepthStencilTex();
 	//
 	virtual void Begin();
 	virtual void End();
 protected:
 	//
-	bool m_valid;
+	NNUInt mCount;
+	NNUInt mWidth, mHeight;
 	//
-	NNUInt m_count;;
-	NNUInt m_width, m_height;
-	//
-	std::shared_ptr<Texture2D> m_depthstencil_tex;
-	std::vector<std::shared_ptr<Texture2D>> m_color_texes;
+	std::shared_ptr<Texture2D> mDepthStencilTex;
+	std::vector<std::shared_ptr<Texture2D>> mColorTexes;
 #if defined NENE_GL
-	GLuint m_fbo;
+	GLuint mFBO;
 #elif defined NENE_DX
 	//
 	std::vector<ID3D11RenderTargetView*> mRTVs;
@@ -46,10 +45,9 @@ protected:
 	ID3D11DepthStencilView* mpPrevDSV;
 #endif
 protected:
-	RenderTarget() = delete;
-	RenderTarget(const RenderTarget& rhs) = delete;
-	RenderTarget& operator=(const RenderTarget& rhs) = delete;
-	RenderTarget(const NNUInt& width, const NNUInt& height, const NNUInt& count);
+	RenderTarget();
+	RenderTarget(const RenderTarget& rhs);
+	RenderTarget& operator=(const RenderTarget& rhs);
 };
 
 #endif // RENDER_TARGET_H

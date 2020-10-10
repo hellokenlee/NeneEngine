@@ -17,27 +17,27 @@ public:
 	Camera();
 	// 析构
 	~Camera();
-	
+	// 移动摄像机
+	void MoveUp(const NNFloat& distance);
+	void MoveDowm(const NNFloat& distance);
+	void MoveLeft(const NNFloat& distance);
+	void MoveRight(const NNFloat& distance);
+	void MoveBack(const NNFloat& distance);
+	void MoveForward(const NNFloat& distance);
 	// 旋转摄像机
-	void Rotate(const NNFloat pitch, const NNFloat yaw);
+	void Rotate(const NNFloat& pitch, const NNFloat& yaw);
 	// 设置为透视投影
-	void SetPerspective(const NNFloat fov, const NNFloat ratio, const NNFloat nearz, const NNFloat farz);
+	void SetPerspective(const NNFloat& fov, const NNFloat& ratio, const NNFloat& nearz, const NNFloat& farz);
 	// 设置为正交投影
-	void SetOrtho(const NNFloat left, const NNFloat right, const NNFloat bottom, const NNFloat top, const NNFloat near, const NNFloat far);
-	// 判断是否为正交
-	inline bool IsOrtho() { return m_orthographic; }
-	// 
-	void CalculateFrustumCorners();
+	void SetOrtho();
 	// 使用该摄像机
 	void Use();
 	// 获取当前摄像机的矩阵
-	inline NNMat4 GetViewMat() { return m_view_mat; };
-	inline NNMat4 GetProjMat() { return m_proj_mat; };
-	inline NNMat4 GetInversedViewMat() { m_inv_view_mat = NNMat4Inverse(m_view_mat); return m_inv_view_mat; };
-	inline NNMat4 GetInversedProjMat() { m_inv_proj_mat = NNMat4Inverse(m_proj_mat); return m_inv_proj_mat; };
+	inline NNMat4& GetViewMat() { return m_view_mat; };
+	inline NNMat4& GetProjMat() { return m_proj_mat; };
+	inline NNMat4& GetInversedViewMat() { m_inv_view_mat = NNMat4Inverse(m_view_mat); return m_inv_view_mat; };
+	inline NNMat4& GetInversedProjMat() { m_inv_proj_mat = NNMat4Inverse(m_proj_mat); return m_inv_proj_mat; };
 private:
-	//
-	bool m_orthographic;
 	//
 	NNMat4 m_view_mat;
 	NNMat4 m_proj_mat;
@@ -47,16 +47,10 @@ private:
 	NNVec3 m_right;
 	NNVec3 m_position;
 	//
-	NNFloat m_near, m_far;
-	NNFloat m_pers_fov, m_pers_ratio;
-	//
-	NNFloat m_orth_left, m_orth_right, m_orth_bottom, m_orth_top;
+	NNFloat m_fov, m_ratio, m_near, m_far;
 	//
 	NNMat4 m_inv_view_mat;
 	NNMat4 m_inv_proj_mat;
-
-
-	friend class CameraController;
 };
 
 #endif // CAMERA_H

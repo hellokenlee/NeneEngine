@@ -122,7 +122,7 @@ shared_ptr<Shape> Geometry::CreateSphereIco(const NNUInt& level, NNVertexOrder v
 		}
 		faces = faces2;// 细分后的面取代原来的面
 	}
-	if (vo == COUNTER_CLOCK_WISE) {
+	if (vo == CLOCK_WISE) {
 		InvertIndexOrder(&faces[0].x, (NNUInt)faces.size() * 3);
 	}
 	dLog("[Info] Create icosphere with level %d :\n", level);
@@ -283,7 +283,7 @@ shared_ptr<Shape> Geometry::CreateSphereUV(const NNUInt& latLines, const NNUInt&
 	dLog("    Faces Num: %zd \n", indices.size() / 3);
 	dLog("    Total Render vertices number: %zd \n\n", indices.size());
 	//
-	if (vo == COUNTER_CLOCK_WISE) {
+	if (vo == CLOCK_WISE) {
 		InvertIndexOrder(indices.data(), (NNUInt)indices.size());
 	}
 	//
@@ -329,23 +329,23 @@ shared_ptr<Shape> Geometry::CreateCube(NNVertexOrder vo) {
 	// 立方体索引
 	static vector<NNUInt> indices = {
 		// Front Face
-		0,  2,  1,
-		0,  3,  2,
+		0,  1,  2,
+		0,  2,  3,
 		// Back Face
-		4,  6,  5,
-		4,  7,  6,
+		4,  5,  6,
+		4,  6,  7,
 		// Top Face
-		8,  9,  10,
-		8, 10, 11,
+		8, 10,  9,
+		8, 11, 10,
 		// Bottom Face
-		12, 14, 13,
-		12, 15, 14,
+		12, 13, 14,
+		12, 14, 15,
 		// Left Face
-		16, 17, 18,
-		16, 18, 19,
+		16, 18, 17,
+		16, 19, 18,
 		// Right Face
-		20, 22, 21,
-		20, 23, 22
+		20, 21, 22,
+		20, 22, 23
 	};
 	if (vo == CLOCK_WISE) {
 		InvertIndexOrder(indices.data(), (NNUInt)indices.size());

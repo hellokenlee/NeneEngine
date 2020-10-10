@@ -21,8 +21,6 @@ public:
 	static void SetWindowShouldClose(bool flag);
 	// 刷新缓冲
 	static void Clear();
-	//
-	static void SetViewPort(NNUInt x, NNUInt y, NNUInt width, NNUInt height);
 	// 
 	static void Update();
 	// 颜色缓冲颜色指定

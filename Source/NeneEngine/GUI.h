@@ -2,7 +2,7 @@
 #ifndef GUI_H
 #define GUI_H
 
-#include <memory>
+#include "ImGui/imgui.h"
 #include <functional>
 
 //
@@ -11,20 +11,15 @@
 class GUI {
 public:
 	//
-	static std::shared_ptr<GUI> Create();
-	//
-	virtual ~GUI();
+	GUI();
+	~GUI();
 	//
 	void Draw();
-	inline void SetDrawFunc(std::function<void()> func) { mDrawFunc = func; }
-protected:
+public:
 	std::function<void()> mDrawFunc;
+private:
 	static int sInsNum;
 	static void sDefaultDrawFunc();
-protected:
-	GUI();
-	GUI(const GUI& rhs) = delete;
-	GUI& operator=(const GUI& rhs) = delete;
 };
 
 #endif // GUI_H

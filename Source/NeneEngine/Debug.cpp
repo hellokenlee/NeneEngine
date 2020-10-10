@@ -15,11 +15,13 @@ void _dCheckFileExist(const char* fileName) {
 #ifdef _WIN32
 	if (_access(fileName, 0) == -1) {
 		printf("[Error] File not exist! (%s)\n\n", fileName);
+		system("PAUSE");
 		exit(-1);
 	}
 #else
 	if (access(fileName, F_OK)) {
 		printf("[Error] File not exist! (%s)\n\n", fileName);
+		system("PAUSE");
 		exit(-1);
 	}
 #endif

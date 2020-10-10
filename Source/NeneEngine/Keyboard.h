@@ -24,7 +24,7 @@ public:
 	inline Observable& OnPress() { return m_on_press; };
 	inline Observable& OnRepeat() { return m_on_repeat; };
 	inline Observable& OnRelease() { return m_on_release; };
-protected:
+public:
 	// 可监听事件
 	Observable m_on_press;
 	Observable m_on_repeat;

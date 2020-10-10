@@ -2,8 +2,7 @@
 
 #include "Camera.h"
 
-Camera::Camera()
-{
+Camera::Camera() {
 	// 初始化视角矩阵
 	m_up = NNVec3(0.0f, 1.0f, 0.0f);
 	m_front = NNVec3(0.0f, 0.0f, -1.0f);
@@ -11,18 +10,42 @@ Camera::Camera()
 	m_right = NNNormalize(NNCross(m_front, m_up));
 	m_view_mat = NNCreateLookAt(m_position, m_position + m_front, m_up);
 	// 初始化投影矩阵
-	m_orthographic = false;
-	m_pers_fov = NNRadians(45.0f);
-	m_pers_ratio = (NNFloat)Utils::GetWindowWidth() / (NNFloat)Utils::GetWindowHeight();
+	m_fov = NNRadians(45.0f);
+	m_ratio = (NNFloat)Utils::GetWindowWidth() / (NNFloat)Utils::GetWindowHeight();
 	m_near = 0.0001f;
 	m_far = 1000.0f;
-	m_proj_mat = NNCreatePerspective(m_pers_fov, m_pers_ratio, m_near, m_far);
+	m_proj_mat = NNCreatePerspective(m_fov, m_ratio, m_near, m_far);
 }
 
-Camera::~Camera() {}
+Camera::~Camera() {
 
-void Camera::Rotate(const NNFloat pitch, const NNFloat yaw) 
-{
+}
+
+void Camera::MoveUp(const NNFloat& distance) {
+	m_position += distance * m_up;
+}
+
+void Camera::MoveDowm(const NNFloat& distance) {
+	m_position -= distance * m_up;
+}
+
+void Camera::MoveLeft(const NNFloat& distance) {
+	m_position -= distance * m_right;
+}
+
+void Camera::MoveRight(const NNFloat& distance) {
+	m_position += distance * m_right;
+}
+
+void Camera::MoveBack(const NNFloat& distance) {
+	m_position -= distance * m_front;
+}
+
+void Camera::MoveForward(const NNFloat& distance) {
+	m_position += distance * m_front;
+}
+
+void Camera::Rotate(const NNFloat& pitch, const NNFloat& yaw) {
 	// 更新前向量
 	m_front.x = cosf(yaw) * cosf(pitch);
 	m_front.y = sinf(pitch);
@@ -35,26 +58,16 @@ void Camera::Rotate(const NNFloat pitch, const NNFloat yaw)
 	m_right = NNNormalize(m_right);
 }
 
-void Camera::SetPerspective(const NNFloat fov, const NNFloat ratio, const NNFloat nearz, const NNFloat farz)
-{
-	m_pers_fov = fov;
-	m_pers_ratio = ratio;
+void Camera::SetPerspective(const NNFloat& fov, const NNFloat& ratio, const NNFloat& nearz, const NNFloat& farz) {
+	m_fov = fov;
+	m_ratio = ratio;
 	m_near = nearz;
 	m_far = farz;
-	m_proj_mat = NNCreatePerspective(m_pers_fov, m_pers_ratio, m_near, m_far);
-	m_orthographic = false;
+	m_proj_mat = NNCreatePerspective(m_fov, m_ratio, m_near, m_far);
 }
 
-void Camera::SetOrtho(const NNFloat left, const NNFloat right, const NNFloat bottom, const NNFloat top, const NNFloat near, const NNFloat far)
-{
-	m_orth_top = top;
-	m_orth_left = left;
-	m_orth_right = right;
-	m_orth_bottom = bottom;
-	m_far = far;
-	m_near = near;
-	m_proj_mat = NNCreateOrtho(m_orth_left, m_orth_right, m_orth_bottom, m_orth_top, m_near, m_far);
-	m_orthographic = true;
+void Camera::SetOrtho() {
+
 }
 
 void Camera::Use() {

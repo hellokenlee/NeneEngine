@@ -5,37 +5,22 @@
 #include <memory>
 #include "Types.h"
 
-struct LightProperty
-{
-
-};
-
-class Light 
-{
+class Light {
 public:
 	static std::shared_ptr<Light> Create();
-
-	inline NNLightType GetType() { return m_type; };
-	inline void SetType(const NNLightType t) { m_type = t; };
-
-	inline NNVec3 GetPosition() { return m_position; }
-	inline void SetPosition(const NNVec3 pos) { m_position = pos; }
-
-	inline NNVec3 GetDirection() { return m_direction; }
-	inline void SetDirection(const NNVec3 dir) { m_direction = dir; }
-protected:
-	NNLightType m_type;
-	NNFloat m_range;
-	NNVec3 m_position;
-	NNVec3 m_direction;
-	NNVec4 m_attenuation;
-	NNVec3 m_color_ambient;
-	NNVec3 m_color_diffuse;
-	NNVec3 m_color_specular;
-protected:
+public:
+	NNLightType mType;
+	NNFloat mRange;
+	NNVec3 mPosition;
+	NNVec3 mDirection;
+	NNVec4 mAttenuation;
+	NNVec3 mColorAmbient;
+	NNVec3 mColorDiffuse;
+	NNVec3 mColorSpecular;
+private:
 	Light();
-	Light(const Light& rhs) = delete;
-	Light& operator=(const Light& rhs) = delete;
+	Light(const Light& rhs);
+	Light& operator=(const Light& rhs);
 };
 
-#endif // LIGHT_H
+#endif // SHADOW_MAP_H

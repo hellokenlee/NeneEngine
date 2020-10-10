@@ -7,7 +7,7 @@
 void BindTexture(pybind11::module& mod)
 {
 	auto tex = pybind11::class_<Texture, std::shared_ptr<Texture>>(mod, "Texture")
-		.def("Use", &Texture::Use);
+		.def("use", &Texture::Use);
 
 	auto tex2d = pybind11::class_<Texture2D, std::shared_ptr<Texture2D>>(mod, "Texture2D", tex)
 		.def(pybind11::init<>(&Texture2D::Create))
