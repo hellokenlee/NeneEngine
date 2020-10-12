@@ -45,7 +45,7 @@ void Model::Draw(const shared_ptr<Shader> pShader, const shared_ptr<Camera> pCam
 	if (pShader) pShader->Use();
 	if (pCamera) pCamera->Use();
 	// 更新Model矩阵
-	NeneCB::Instance().PerObject().data.model = mModelMat;
+	NeneCB::Instance().PerObject().Data().model = mModelMat;
 	NeneCB::Instance().PerObject().Update(PER_OBJECT_SLOT);
 	// 绘制所有网格
 	for (NNUInt i = 0; i < mMeshes.size(); ++i) {

@@ -24,5 +24,6 @@
 #include "NeneCB.h"
 #include "ConstantBufferPool.h"
 #include "ShadowMap.h"
+#include "Light.h"
 
 #endif // NENE_H

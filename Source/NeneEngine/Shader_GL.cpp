@@ -121,7 +121,10 @@ bool Shader::addOptionalShaderFromSource(const NNChar *source, const NNShaderTyp
 }
 
 void Shader::Use() {
-	glUseProgram(mProgramID);
+	if (mIsLinked)
+	{
+		glUseProgram(mProgramID);
+	}
 }
 
 bool Shader::checkCompileInfo(const NNShaderType st) {
@@ -169,14 +172,13 @@ bool Shader::checkCompileInfo(const NNShaderType st) {
 }
 
 bool Shader::checkLinkInfo() {
-	GLint isSuccess;
-	glGetProgramiv(mProgramID, GL_LINK_STATUS, &isSuccess);
-	if (!isSuccess) {
+	glGetProgramiv(mProgramID, GL_LINK_STATUS, &mIsLinked);
+	if (!mIsLinked) {
 		GLchar infoLog[512];
 		glGetProgramInfoLog(mProgramID, 512, nullptr, infoLog);
 		dLog("[Error]: Link Program Error:\n%s\n\n", infoLog);
 	}
-	return isSuccess;
+	return mIsLinked;
 }
 
 #endif

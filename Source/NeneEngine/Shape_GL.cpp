@@ -117,7 +117,7 @@ void Shape::Draw(const shared_ptr<Shader> pShader, const shared_ptr<Camera> pCam
 	}
 	//
 	NeneCB& CB = NeneCB::Instance();
-	CB.PerObject().data.model = mModelMat;
+	CB.PerObject().Data().model = mModelMat;
 	CB.PerObject().Update(PER_OBJECT_SLOT);
 	//
 	glBindVertexArray(mVAO);

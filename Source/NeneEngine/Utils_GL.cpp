@@ -102,9 +102,9 @@ void Utils::Update() {
 	NNFloat cosTime = cosf(currTime);
 	//
 	static NeneCB& CB = NeneCB::Instance();
-	CB.PerFrame().data.curr_time = currTime;
-	CB.PerFrame().data.sin_time = sinTime;
-	CB.PerFrame().data.cos_time = cosTime;
+	CB.PerFrame().Data().curr_time = currTime;
+	CB.PerFrame().Data().sin_time = sinTime;
+	CB.PerFrame().Data().cos_time = cosTime;
 }
 
 bool Utils::WindowShouldClose() {

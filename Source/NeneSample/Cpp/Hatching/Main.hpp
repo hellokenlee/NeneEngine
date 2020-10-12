@@ -35,14 +35,22 @@ namespace hatching
 		auto ca = CoordinateAxes::Create(100.0f, 10.0f);
 		//
 		auto cube = Geometry::CreateCube();
+		auto ball = Geometry::CreateSphereUV(50, 50);
 		auto shader = Shader::Create(
-			"../../Resource/Shader/GLSL/Common.vert", 
-			"../../Resource/Shader/GLSL/Common.frag", 
+			"../../Resource/Shader/GLSL/Hatching.vert", 
+			"../../Resource/Shader/GLSL/Hatching.frag", 
 			NNVertexFormat::POSITION_NORMAL_TEXTURE
 		);
 		auto texture = Texture2D::Create("../../Resource/Texture/hatching01.png");
 		//
 		cc->m_speed = 1.5f;
+		//
+		ConstantBuffer<LightCBDS> LightConstantBuffer;
+		LightConstantBuffer.Data().ltype = 123.456f;
+		LightConstantBuffer.Data().range = 1000.0f;
+		LightConstantBuffer.Data().color = NNVec4(1.0f, 1.0f, 1.0f, 1.0f);
+		LightConstantBuffer.Data().position = NNVec4(10.0f, 10.0f, 10.0f, 1.0f);
+		LightConstantBuffer.Data().attenuation = 1000.0f;
 		// 
 		while (!Utils::WindowShouldClose()) {
 			//
@@ -51,28 +59,31 @@ namespace hatching
 			cc->Update();
 			cc->GetCamera()->Use();
 			NeneCB::Instance().PerFrame().Update(NNConstantBufferSlot::PER_FRAME_SLOT);
+			LightConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_LIGHT_SLOT);
 			//
 			{
 				Utils::Clear();
 				ca->Draw();
-				//texture->Use(0);
-				cube->Draw(shader);
+				texture->Use(0);
+				ball->Draw(shader);
 			}
 			//
 			Utils::SwapBuffers();
 			//
 			if (g_shader_update)
 			{
+				printf("========== Compiling Shaders >>> ===========\n");
 				auto new_shader = Shader::Create(
-					"../../Resource/Shader/GLSL/Common.vert",
-					"../../Resource/Shader/GLSL/Common.frag",
+					"../../Resource/Shader/GLSL/Hatching.vert",
+					"../../Resource/Shader/GLSL/Hatching.frag",
 					NNVertexFormat::POSITION_NORMAL_TEXTURE
-				);
+				); 
 				if (new_shader != nullptr)
 				{
 					shader = new_shader;
 				}
 				g_shader_update = false;
+				printf("========== Compiling Shaders <<< ===========\n");
 			}
 		}
 		// 

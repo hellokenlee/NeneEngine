@@ -8,7 +8,7 @@
 //  ConstantBuffer: Manage Uniform Buffer Object in GL or Constant Buffer in D3D
 //
 
-template<typename T>
+template<typename T, std::size_t N=1>
 class ConstantBuffer {
 public:
 	// 构造
@@ -17,16 +17,18 @@ public:
 	~ConstantBuffer();
 	// 更新数据
 	void Update(const NNUInt& slot);
-public:
+	// 
+	inline T& Data(const NNUInt index=0) { return m_datas[index]; }
+protected:
 	// 常量缓冲数据
-	T data;
+	T m_datas[N];
 private:
 	// 禁止拷贝
 	ConstantBuffer(const ConstantBuffer& rhs);
 	ConstantBuffer& operator=(const ConstantBuffer& rhs);
 	// 缓冲指针
 #if defined NENE_GL
-	GLuint mUBO;
+	GLuint m_UBO;
 #elif defined NENE_DX
 	ID3D11Buffer* mpBuffer;
 #endif

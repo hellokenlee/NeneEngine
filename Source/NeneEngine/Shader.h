@@ -46,6 +46,7 @@ private:
 	std::vector<std::string> mFilepaths;
 	// 各个着色器
 #if defined NENE_GL
+	GLint mIsLinked;
 	GLuint mProgramID;
 	GLuint mVS, mTCS, mTES, mGS, mFS;
 #elif defined NENE_DX

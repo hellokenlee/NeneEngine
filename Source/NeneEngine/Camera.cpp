@@ -75,7 +75,7 @@ void Camera::Use() {
 	m_view_mat = NNCreateLookAt(m_position, m_position + m_front, m_up);
 	// 写入常量缓冲
 	NeneCB& CB = NeneCB::Instance();
-	CB.PerFrame().data.view = m_view_mat;
-	CB.PerFrame().data.projection = m_proj_mat;
-	CB.PerFrame().data.camera_position = m_position;
+	CB.PerFrame().Data().view = m_view_mat;
+	CB.PerFrame().Data().projection = m_proj_mat;
+	CB.PerFrame().Data().camera_position = m_position;
 }

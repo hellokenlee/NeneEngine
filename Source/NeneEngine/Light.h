@@ -5,22 +5,19 @@
 #include <memory>
 #include "Types.h"
 
-class Light {
-public:
-	static std::shared_ptr<Light> Create();
-public:
-	NNLightType mType;
-	NNFloat mRange;
-	NNVec3 mPosition;
-	NNVec3 mDirection;
-	NNVec4 mAttenuation;
-	NNVec3 mColorAmbient;
-	NNVec3 mColorDiffuse;
-	NNVec3 mColorSpecular;
-private:
-	Light();
-	Light(const Light& rhs);
-	Light& operator=(const Light& rhs);
+//
+struct LightCBDS
+{
+	//
+	NNFloat ltype;
+	NNFloat range;
+	NNFloat _pad0;
+	NNFloat _pad1;
+	//
+	NNVec4 color;
+	NNVec4 position;
+	NNVec4 direction;
+	NNFloat attenuation;
 };
 
-#endif // SHADOW_MAP_H
+#endif // LIGHT_H
