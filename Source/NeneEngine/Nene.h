@@ -15,7 +15,7 @@
 #include "TextureCube.h"
 #include "CameraController.h"
 #include "Geometry.h"
-#include "GUI.h"
+#include "UserInterface.h"
 #include "IO.h"
 #include "RenderTarget.h"
 #include "CoordinateAxes.h"

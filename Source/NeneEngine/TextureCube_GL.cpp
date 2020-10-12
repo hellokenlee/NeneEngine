@@ -31,12 +31,12 @@ shared_ptr<TextureCube> TextureCube::Create(
 	GLuint imageWidth = 0, imageHeight = 0;
 	std::shared_ptr<NNByte[]> imageData[CubeMapBiasNum];
 	//
-	imageData[BIAS_RIGHT] = loadImage(filepathRight, imageWidth, imageHeight, format);
-	imageData[BIAS_LEFT] = loadImage(filepathLeft, imageWidth, imageHeight, format);
-	imageData[BIAS_TOP] = loadImage(filepathTop, imageWidth, imageHeight, format);
-	imageData[BIAS_BOTTOM] = loadImage(filepathBottom, imageWidth, imageHeight, format);
-	imageData[BIAS_BACK] = loadImage(filepathBack, imageWidth, imageHeight, format);
-	imageData[BIAS_FRONT] = loadImage(filepathFront, imageWidth, imageHeight, format);
+	imageData[BIAS_RIGHT] = LoadImage(filepathRight, imageWidth, imageHeight, format);
+	imageData[BIAS_LEFT] = LoadImage(filepathLeft, imageWidth, imageHeight, format);
+	imageData[BIAS_TOP] = LoadImage(filepathTop, imageWidth, imageHeight, format);
+	imageData[BIAS_BOTTOM] = LoadImage(filepathBottom, imageWidth, imageHeight, format);
+	imageData[BIAS_BACK] = LoadImage(filepathBack, imageWidth, imageHeight, format);
+	imageData[BIAS_FRONT] = LoadImage(filepathFront, imageWidth, imageHeight, format);
 	//
 	GLuint texID;
 	glGenTextures(1, &texID);

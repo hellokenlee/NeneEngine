@@ -105,19 +105,8 @@ void CameraController::OnNotify(shared_ptr<BaseEvent> eve) {
 		//
 		m_yaw += m_delta_x;
 		m_pitch -= m_delta_y;
-		if (m_pitch > NNRadians(89.5f)) {
-			m_pitch = NNRadians(89.5f);
-		}
-		else if (m_pitch < NNRadians(-89.5)) {
-			m_pitch = NNRadians(-89.5f);
-		}
-		if (m_yaw > NNRadians(360.0f)) {
-			m_yaw -= NNRadians(360.0f);
-		}
-		else if (m_yaw < NNRadians(0.0f)) {
-			m_yaw += NNRadians(360.0f);
-		}
-		m_camera->Rotate(m_pitch, m_yaw);
+		//
+		RotateCamera();
 		break;
 	}
 	case ON_KEY_PRESS:
@@ -135,4 +124,23 @@ void CameraController::OnNotify(shared_ptr<BaseEvent> eve) {
 	}
 }
 
-
+void CameraController::RotateCamera()
+{
+	if (m_pitch > NNRadians(89.5f)) 
+	{
+		m_pitch = NNRadians(89.5f);
+	}
+	else if (m_pitch < NNRadians(-89.5)) 
+	{
+		m_pitch = NNRadians(-89.5f);
+	}
+	if (m_yaw > NNRadians(360.0f))
+	{
+		m_yaw -= NNRadians(360.0f);
+	}
+	else if (m_yaw < NNRadians(0.0f))
+	{
+		m_yaw += NNRadians(360.0f);
+	}
+	m_camera->Rotate(m_pitch, m_yaw);
+}

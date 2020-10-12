@@ -11,7 +11,8 @@
 //    Camera: Mange View Point Class
 //
 
-class Camera : public std::enable_shared_from_this<Camera> {
+class Camera : public std::enable_shared_from_this<Camera>
+{
 public:
 	// 构造
 	Camera();
@@ -32,11 +33,15 @@ public:
 	void SetOrtho();
 	// 使用该摄像机
 	void Use();
+	//
+	inline NNFloat GetYaw() { return m_yaw; }
+	inline NNFloat GetPitch() { return m_pitch; }
 	// 获取当前摄像机的矩阵
-	inline NNMat4& GetViewMat() { return m_view_mat; };
-	inline NNMat4& GetProjMat() { return m_proj_mat; };
-	inline NNMat4& GetInversedViewMat() { m_inv_view_mat = NNMat4Inverse(m_view_mat); return m_inv_view_mat; };
-	inline NNMat4& GetInversedProjMat() { m_inv_proj_mat = NNMat4Inverse(m_proj_mat); return m_inv_proj_mat; };
+	inline NNVec3& GetPosition() { return m_position; }
+	inline NNMat4& GetViewMat() { return m_view_mat; }
+	inline NNMat4& GetProjMat() { return m_proj_mat; }
+	inline NNMat4& GetInversedViewMat() { m_inv_view_mat = NNMat4Inverse(m_view_mat); return m_inv_view_mat; }
+	inline NNMat4& GetInversedProjMat() { m_inv_proj_mat = NNMat4Inverse(m_proj_mat); return m_inv_proj_mat; }
 private:
 	//
 	NNMat4 m_view_mat;
@@ -48,6 +53,8 @@ private:
 	NNVec3 m_position;
 	//
 	NNFloat m_fov, m_ratio, m_near, m_far;
+	//
+	NNFloat m_yaw, m_pitch;
 	//
 	NNMat4 m_inv_view_mat;
 	NNMat4 m_inv_proj_mat;

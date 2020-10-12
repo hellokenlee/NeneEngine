@@ -2,6 +2,7 @@
 #ifndef TEXTURE2D_H
 #define TEXTURE2D_H
 
+#include <vector>
 #include "Texture.h"
 
 //
@@ -10,21 +11,26 @@
 
 class Texture2D : public Texture {
 public:
-	// 创造一个2D纹理
-	static std::shared_ptr<Texture2D> Create(const NNChar* filePath);
-	static std::shared_ptr<Texture2D> createFromMemory(const NNUInt& width, const NNUInt& height,
-		const NNUInt& iformat, const NNUInt& format, const NNUInt& type, const void *pInitData = nullptr);
-	static std::shared_ptr<Texture2D> createMultisample(const NNUInt& width, const NNUInt& height, const NNUInt& samples, const NNUInt& iformat);
-	// 析构函数
+	//
 	~Texture2D();
-	// 使用该纹理
+
+	// Create texture with one image path
+	static std::shared_ptr<Texture2D> Create(const NNChar* filePath);
+	// Create texture with multi image paths as mipmaps
+	static std::shared_ptr<Texture2D> Create(std::vector<const NNChar*> filepaths);
+	// 
+	static std::shared_ptr<Texture2D> CreateFromMemory(const NNUInt& width, const NNUInt& height,
+		const NNUInt& iformat, const NNUInt& format, const NNUInt& type, const void *pInitData = nullptr);
+	//
+	static std::shared_ptr<Texture2D> CreateMultisample(const NNUInt& width, const NNUInt& height, const NNUInt& samples, const NNUInt& iformat);
+	
+	// 
 	virtual void Use(const NNUInt& slot = 0);
-	// 更改纹理模式
-	virtual void mode(NNTextureMode m);
+	// 
+	virtual void SetMode(NNTextureMode m);
 protected:
 	NNTextureMode mMode;
 #if defined NENE_GL
-	// 纹理编号
 	GLuint mTextureID;
 #elif defined NENE_DX
 	//
@@ -36,8 +42,8 @@ protected:
 #endif
 protected:
 	Texture2D();
-	Texture2D(const Texture2D& rhs);
-	Texture2D& operator=(const Texture2D& rhs);
+	Texture2D(const Texture2D& rhs) = delete;
+	Texture2D& operator=(const Texture2D& rhs) = delete;
 
 friend class RenderTarget;
 };

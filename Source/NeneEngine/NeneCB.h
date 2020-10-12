@@ -25,7 +25,7 @@ struct PerFrameCBDS {
 	NNFloat _padding;
 	//
 	NNFloat curr_time, sin_time, cos_time;
-	NNFloat _padding2;
+	NNFloat texcoord_scale;
 	//
 	NNMat4 shadowlight_space;
 };

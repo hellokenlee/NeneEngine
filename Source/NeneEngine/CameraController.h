@@ -26,6 +26,11 @@ public:
 	void Update();
 	//
 	void SetLocked(const bool& isLocked);
+	//
+	void SetYaw(const float yaw) { m_yaw = yaw; RotateCamera(); }
+	void SetPitch(const float pitch) { m_pitch = pitch; RotateCamera();}
+	void SetPosition(const NNVec3& position) { m_camera->GetPosition() = position; }
+
 	// 获取摄像机
 	inline const std::shared_ptr<Camera> GetCamera() { return m_camera; }
 protected:
@@ -36,6 +41,8 @@ protected:
 	CameraController& operator=(const CameraController& rhs);
 	// 输入事件监听
 	virtual void OnNotify(std::shared_ptr<BaseEvent> eve);
+	//
+	virtual void RotateCamera();
 private:
 	//
 	std::shared_ptr<Camera> m_camera;

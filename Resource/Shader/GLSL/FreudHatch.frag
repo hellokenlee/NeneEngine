@@ -33,9 +33,9 @@ out vec4 color_FS_out;
 
 void main() {
 	//
-	vec3 albedo = texture(tex0, texcoord_VS_out).rgb * 0.2;
+	vec3 albedo = vec3(0.3);
 	//
-	vec3 final_color = vec3(0.0);
+	vec3 intensity = vec3(0.0);
 	//
 	for (uint i = 0; i < LIGHT_NUM; ++i)
 	{
@@ -50,8 +50,11 @@ void main() {
 		vec3 halfway_dir = normalize(light_dir + view_dir);
 		vec3 specular = pow(max(dot(normal, halfway_dir), 0.0), 2.0) * lights[i].color.rgb * albedo;
 		//
-		final_color += (ambient + diffuse + specular);
+		intensity += (ambient + diffuse + specular);
 	}
 	//
+	float threshold = texture(tex0, texcoord_VS_out).r * 0.5;
+	//
+	vec3 final_color = vec3(1.0 - 4.0 * (1.0 - (intensity + threshold)));
 	color_FS_out = vec4(final_color, 1.0);
 }

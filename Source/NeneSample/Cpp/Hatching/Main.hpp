@@ -8,7 +8,13 @@
 namespace hatching
 {
 	bool g_shader_update = false;
-	
+	const char* g_vertexshader_path = "../../Resource/Shader/GLSL/PraunHatchOrigin.vert";
+	const char* g_fragmentshader_path = "../../Resource/Shader/GLSL/PraunHatchOrigin.frag";
+	float g_texcoord_scale = 1.0f;
+	float g_light_position[3] = { 3.0f, 4.0f, -4.0f };
+	float g_camera_position[3] = { 0.0f, 0.0f, 0.0f };
+	float g_camera_rotation[2] = { 0.0f, 0.0f };
+
 	void KeyboardControl(std::shared_ptr<BaseEvent> eve) {
 		std::shared_ptr<KeyboardEvent> k_event = std::dynamic_pointer_cast<KeyboardEvent>(eve);
 		if (k_event->mKey == NNKeyMap(ESCAPE))
@@ -21,11 +27,30 @@ namespace hatching
 		}
 	}
 
+	void DrawGraphicUserInterfaces()
+	{
+		ImGui::Begin("Control", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+		{
+			//
+			ImGui::SetWindowPos(ImVec2(10, 10));
+			ImGui::SetWindowSize(ImVec2(320, 180));
+			//
+			ImGui::Text("Camera: ");
+			ImGui::Text("(%.1f, %.1f, %.1f) | (%.1f, %.1f) ", g_camera_position[0], g_camera_position[1], g_camera_position[2], g_camera_rotation[0], g_camera_rotation[1]);
+			//
+			ImGui::Text("TexCoord: ");
+			ImGui::SliderFloat("", &g_texcoord_scale, 1.0f, 10.0f);
+			//
+			ImGui::Text("LightPos: ");
+			ImGui::SliderFloat3("", g_light_position, -10.0f, 10.0f);
+		}
+		ImGui::End();
+	}
 
 	void Main()
 	{
 		//
-		Utils::Init("Hatching", 800, 600);
+		Utils::Init("Hatching", 1600, 900);
 		Utils::ClearColor(0.1f, 0.1f, 0.1f);
 		Keyboard::Instance().OnPress().AddCallbackFunc(KeyboardControl);
 		//
@@ -33,24 +58,35 @@ namespace hatching
 		//
 		auto cc = CameraController::Create();
 		auto ca = CoordinateAxes::Create(100.0f, 10.0f);
+		auto controls = UserInterface::Create(DrawGraphicUserInterfaces);
 		//
 		auto cube = Geometry::CreateCube();
 		auto ball = Geometry::CreateSphereUV(50, 50);
 		auto shader = Shader::Create(
-			"../../Resource/Shader/GLSL/Hatching.vert", 
-			"../../Resource/Shader/GLSL/Hatching.frag", 
+			g_vertexshader_path,
+			g_fragmentshader_path,
 			NNVertexFormat::POSITION_NORMAL_TEXTURE
 		);
-		auto texture = Texture2D::Create("../../Resource/Texture/hatching01.png");
+		auto texture = Texture2D::Create({
+			"../../Resource/Texture/TAM/default03.bmp",
+			"../../Resource/Texture/TAM/default02.bmp", 
+			"../../Resource/Texture/TAM/default01.bmp", 
+			"../../Resource/Texture/TAM/default00.bmp"
+		});
 		//
+		cc->SetPosition(NNVec3(4.0f, 5.0f, 4.0f));
+		cc->SetYaw(4.0f);
+		cc->SetPitch(-0.7f);
 		cc->m_speed = 1.5f;
+		ball->MoveTo(NNVec3(0.0, 1.0, 0.0));
 		//
 		ConstantBuffer<LightCBDS> LightConstantBuffer;
 		LightConstantBuffer.Data().ltype = 123.456f;
 		LightConstantBuffer.Data().range = 1000.0f;
 		LightConstantBuffer.Data().color = NNVec4(1.0f, 1.0f, 1.0f, 1.0f);
-		LightConstantBuffer.Data().position = NNVec4(10.0f, 10.0f, 10.0f, 1.0f);
 		LightConstantBuffer.Data().attenuation = 1000.0f;
+		//
+		
 		// 
 		while (!Utils::WindowShouldClose()) {
 			//
@@ -58,7 +94,13 @@ namespace hatching
 			//
 			cc->Update();
 			cc->GetCamera()->Use();
+			//
+			NeneCB::Instance().PerFrame().Data().texcoord_scale = g_texcoord_scale;
 			NeneCB::Instance().PerFrame().Update(NNConstantBufferSlot::PER_FRAME_SLOT);
+			//
+			LightConstantBuffer.Data().position.x = g_light_position[0];
+			LightConstantBuffer.Data().position.y = g_light_position[1];
+			LightConstantBuffer.Data().position.z = g_light_position[2];
 			LightConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_LIGHT_SLOT);
 			//
 			{
@@ -68,14 +110,23 @@ namespace hatching
 				ball->Draw(shader);
 			}
 			//
+			{
+				g_camera_position[0] = cc->GetCamera()->GetPosition().x;
+				g_camera_position[1] = cc->GetCamera()->GetPosition().y;
+				g_camera_position[2] = cc->GetCamera()->GetPosition().z;
+				g_camera_rotation[0] = cc->GetCamera()->GetYaw();
+				g_camera_rotation[1] = cc->GetCamera()->GetPitch();
+				controls->Draw();
+			}
+			//
 			Utils::SwapBuffers();
 			//
 			if (g_shader_update)
 			{
 				printf("========== Compiling Shaders >>> ===========\n");
 				auto new_shader = Shader::Create(
-					"../../Resource/Shader/GLSL/Hatching.vert",
-					"../../Resource/Shader/GLSL/Hatching.frag",
+					g_vertexshader_path,
+					g_fragmentshader_path,
 					NNVertexFormat::POSITION_NORMAL_TEXTURE
 				); 
 				if (new_shader != nullptr)

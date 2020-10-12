@@ -56,6 +56,9 @@ void Camera::Rotate(const NNFloat& pitch, const NNFloat& yaw) {
 	// 更新右向量
 	m_right = NNCross(m_front, m_up);
 	m_right = NNNormalize(m_right);
+	//
+	m_yaw = yaw;
+	m_pitch = pitch;
 }
 
 void Camera::SetPerspective(const NNFloat& fov, const NNFloat& ratio, const NNFloat& nearz, const NNFloat& farz) {

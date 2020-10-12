@@ -5,6 +5,14 @@
 #include <cstdio>
 #include <string>
 
+//
+#ifndef IN
+	#define IN
+#endif
+#ifndef OUT
+	#define OUT
+#endif
+
 // 调试级别
 #define NNDEBUG 1
 

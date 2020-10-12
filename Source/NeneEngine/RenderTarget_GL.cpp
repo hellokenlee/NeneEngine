@@ -25,10 +25,10 @@ shared_ptr<RenderTarget> RenderTarget::Create(const NNUInt& width, const NNUInt&
 	ret->mFBO = FBO;
 	// 颜色附件
 	for (unsigned int i = 0; i < count; ++i) {
-		ret->mColorTexes.push_back(Texture2D::createFromMemory(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE));
+		ret->mColorTexes.push_back(Texture2D::CreateFromMemory(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE));
 	}
 	// 深度模板附件
-	ret->mDepthStencilTex = Texture2D::createFromMemory(width, height, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
+	ret->mDepthStencilTex = Texture2D::CreateFromMemory(width, height, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
 	// 绑定附件
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 		// 颜色
@@ -70,10 +70,10 @@ shared_ptr<RenderTarget> RenderTarget::CreateMultisample(const NNUInt& width, co
 	ret->mFBO = FBO;
 	// 颜色附件
 	for (unsigned int i = 0; i < count; ++i) {
-		ret->mColorTexes.push_back(Texture2D::createMultisample(width, height, samples, GL_RGBA8));
+		ret->mColorTexes.push_back(Texture2D::CreateMultisample(width, height, samples, GL_RGBA8));
 	}
 	// 深度模板附件
-	ret->mDepthStencilTex = Texture2D::createMultisample(width, height, samples, GL_DEPTH24_STENCIL8);
+	ret->mDepthStencilTex = Texture2D::CreateMultisample(width, height, samples, GL_DEPTH24_STENCIL8);
 	// 绑定附件
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	// 颜色

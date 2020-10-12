@@ -5,7 +5,7 @@
 
 using namespace std;
 
-shared_ptr<NNByte[]> Texture::loadImage(const NNChar* filepath, NNUInt& width, NNUInt& height, NNColorFormat &format) {
+shared_ptr<NNByte[]> Texture::LoadImage(const NNChar* filepath, NNUInt& width, NNUInt& height, NNColorFormat &format) {
 	// 检查文件
 	checkFileExist(filepath);
 	// 图片格式

@@ -14,7 +14,7 @@ public:
 	// 使用纹理
 	virtual void Use(const NNUInt& slot = 0) = 0;
 	//
-	static std::shared_ptr<NNByte[]> loadImage(const NNChar* filepath, NNUInt& width, NNUInt& height, NNColorFormat &format);
+	static std::shared_ptr<NNByte[]> LoadImage(const NNChar* filepath, NNUInt& width, NNUInt& height, NNColorFormat &format);
 };
 
 #endif // TEXTURE_H
