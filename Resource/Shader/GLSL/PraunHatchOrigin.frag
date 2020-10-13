@@ -52,7 +52,6 @@ void main() {
 	float whiteness = 1.0 - dot((weight012_VS_out + weight345_VS_out), vec3(1.0));
 	//
 	float final_color = blend_color012 + blend_color345 + whiteness;
-	// color_FS_out = vec4(final_color, final_color, final_color, 1.0);
-	color_FS_out = vec4(intensity_debug_VS_out, intensity_debug_VS_out, intensity_debug_VS_out, 1.0);
-
+	color_FS_out = vec4(final_color, final_color, final_color, 1.0);
+	//color_FS_out = vec4(intensity_debug_VS_out, intensity_debug_VS_out, intensity_debug_VS_out, 1.0);
 }

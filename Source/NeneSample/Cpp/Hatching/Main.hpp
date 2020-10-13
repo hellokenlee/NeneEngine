@@ -8,12 +8,20 @@
 namespace hatching
 {
 	bool g_shader_update = false;
-	const char* g_vertexshader_path = "../../Resource/Shader/GLSL/PraunHatchOrigin.vert";
-	const char* g_fragmentshader_path = "../../Resource/Shader/GLSL/PraunHatchOrigin.frag";
 	float g_texcoord_scale = 2.0f;
 	float g_light_position[3] = { 3.0f, 4.0f, -4.0f };
 	float g_camera_position[3] = { 0.0f, 0.0f, 0.0f };
 	float g_camera_rotation[2] = { 0.0f, 0.0f };
+	float g_light_intensity = 1.0f;
+
+	/* For <Real-Time Hatching> Praun et al.
+	const char* g_vertexshader_path = "Resource/Shader/GLSL/PraunHatchOrigin.vert";
+	const char* g_fragmentshader_path = "Resource/Shader/GLSL/PraunHatchOrigin.frag";
+	//*/
+	//* For <Real-Time Stroke Textures> Freud. et al.
+	const char* g_vertexshader_path = "Resource/Shader/GLSL/FreudHatch.vert";
+	const char* g_fragmentshader_path = "Resource/Shader/GLSL/FreudHatch.frag";
+	//*/
 
 	void KeyboardControl(std::shared_ptr<BaseEvent> eve) {
 		std::shared_ptr<KeyboardEvent> k_event = std::dynamic_pointer_cast<KeyboardEvent>(eve);
@@ -33,16 +41,19 @@ namespace hatching
 		{
 			//
 			ImGui::SetWindowPos(ImVec2(10, 10));
-			ImGui::SetWindowSize(ImVec2(320, 180));
+			ImGui::SetWindowSize(ImVec2(320, 240));
 			//
 			ImGui::Text("Camera: ");
 			ImGui::Text("(%.1f, %.1f, %.1f) | (%.1f, %.1f) ", g_camera_position[0], g_camera_position[1], g_camera_position[2], g_camera_rotation[0], g_camera_rotation[1]);
 			//
 			ImGui::Text("TexCoord: ");
-			ImGui::SliderFloat("", &g_texcoord_scale, 1.0f, 10.0f);
+			ImGui::SliderFloat(" ", &g_texcoord_scale, 1.0f, 10.0f);
 			//
 			ImGui::Text("LightPos: ");
-			ImGui::SliderFloat3("", g_light_position, -10.0f, 10.0f);
+			ImGui::SliderFloat3("  ", g_light_position, -10.0f, 10.0f);
+			//
+			ImGui::Text("LightIntensity: ");
+			ImGui::SliderFloat("   ", &g_light_intensity, 0.0f, 1.0f);
 		}
 		ImGui::End();
 	}
@@ -61,23 +72,24 @@ namespace hatching
 		auto controls = UserInterface::Create(DrawGraphicUserInterfaces);
 		//
 		auto cube = Geometry::CreateCube();
-		auto ball = Geometry::CreateSphereUV(50, 50);
+		auto ball = Geometry::CreateSphereUV(30, 30);
 		auto shader = Shader::Create(
 			g_vertexshader_path,
 			g_fragmentshader_path,
 			NNVertexFormat::POSITION_NORMAL_TEXTURE
 		);
+		auto tex_hatch = Texture2D::Create("Resource/Texture/TAM/default23.bmp");
 		auto tex_hatch_tone012 = Texture2D::Create({
-			"../../Resource/Texture/BTAM/Default_Mip0_Tone012.png",
-			"../../Resource/Texture/BTAM/Default_Mip1_Tone012.png", 
-			"../../Resource/Texture/BTAM/Default_Mip2_Tone012.png", 
-			"../../Resource/Texture/BTAM/Default_Mip3_Tone012.png"
+			"Resource/Texture/BTAM/Default_Mip0_Tone012.png",
+			"Resource/Texture/BTAM/Default_Mip1_Tone012.png", 
+			"Resource/Texture/BTAM/Default_Mip2_Tone012.png", 
+			"Resource/Texture/BTAM/Default_Mip3_Tone012.png"
 		});
 		auto tex_hatch_tone345 = Texture2D::Create({
-			"../../Resource/Texture/BTAM/Default_Mip0_Tone345.png",
-			"../../Resource/Texture/BTAM/Default_Mip1_Tone345.png",
-			"../../Resource/Texture/BTAM/Default_Mip2_Tone345.png",
-			"../../Resource/Texture/BTAM/Default_Mip3_Tone345.png"
+			"Resource/Texture/BTAM/Default_Mip0_Tone345.png",
+			"Resource/Texture/BTAM/Default_Mip1_Tone345.png",
+			"Resource/Texture/BTAM/Default_Mip2_Tone345.png",
+			"Resource/Texture/BTAM/Default_Mip3_Tone345.png"
 			});
 		//
 		cc->SetPosition(NNVec3(4.0f, 5.0f, 4.0f));
@@ -102,11 +114,12 @@ namespace hatching
 			NeneCB::Instance().PerFrame().Data().texcoord_scale = g_texcoord_scale;
 			NeneCB::Instance().PerFrame().Update(NNConstantBufferSlot::PER_FRAME_SLOT);
 			//
+			LightConstantBuffer.Data().color.r = g_light_intensity;
 			LightConstantBuffer.Data().position.x = g_light_position[0];
 			LightConstantBuffer.Data().position.y = g_light_position[1];
 			LightConstantBuffer.Data().position.z = g_light_position[2];
 			LightConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_LIGHT_SLOT);
-			//
+			/* 2001 Praun et al. Method1
 			{
 				Utils::Clear();
 				ca->Draw();
@@ -114,7 +127,15 @@ namespace hatching
 				tex_hatch_tone345->Use(1);
 				ball->Draw(shader);
 			}
-			//
+			//*/
+			//* 2001 Freud. et al.
+			{
+				Utils::Clear();
+				ca->Draw();
+				tex_hatch->Use(0);
+				ball->Draw(shader);
+			}
+			//*/
 			{
 				g_camera_position[0] = cc->GetCamera()->GetPosition().x;
 				g_camera_position[1] = cc->GetCamera()->GetPosition().y;

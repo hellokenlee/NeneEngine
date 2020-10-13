@@ -18,6 +18,9 @@ layout (std140, binding = 0) uniform UBO0 {
 	mat4 view;
 	mat4 proj;
 	vec3 camera_position;
+	float curr_time, sin_time, cos_time;
+	float _pad0;
+	float texcoord_scale;
 };
 
 layout (std140, binding = 2) uniform UBO2 {
@@ -33,27 +36,23 @@ out vec4 color_FS_out;
 
 void main() {
 	//
-	vec3 albedo = vec3(0.3);
+	vec2 texcoord = texcoord_VS_out * texcoord_scale;
 	//
 	vec3 intensity = vec3(0.0);
 	//
-	for (uint i = 0; i < LIGHT_NUM; ++i)
-	{
-		//
-		vec3 ambient = lights[i].color.rgb * albedo.rgb;
-		//
-		vec3 normal = normalize(normal_VS_out);
-		vec3 light_dir = normalize(lights[i].position.xyz - position_VS_out);
-		vec3 diffuse = max(dot(normal, light_dir), 0.0) * lights[i].color.rgb * albedo;
-		//
-		vec3 view_dir = normalize(camera_position - position_VS_out);
-		vec3 halfway_dir = normalize(light_dir + view_dir);
-		vec3 specular = pow(max(dot(normal, halfway_dir), 0.0), 2.0) * lights[i].color.rgb * albedo;
-		//
-		intensity += (ambient + diffuse + specular);
-	}
+	vec3 ambient = lights[0].color.rrr;
 	//
-	float threshold = texture(tex0, texcoord_VS_out).r * 0.5;
+	vec3 normal = normalize(normal_VS_out);
+	vec3 light_dir = normalize(lights[0].position.xyz - position_VS_out);
+	vec3 diffuse = max(dot(normal, light_dir), 0.0) * lights[0].color.rrr;
+	//
+	vec3 view_dir = normalize(camera_position - position_VS_out);
+	vec3 halfway_dir = normalize(light_dir + view_dir);
+	vec3 specular = pow(max(dot(normal, halfway_dir), 0.0), 2.0) * lights[0].color.rrr;
+	//
+	intensity += clamp(ambient + diffuse + specular, 0.0, 1.0);
+	//
+	float threshold = texture(tex0, texcoord).r * 0.5;
 	//
 	vec3 final_color = vec3(1.0 - 4.0 * (1.0 - (intensity + threshold)));
 	color_FS_out = vec4(final_color, 1.0);

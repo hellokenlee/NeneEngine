@@ -51,8 +51,13 @@ void main() {
 	texcoord_VS_out = texcoord_VS_in;
 	position_VS_out = vec3(model * vec4(position_VS_in, 1.0f));
 	normal_VS_out = mat3(transpose(inverse(model))) * normal_VS_in;
-	//
-	float intensity = clamp(dot(normalize(lights[0].position.xyz - position_VS_out), normal_VS_out), 0.0, 1.0);
+	// Light pre vertex
+	vec3 light_dir = normalize(lights[0].position.xyz - position_VS_out);
+	float diffuse = clamp(dot(light_dir, normal_VS_out), 0.0, 1.0) * lights[0].color.r;
+	vec3 view_dir = normalize(camera_position - position_VS_out);
+	vec3 halfway_dir = normalize(light_dir + view_dir);
+	float specular = pow(max(dot(normal_VS_out, halfway_dir), 0.0), 2.0) * lights[0].color.r;
+	float intensity = specular + diffuse;
 	float tone = intensity * 6.0;
 	//
 	intensity_debug_VS_out = intensity;
