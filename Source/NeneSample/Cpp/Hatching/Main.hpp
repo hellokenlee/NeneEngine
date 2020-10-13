@@ -10,7 +10,7 @@ namespace hatching
 	bool g_shader_update = false;
 	const char* g_vertexshader_path = "../../Resource/Shader/GLSL/PraunHatchOrigin.vert";
 	const char* g_fragmentshader_path = "../../Resource/Shader/GLSL/PraunHatchOrigin.frag";
-	float g_texcoord_scale = 1.0f;
+	float g_texcoord_scale = 2.0f;
 	float g_light_position[3] = { 3.0f, 4.0f, -4.0f };
 	float g_camera_position[3] = { 0.0f, 0.0f, 0.0f };
 	float g_camera_rotation[2] = { 0.0f, 0.0f };
@@ -67,12 +67,18 @@ namespace hatching
 			g_fragmentshader_path,
 			NNVertexFormat::POSITION_NORMAL_TEXTURE
 		);
-		auto texture = Texture2D::Create({
-			"../../Resource/Texture/TAM/default03.bmp",
-			"../../Resource/Texture/TAM/default02.bmp", 
-			"../../Resource/Texture/TAM/default01.bmp", 
-			"../../Resource/Texture/TAM/default00.bmp"
+		auto tex_hatch_tone012 = Texture2D::Create({
+			"../../Resource/Texture/BTAM/Default_Mip0_Tone012.png",
+			"../../Resource/Texture/BTAM/Default_Mip1_Tone012.png", 
+			"../../Resource/Texture/BTAM/Default_Mip2_Tone012.png", 
+			"../../Resource/Texture/BTAM/Default_Mip3_Tone012.png"
 		});
+		auto tex_hatch_tone345 = Texture2D::Create({
+			"../../Resource/Texture/BTAM/Default_Mip0_Tone345.png",
+			"../../Resource/Texture/BTAM/Default_Mip1_Tone345.png",
+			"../../Resource/Texture/BTAM/Default_Mip2_Tone345.png",
+			"../../Resource/Texture/BTAM/Default_Mip3_Tone345.png"
+			});
 		//
 		cc->SetPosition(NNVec3(4.0f, 5.0f, 4.0f));
 		cc->SetYaw(4.0f);
@@ -85,8 +91,6 @@ namespace hatching
 		LightConstantBuffer.Data().range = 1000.0f;
 		LightConstantBuffer.Data().color = NNVec4(1.0f, 1.0f, 1.0f, 1.0f);
 		LightConstantBuffer.Data().attenuation = 1000.0f;
-		//
-		
 		// 
 		while (!Utils::WindowShouldClose()) {
 			//
@@ -106,7 +110,8 @@ namespace hatching
 			{
 				Utils::Clear();
 				ca->Draw();
-				texture->Use(0);
+				tex_hatch_tone012->Use(0);
+				tex_hatch_tone345->Use(1);
 				ball->Draw(shader);
 			}
 			//
