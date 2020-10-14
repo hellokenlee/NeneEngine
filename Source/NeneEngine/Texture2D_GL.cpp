@@ -83,7 +83,7 @@ shared_ptr<Texture2D> Texture2D::Create(vector<const NNChar*> filepaths)
 		{
 			//
 			const char* filepath = filepaths[idx];
-			std::shared_ptr<NNByte[]> image_data = nullptr;
+			shared_ptr<NNByte[]> image_data = nullptr;
 			//
 			GLuint width, height;
 			NNColorFormat format;

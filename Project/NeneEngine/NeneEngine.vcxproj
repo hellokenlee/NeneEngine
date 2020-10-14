@@ -293,6 +293,7 @@
     <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_draw.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_impl_glfw_gl3.cpp" />
+    <ClCompile Include="..\..\Source\NeneEngine\Texture3D_GL.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\UserInterface_DX.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\UserInterface_GL.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\IO.cpp" />

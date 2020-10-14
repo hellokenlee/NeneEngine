@@ -5,10 +5,11 @@
 #include "NeneEngine/Debug.h"
 #include "NeneEngine/Nene.h"
 
+
 namespace hatching
 {
 	bool g_shader_update = false;
-	float g_texcoord_scale = 2.0f;
+	float g_texcoord_scale = 0.0f;
 	float g_light_position[3] = { 3.0f, 4.0f, -4.0f };
 	float g_camera_position[3] = { 0.0f, 0.0f, 0.0f };
 	float g_camera_rotation[2] = { 0.0f, 0.0f };
@@ -18,10 +19,14 @@ namespace hatching
 	const char* g_vertexshader_path = "Resource/Shader/GLSL/PraunHatchOrigin.vert";
 	const char* g_fragmentshader_path = "Resource/Shader/GLSL/PraunHatchOrigin.frag";
 	//*/
-	//* For <Real-Time Stroke Textures> Freud. et al.
+	
+	/* For <Real-Time Stroke Textures> Freud. et al.
 	const char* g_vertexshader_path = "Resource/Shader/GLSL/FreudHatch.vert";
 	const char* g_fragmentshader_path = "Resource/Shader/GLSL/FreudHatch.frag";
 	//*/
+
+	const char* g_vertexshader_path = "Resource/Shader/GLSL/TextureVisualize.vert";
+	const char* g_fragmentshader_path = "Resource/Shader/GLSL/TextureVisualize.frag";
 
 	void KeyboardControl(std::shared_ptr<BaseEvent> eve) {
 		std::shared_ptr<KeyboardEvent> k_event = std::dynamic_pointer_cast<KeyboardEvent>(eve);
@@ -47,7 +52,7 @@ namespace hatching
 			ImGui::Text("(%.1f, %.1f, %.1f) | (%.1f, %.1f) ", g_camera_position[0], g_camera_position[1], g_camera_position[2], g_camera_rotation[0], g_camera_rotation[1]);
 			//
 			ImGui::Text("TexCoord: ");
-			ImGui::SliderFloat(" ", &g_texcoord_scale, 1.0f, 10.0f);
+			ImGui::SliderFloat(" ", &g_texcoord_scale, 0.0f, 1.0f);
 			//
 			ImGui::Text("LightPos: ");
 			ImGui::SliderFloat3("  ", g_light_position, -10.0f, 10.0f);
@@ -71,6 +76,7 @@ namespace hatching
 		auto ca = CoordinateAxes::Create(100.0f, 10.0f);
 		auto controls = UserInterface::Create(DrawGraphicUserInterfaces);
 		//
+		auto quad = Geometry::CreateQuad();
 		auto cube = Geometry::CreateCube();
 		auto ball = Geometry::CreateSphereUV(30, 30);
 		auto shader = Shader::Create(
@@ -78,6 +84,24 @@ namespace hatching
 			g_fragmentshader_path,
 			NNVertexFormat::POSITION_NORMAL_TEXTURE
 		);
+		//
+		static const size_t MIPMAP_LEVELS = 4;
+		static const NNUInt MAX_TONE_LEVELS = 64;
+		//
+		NNChar filepath[256];
+		std::vector<std::vector<std::string>> images(MIPMAP_LEVELS);
+		//
+		for (NNUInt mip = 0; mip < MIPMAP_LEVELS; ++mip)
+		{
+			NNUInt curr_tone_levels = MAX_TONE_LEVELS >> mip;
+			for (NNUInt tone = 0; tone < curr_tone_levels; ++tone)
+			{
+				sprintf_s(filepath, "Resource/Texture/VTAM/MipMapLv%d/Tone%03d.bmp", mip, tone);
+				images[mip].push_back(filepath);
+			}
+		}
+		//
+		auto tex_hatch_vol = Texture3D::Create(images);
 		auto tex_hatch = Texture2D::Create("Resource/Texture/TAM/default23.bmp");
 		auto tex_hatch_tone012 = Texture2D::Create({
 			"Resource/Texture/BTAM/Default_Mip0_Tone012.png",
@@ -90,12 +114,12 @@ namespace hatching
 			"Resource/Texture/BTAM/Default_Mip1_Tone345.png",
 			"Resource/Texture/BTAM/Default_Mip2_Tone345.png",
 			"Resource/Texture/BTAM/Default_Mip3_Tone345.png"
-			});
+		});
 		//
 		cc->SetPosition(NNVec3(4.0f, 5.0f, 4.0f));
 		cc->SetYaw(4.0f);
 		cc->SetPitch(-0.7f);
-		cc->m_speed = 1.5f;
+		cc->m_speed = 10.0f;
 		ball->MoveTo(NNVec3(0.0, 1.0, 0.0));
 		//
 		ConstantBuffer<LightCBDS> LightConstantBuffer;
@@ -119,8 +143,20 @@ namespace hatching
 			LightConstantBuffer.Data().position.y = g_light_position[1];
 			LightConstantBuffer.Data().position.z = g_light_position[2];
 			LightConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_LIGHT_SLOT);
-			/* 2001 Praun et al. Method1
+
+			/* 2001 Freud. et al.
 			{
+
+				Utils::Clear();
+				ca->Draw();
+				tex_hatch->Use(0);
+				ball->Draw(shader);
+			}
+			//*/
+
+			/* 2001 Praun et al.
+			{
+				
 				Utils::Clear();
 				ca->Draw();
 				tex_hatch_tone012->Use(0);
@@ -128,14 +164,23 @@ namespace hatching
 				ball->Draw(shader);
 			}
 			//*/
-			//* 2001 Freud. et al.
+			
+			/* 2002 Praun et al. Scheme 1
 			{
 				Utils::Clear();
 				ca->Draw();
-				tex_hatch->Use(0);
 				ball->Draw(shader);
 			}
 			//*/
+			
+			{
+				Utils::Clear();
+				ca->Draw();
+				tex_hatch_vol->Use(0);
+				quad->Draw(shader);
+			}
+
+			//
 			{
 				g_camera_position[0] = cc->GetCamera()->GetPosition().x;
 				g_camera_position[1] = cc->GetCamera()->GetPosition().y;

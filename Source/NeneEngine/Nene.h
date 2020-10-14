@@ -12,6 +12,7 @@
 #include "Observer.h"
 #include "Keyboard.h"
 #include "Texture2D.h"
+#include "Texture3D.h"
 #include "TextureCube.h"
 #include "CameraController.h"
 #include "Geometry.h"

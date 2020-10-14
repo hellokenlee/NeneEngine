@@ -36,29 +36,19 @@ shared_ptr<NNByte[]> Texture::LoadImage(const NNChar* filepath, NNUInt& width, N
 	}
 	FREE_IMAGE_COLOR_TYPE color = FreeImage_GetColorType(pImage);
 	// !TODO: 避免转换
-	if (color != FIC_RGBALPHA) {
+	if (color != FIC_RGBALPHA) 
+	{
 		FIBITMAP *tmp = pImage;
 		pImage = FreeImage_ConvertTo32Bits(pImage);
 		FreeImage_Unload(tmp);
 		color = FreeImage_GetColorType(pImage);
 	}
+	format = RGBA;
 	// 获取数据
 	pBits = FreeImage_GetBits(pImage);
 	width = FreeImage_GetWidth(pImage);
 	height = FreeImage_GetHeight(pImage);
 	NNUInt pitch = FreeImage_GetPitch(pImage);
-	switch (color)
-	{
-	case FIC_RGB:
-		format = RGB;
-		break;
-	case FIC_RGBALPHA:
-		format = RGBA;
-		break;
-	default:
-		dLog("[Error] Wrong image color format!\n");
-		break;
-	}
 	// 拷贝一份数据返回
 	NNUInt BBP = FreeImage_GetBPP(pImage) / 8;
 	BYTE *res = new BYTE[width * height * BBP];
