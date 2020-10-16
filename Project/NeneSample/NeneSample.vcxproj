@@ -135,6 +135,7 @@
     <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoNOAA.hpp" />
     <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoTSAA.hpp" />
     <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\Main.hpp" />
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\Lap.hpp" />
     <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\Main.hpp" />
   </ItemGroup>
   <ItemGroup>

@@ -48,6 +48,9 @@
     <ClInclude Include="..\..\Source\NeneSample\Cpp\Simple\Main.hpp">
       <Filter>头文件\Simple</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\Lap.hpp">
+      <Filter>头文件\Hatching</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\NeneSample\Cpp\Main.cpp">
