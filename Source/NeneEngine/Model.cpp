@@ -18,7 +18,7 @@ shared_ptr<Model> Model::Create(const NNChar* filepath) {
 	// 载入器
 	Assimp::Importer importer;
 	// 获取场景指针 ( 执行三角化 )
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipWindingOrder);
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipWindingOrder | aiProcess_GenNormals);
 	// 错误检测
 	if (scene == nullptr || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
 		printf("[Error] Model Loading Error: %s\n\n", importer.GetErrorString());

@@ -38,22 +38,19 @@ void main() {
 	//
 	vec2 texcoord = texcoord_VS_out * texcoord_scale;
 	//
-	vec3 intensity = vec3(0.0);
-	//
-	vec3 ambient = lights[0].color.rrr;
-	//
 	vec3 normal = normalize(normal_VS_out);
 	vec3 light_dir = normalize(lights[0].position.xyz - position_VS_out);
-	vec3 diffuse = max(dot(normal, light_dir), 0.0) * lights[0].color.rrr;
+	float diffuse = max(dot(normal, light_dir), 0.0) * lights[0].color.r;
 	//
 	vec3 view_dir = normalize(camera_position - position_VS_out);
 	vec3 halfway_dir = normalize(light_dir + view_dir);
-	vec3 specular = pow(max(dot(normal, halfway_dir), 0.0), 2.0) * lights[0].color.rrr;
+	float specular = pow(max(dot(normal, halfway_dir), 0.0), 2.0) * lights[0].color.r;
 	//
-	intensity += clamp(ambient + diffuse + specular, 0.0, 1.0);
+	float intensity = clamp(diffuse, 0.0, 1.0);
 	//
-	float threshold = texture(tex0, texcoord).r * 0.5;
+	float threshold = texture(tex0, texcoord).r;
 	//
-	vec3 final_color = vec3(1.0 - 4.0 * (1.0 - (intensity + threshold)));
-	color_FS_out = vec4(final_color, 1.0);
+	float final_color = 1.0 - 4.0 * (1.0 - (intensity + threshold));
+	//
+	color_FS_out = vec4(final_color, final_color, final_color, 1.0);
 }

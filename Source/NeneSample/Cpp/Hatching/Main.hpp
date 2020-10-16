@@ -9,24 +9,29 @@
 namespace hatching
 {
 	bool g_shader_update = false;
-	float g_texcoord_scale = 0.0f;
+	float g_texcoord_scale = 5.0f;
 	float g_light_position[3] = { 3.0f, 4.0f, -4.0f };
 	float g_camera_position[3] = { 0.0f, 0.0f, 0.0f };
 	float g_camera_rotation[2] = { 0.0f, 0.0f };
 	float g_light_intensity = 1.0f;
+
+	/* For <Real-Time Stroke Textures> Freud. et al.
+	const char* g_vertexshader_path = "Resource/Shader/GLSL/FreudHatch.vert";
+	const char* g_fragmentshader_path = "Resource/Shader/GLSL/FreudHatch.frag";
+	//*/
 
 	/* For <Real-Time Hatching> Praun et al.
 	const char* g_vertexshader_path = "Resource/Shader/GLSL/PraunHatchOrigin.vert";
 	const char* g_fragmentshader_path = "Resource/Shader/GLSL/PraunHatchOrigin.frag";
 	//*/
 	
-	/* For <Real-Time Stroke Textures> Freud. et al.
-	const char* g_vertexshader_path = "Resource/Shader/GLSL/FreudHatch.vert";
-	const char* g_fragmentshader_path = "Resource/Shader/GLSL/FreudHatch.frag";
+	//* For <Fine Tone Control in Harward Hatching> Praun et al. Scheme1
+	const char* g_vertexshader_path = "Resource/Shader/GLSL/PraunHatchScheme1.vert";
+	const char* g_fragmentshader_path = "Resource/Shader/GLSL/PraunHatchScheme1.frag";
 	//*/
 
-	const char* g_vertexshader_path = "Resource/Shader/GLSL/TextureVisualize.vert";
-	const char* g_fragmentshader_path = "Resource/Shader/GLSL/TextureVisualize.frag";
+	//const char* g_vertexshader_path = "Resource/Shader/GLSL/TextureVisualize.vert";
+	//const char* g_fragmentshader_path = "Resource/Shader/GLSL/TextureVisualize.frag";
 
 	void KeyboardControl(std::shared_ptr<BaseEvent> eve) {
 		std::shared_ptr<KeyboardEvent> k_event = std::dynamic_pointer_cast<KeyboardEvent>(eve);
@@ -52,13 +57,13 @@ namespace hatching
 			ImGui::Text("(%.1f, %.1f, %.1f) | (%.1f, %.1f) ", g_camera_position[0], g_camera_position[1], g_camera_position[2], g_camera_rotation[0], g_camera_rotation[1]);
 			//
 			ImGui::Text("TexCoord: ");
-			ImGui::SliderFloat(" ", &g_texcoord_scale, 0.0f, 1.0f);
+			ImGui::SliderFloat(" ", &g_texcoord_scale, 1.0f, 10.0f);
 			//
 			ImGui::Text("LightPos: ");
 			ImGui::SliderFloat3("  ", g_light_position, -10.0f, 10.0f);
 			//
 			ImGui::Text("LightIntensity: ");
-			ImGui::SliderFloat("   ", &g_light_intensity, 0.0f, 1.0f);
+			ImGui::SliderFloat("   ", &g_light_intensity, 0.0f, 2.0f);
 		}
 		ImGui::End();
 	}
@@ -102,7 +107,9 @@ namespace hatching
 		}
 		//
 		auto tex_hatch_vol = Texture3D::Create(images);
-		auto tex_hatch = Texture2D::Create("Resource/Texture/TAM/default23.bmp");
+		auto tex_hatch = Texture2D::Create({
+			"Resource/Texture/TAM/default23.bmp"
+		});
 		auto tex_hatch_tone012 = Texture2D::Create({
 			"Resource/Texture/BTAM/Default_Mip0_Tone012.png",
 			"Resource/Texture/BTAM/Default_Mip1_Tone012.png", 
@@ -119,7 +126,7 @@ namespace hatching
 		cc->SetPosition(NNVec3(4.0f, 5.0f, 4.0f));
 		cc->SetYaw(4.0f);
 		cc->SetPitch(-0.7f);
-		cc->m_speed = 10.0f;
+		cc->m_speed = 3.0f;
 		ball->MoveTo(NNVec3(0.0, 1.0, 0.0));
 		//
 		ConstantBuffer<LightCBDS> LightConstantBuffer;
@@ -144,7 +151,7 @@ namespace hatching
 			LightConstantBuffer.Data().position.z = g_light_position[2];
 			LightConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_LIGHT_SLOT);
 
-			/* 2001 Freud. et al.
+			/* 2001 Freu. et al.
 			{
 
 				Utils::Clear();
@@ -156,7 +163,6 @@ namespace hatching
 
 			/* 2001 Praun et al.
 			{
-				
 				Utils::Clear();
 				ca->Draw();
 				tex_hatch_tone012->Use(0);
@@ -165,20 +171,14 @@ namespace hatching
 			}
 			//*/
 			
-			/* 2002 Praun et al. Scheme 1
-			{
-				Utils::Clear();
-				ca->Draw();
-				ball->Draw(shader);
-			}
-			//*/
-			
+			//* 2002 Praun et al. Scheme 1
 			{
 				Utils::Clear();
 				ca->Draw();
 				tex_hatch_vol->Use(0);
-				quad->Draw(shader);
+				ball->Draw(shader);
 			}
+			//*/
 
 			//
 			{

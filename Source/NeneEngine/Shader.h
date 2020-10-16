@@ -24,8 +24,8 @@ public:
 	// 析构函数
 	~Shader();
 	// 增加可选着色器
-	bool addOptionalShader(const NNChar *filePath, const NNShaderType st, const bool& isLink = true);
-	bool addOptionalShaderFromSource(const NNChar *source, const NNShaderType st, const bool& isLink = true);
+	bool AddOptionalShader(const NNChar *filePath, const NNShaderType st, const bool& isLink = true);
+	bool AddOptionalShaderFromSource(const NNChar *source, const NNShaderType st, const bool& isLink = true);
 	// 设置输出类型
 	bool setLayoutFormat(const NNVertexFormat vf);
 	// 使用该着色器

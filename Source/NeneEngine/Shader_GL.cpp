@@ -42,8 +42,8 @@ shared_ptr<Shader> Shader::createFromSource(const NNChar *vsSource, const NNChar
 	Shader *res = new Shader();
 	res->mProgramID = glCreateProgram();
 	// 编译
-	res->addOptionalShaderFromSource(vsSource, VERTEX_SHADER, false);
-	res->addOptionalShaderFromSource(fsSource, FRAGMENT_SHADER, false);
+	res->AddOptionalShaderFromSource(vsSource, VERTEX_SHADER, false);
+	res->AddOptionalShaderFromSource(fsSource, FRAGMENT_SHADER, false);
 	// 检查
 	if (isLink) {
 		glLinkProgram(res->mProgramID);
@@ -58,12 +58,12 @@ shared_ptr<Shader> Shader::createFromSource(const NNChar *vsSource, const NNChar
 	return shared_ptr<Shader>(res);
 }
 
-bool Shader::addOptionalShader(const NNChar *filePath, const NNShaderType st, const bool& isLink) {
+bool Shader::AddOptionalShader(const NNChar *filePath, const NNShaderType st, const bool& isLink) {
 	string source = IO::ReadFile(filePath);
-	return addOptionalShaderFromSource(source.c_str(), st, isLink);
+	return AddOptionalShaderFromSource(source.c_str(), st, isLink);
 }
 
-bool Shader::addOptionalShaderFromSource(const NNChar *source, const NNShaderType st, const bool& isLink) {
+bool Shader::AddOptionalShaderFromSource(const NNChar *source, const NNShaderType st, const bool& isLink) {
 	//
 	GLuint *pID = nullptr;
 	switch (st) {
