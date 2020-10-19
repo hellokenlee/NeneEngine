@@ -63,9 +63,6 @@
     <ClInclude Include="..\..\Source\NeneEngine\Mesh.h">
       <Filter>头文件\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\NeneEngine\Model.h">
-      <Filter>头文件\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\NeneEngine\Mouse.h">
       <Filter>头文件\Engine</Filter>
     </ClInclude>
@@ -144,6 +141,9 @@
     <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_truetype.h">
       <Filter>头文件\Engine\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\NeneEngine\StaticMesh.h">
+      <Filter>头文件\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\NeneEngine\ConstantBuffer_DX.inl">
@@ -200,9 +200,6 @@
       <Filter>源文件\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\NeneEngine\Mesh_GL.cpp">
-      <Filter>源文件\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\NeneEngine\Model.cpp">
       <Filter>源文件\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\NeneEngine\Mouse_DX.cpp">
@@ -299,6 +296,9 @@
       <Filter>源文件\Engine\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\NeneEngine\Texture3D_GL.cpp">
+      <Filter>源文件\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NeneEngine\StaticMesh.cpp">
       <Filter>源文件\Engine</Filter>
     </ClCompile>
   </ItemGroup>

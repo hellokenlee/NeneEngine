@@ -252,7 +252,7 @@
     <ClInclude Include="..\..\Source\NeneEngine\Keyboard.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Light.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Mesh.h" />
-    <ClInclude Include="..\..\Source\NeneEngine\Model.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\StaticMesh.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Mouse.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Nene.h" />
     <ClInclude Include="..\..\Source\NeneEngine\NeneCB.h" />
@@ -302,7 +302,7 @@
     <ClCompile Include="..\..\Source\NeneEngine\Light.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\Mesh_DX.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\Mesh_GL.cpp" />
-    <ClCompile Include="..\..\Source\NeneEngine\Model.cpp" />
+    <ClCompile Include="..\..\Source\NeneEngine\StaticMesh.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\Mouse_DX.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\Mouse_GL.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\NeneCB.cpp" />

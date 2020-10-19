@@ -12,7 +12,7 @@ CoordinateAxes::CoordinateAxes() : mLineLen(0), mLineGap(0), mpAxes(nullptr), mp
 
 shared_ptr<CoordinateAxes> CoordinateAxes::Create(const NNFloat& lineLen, const NNFloat& lineGap) {
 	//
-	static shared_ptr<Shader> pShader = Shader::createFromSource(vShaderSource, fShaderSource, POSITION_NORMAL);
+	static shared_ptr<Shader> pShader = Shader::CreateFromSource(vShaderSource, fShaderSource, POSITION_NORMAL);
 	//
 	CoordinateAxes* ret = new CoordinateAxes();
 	ret->mpShader = pShader;

@@ -2,66 +2,54 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include "Utils.h"
+#include <array>
 #include <string>
 #include <memory>
-#include <vector>
+
+#include "Utils.h"
+
+class ShaderImpl;
 
 //
 //    Shader: Compiled GPU program
 //
 
-class Shader : public std::enable_shared_from_this<Shader> {
+class Shader : public std::enable_shared_from_this<Shader>
+{
 public:
-	// 创建着色器
-	static std::shared_ptr<Shader> Create(const NNChar *vsFilePath, const NNChar *fsFilePath, 
-		const NNVertexFormat lf, const bool& isLink = true);
-	static std::shared_ptr<Shader> createFromSource(const NNChar *vsSource, const NNChar *fsSource, 
-		const NNVertexFormat lf, const bool& isLink = true);
-	static std::shared_ptr<Shader> createFromSource(std::string vsSource, std::string fsSource,
-		const NNVertexFormat lf, const bool& isLink = true) 
-	{ return createFromSource(vsSource.c_str(), fsSource.c_str(), lf, isLink); }
-	// 析构函数
+	// Destruct
 	~Shader();
-	// 增加可选着色器
+	// Creation
+	static std::shared_ptr<Shader> Create(const NNChar *vs_filepath, const NNChar *fs_filepath, 
+		const NNVertexFormat vf=POSITION_NORMAL_TEXTURE, const bool try_link=true);
+	static std::shared_ptr<Shader> CreateFromSource(const NNChar *vs_source, const NNChar *fs_source, 
+		const NNVertexFormat vf=POSITION_NORMAL_TEXTURE, const bool try_link=true);
+	
+	// Set vertex format
+	void SetLayoutFormat(const NNVertexFormat vf) { m_vf = vf; }
+	// Add optional shader
 	bool AddOptionalShader(const NNChar *filePath, const NNShaderType st, const bool& isLink = true);
 	bool AddOptionalShaderFromSource(const NNChar *source, const NNShaderType st, const bool& isLink = true);
-	// 设置输出类型
-	bool setLayoutFormat(const NNVertexFormat vf);
-	// 使用该着色器
-	void Use();
-	// 输出某个着色器的编译信息
-	bool checkCompileInfo(const NNShaderType st);
-	// 输出整个着色器程序的链接信息
-	bool checkLinkInfo();
 	
-private:
-	// 禁止拷贝
-	Shader();
-	Shader(const Shader& rhs);
-	Shader& operator=(const Shader& rhs);
-	// 输入格式
-	NNVertexFormat mVF;
+	// Use this shader for rendering
+	void Use();
 	//
-	std::vector<std::string> mFilepaths;
-	// 各个着色器
-#if defined NENE_GL
-	GLint mIsLinked;
-	GLuint mProgramID;
-	GLuint mVS, mTCS, mTES, mGS, mFS;
-#elif defined NENE_DX
-	ID3D11VertexShader* mpVS;
-	ID3D11HullShader* mpHS;
-	ID3D11ComputeShader* mpCS;
-	ID3D11GeometryShader* mpGS;
-	ID3D11PixelShader* mpPS;
-	ID3DBlob *mpVSError, *mpHSError, *mpCSError, *mpGSError, *mpPSError;
-	ID3DBlob *mpVSBlob;
-	ID3D11InputLayout* mpLayout;
-#else
-	#error Please define NENE_GL or NENE_DX in the compiler to specify the GAPI you want to Use.
-#endif
+	bool Recompile();
+	// Check the linking informations
+	bool CheckLinkInfo();
+	// Check the compile informations
+	bool CheckCompileInfo(const NNShaderType st);
 
+private:
+	ShaderImpl* m_impl;
+	NNVertexFormat m_vf;
+	std::array<std::string, NNShaderType::NNShaderTypeNum> m_filepaths;
+
+private:
+	// 
+	Shader() = default;
+	Shader(const Shader& rhs) = delete;
+	Shader& operator=(const Shader& rhs) = delete;
 };
 
 #endif // SHADER_H

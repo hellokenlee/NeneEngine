@@ -6,50 +6,52 @@
 #include "Texture2D.h"
 #include <vector>
 
+class MeshImpl;
+
 //
-//    网格顶点
+//    Vertex:
 //
-struct MeshVertex {
-	MeshVertex() {};
+struct Vertex 
+{
 	NNVec3 mPosition;
 	NNVec3 mNormal;
 	NNVec2 mTexcoord;
 };
 
 //
-//    网格类
+//    Mesh:
 //
-class Mesh {
+class Mesh 
+{
 public:
-	static std::shared_ptr<Mesh> Create(std::vector<MeshVertex>& vertices, std::vector<NNUInt>& indices,
-		std::vector<std::shared_ptr<Texture2D>>& textures, std::vector<NNTextureType>& texTypes);
 	~Mesh();
+	static std::shared_ptr<Mesh> Create(std::vector<Vertex>& vertices, std::vector<NNUInt>& indices,
+		std::vector<std::tuple<std::shared_ptr<Texture2D>, NNTextureType>>& textures);
 	void Draw();
-	void drawInstance();
-private:
+	void DrawInstance();
+
 	//
-	Mesh();
-	Mesh(const Mesh& rhs);
-	Mesh& operator=(const Mesh& rhs);
-	// 纹理指针
-	std::vector<std::shared_ptr<Texture2D>> mTextures;
-	// 纹理类型
-	std::vector<NNTextureType> mTexureTypes;
-	// 顶点数，索引数
-	NNUInt mVertexNum, mIndexNum;
-	// 顶点格式
-	NNVertexFormat mVertexFormat;
-	// 绘制模式
-	NNDrawMode mDrawMode;
-	// 顶点缓冲
-#if defined NENE_GL
-	NNUInt mVAO, mVBO, mEBO;
-#elif defined NENE_DX
-	ID3D11Buffer *mpVertexBuffer, *mpIndexBuffer;
-	NNUInt mPerVertexSize, mOffset;
-#else
-	#error Please define NENE_GL or NENE_DX to select which Graphic-API you want to Use!
-#endif
+	std::vector<NNUInt>& GetIndexData();
+	std::vector<Vertex>& GetVertexData();
+
+protected:
+	//
+	MeshImpl* m_impl;
+	//
+	NNVertexFormat m_vertex_format;
+	//
+	std::vector<NNUInt> m_indices;
+	std::vector<Vertex> m_vertices;
+	//
+	std::vector<std::tuple<std::shared_ptr<Texture2D>, NNTextureType>> m_textures;
+
+protected:
+	//
+	Mesh() = default;
+	Mesh(const Mesh& rhs) = delete;
+	Mesh& operator=(const Mesh& rhs) = delete;
+
+protected:
 	friend class Model;
 };
 

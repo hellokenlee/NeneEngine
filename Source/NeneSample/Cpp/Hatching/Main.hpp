@@ -9,31 +9,15 @@
 namespace hatching
 {
 	bool g_shader_update = false;
+
 	float g_texcoord_scale = 5.0f;
 	float g_light_position[3] = { 3.0f, 4.0f, -4.0f };
 	float g_camera_position[3] = { 0.0f, 0.0f, 0.0f };
 	float g_camera_rotation[2] = { 0.0f, 0.0f };
 	float g_light_intensity = 1.0f;
 
-	/* For <Real-Time Stroke Textures> Freud. et al.
-	const char* g_vertexshader_path = "Resource/Shader/GLSL/FreudHatch.vert";
-	const char* g_fragmentshader_path = "Resource/Shader/GLSL/FreudHatch.frag";
-	//*/
-
-	/* For <Real-Time Hatching> Praun et al.
-	const char* g_vertexshader_path = "Resource/Shader/GLSL/PraunHatchOrigin.vert";
-	const char* g_fragmentshader_path = "Resource/Shader/GLSL/PraunHatchOrigin.frag";
-	//*/
-	
-	//* For <Fine Tone Control in Harward Hatching> Praun et al. Scheme1
-	const char* g_vertexshader_path = "Resource/Shader/GLSL/PraunHatchScheme1.vert";
-	const char* g_fragmentshader_path = "Resource/Shader/GLSL/PraunHatchScheme1.frag";
-	//*/
-
-	//const char* g_vertexshader_path = "Resource/Shader/GLSL/TextureVisualize.vert";
-	//const char* g_fragmentshader_path = "Resource/Shader/GLSL/TextureVisualize.frag";
-
-	void KeyboardControl(std::shared_ptr<BaseEvent> eve) {
+	void KeyboardControl(std::shared_ptr<BaseEvent> eve) 
+	{
 		std::shared_ptr<KeyboardEvent> k_event = std::dynamic_pointer_cast<KeyboardEvent>(eve);
 		if (k_event->mKey == NNKeyMap(ESCAPE))
 		{
@@ -84,11 +68,12 @@ namespace hatching
 		auto quad = Geometry::CreateQuad();
 		auto cube = Geometry::CreateCube();
 		auto ball = Geometry::CreateSphereUV(30, 30);
-		auto shader = Shader::Create(
-			g_vertexshader_path,
-			g_fragmentshader_path,
-			NNVertexFormat::POSITION_NORMAL_TEXTURE
-		);
+		// <Real-Time Hatching> Praun et al.
+		auto shader_praun = Shader::Create("Resource/Shader/GLSL/PraunHatchOrigin.vert", "Resource/Shader/GLSL/PraunHatchOrigin.frag");
+		// <Real-Time Stroke Textures> Freud. et al. 
+		auto shader_fraud = Shader::Create("Resource/Shader/GLSL/FreudHatch.vert", "Resource/Shader/GLSL/FreudHatch.frag");
+		// <Fine Tone Control in Harward Hatching> Praun et al. Scheme1
+		auto shader_praun_scheme1 = Shader::Create("Resource/Shader/GLSL/PraunHatchScheme1.vert", "Resource/Shader/GLSL/PraunHatchScheme1.frag");
 		//
 		static const size_t MIPMAP_LEVELS = 4;
 		static const NNUInt MAX_TONE_LEVELS = 64;
@@ -106,7 +91,7 @@ namespace hatching
 			}
 		}
 		//
-		auto tex_hatch_vol = Texture3D::Create(images);
+		auto tex_vol = Texture3D::Create(images);
 		auto tex_hatch = Texture2D::Create({
 			"Resource/Texture/TAM/default23.bmp"
 		});
@@ -150,33 +135,30 @@ namespace hatching
 			LightConstantBuffer.Data().position.y = g_light_position[1];
 			LightConstantBuffer.Data().position.z = g_light_position[2];
 			LightConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_LIGHT_SLOT);
-
-			/* 2001 Freu. et al.
-			{
-
-				Utils::Clear();
-				ca->Draw();
-				tex_hatch->Use(0);
-				ball->Draw(shader);
-			}
-			//*/
-
-			/* 2001 Praun et al.
+			//
+			/* <Real-Time Hatching> Praun et al.
 			{
 				Utils::Clear();
 				ca->Draw();
 				tex_hatch_tone012->Use(0);
 				tex_hatch_tone345->Use(1);
-				ball->Draw(shader);
+				ball->Draw(shader_praun);
 			}
 			//*/
-			
-			//* 2002 Praun et al. Scheme 1
+			//* <Real-Time Stroke Textures> Freud. et al.
 			{
 				Utils::Clear();
 				ca->Draw();
-				tex_hatch_vol->Use(0);
-				ball->Draw(shader);
+				tex_hatch->Use(0);
+				ball->Draw(shader_fraud);
+			}
+			//*/
+			/* <Fine Tone Control in Harward Hatching> Praun et al. Scheme1
+			{
+				Utils::Clear();
+				ca->Draw();
+				tex_vol->Use(0);
+				ball->Draw(shader_praun_scheme1);
 			}
 			//*/
 
@@ -194,17 +176,11 @@ namespace hatching
 			//
 			if (g_shader_update)
 			{
-				printf("========== Compiling Shaders >>> ===========\n");
-				auto new_shader = Shader::Create(
-					g_vertexshader_path,
-					g_fragmentshader_path,
-					NNVertexFormat::POSITION_NORMAL_TEXTURE
-				); 
-				if (new_shader != nullptr)
-				{
-					shader = new_shader;
-				}
 				g_shader_update = false;
+				printf("========== Compiling Shaders >>> ===========\n");
+				shader_fraud->Recompile();
+				shader_praun->Recompile();
+				shader_praun_scheme1->Recompile();
 				printf("========== Compiling Shaders <<< ===========\n");
 			}
 		}

@@ -5,6 +5,11 @@
 #include <vector>
 #include "Texture.h"
 
+class Texture3DImpl;
+
+//
+//
+//
 
 class Texture3D : public Texture
 {
@@ -17,7 +22,7 @@ public:
 	//
 	virtual void Use(const NNUInt& slot = 0);
 private:
-	class Texture3DImpl* m_impl;
+	Texture3DImpl* m_impl;
 private:
 	Texture3D() = default;
 	Texture3D(const Texture3D& rhs) = delete;

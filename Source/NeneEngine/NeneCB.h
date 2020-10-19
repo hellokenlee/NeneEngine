@@ -13,6 +13,7 @@ enum NNConstantBufferSlot {
 	PER_FRAME_SLOT = 0,
 	PER_OBJECT_SLOT = 1,
 	CUSTOM_LIGHT_SLOT = 2,
+	CUSTOM_FRAME_SLOT = 3,
 	NNConstantBufferSoltNum
 };
 

@@ -2,10 +2,10 @@
 #ifndef NENE_H
 #define NENE_H
 
-#include "Model.h"
 #include "Utils.h"
 #include "Shader.h"
 #include "ShaderCross.h"
+#include "StaticMesh.h"
 #include "Camera.h"
 #include "Shape.h"
 #include "Observable.h"
