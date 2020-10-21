@@ -5,6 +5,7 @@
 #include <memory>
 #include <functional>
 #include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 
 //
 //    UserInterface: 

@@ -13,9 +13,9 @@ class MeshImpl;
 //
 struct Vertex 
 {
-	NNVec3 mPosition;
-	NNVec3 mNormal;
-	NNVec2 mTexcoord;
+	NNVec3 m_position;
+	NNVec3 m_normal;
+	NNVec2 m_texcoord;
 };
 
 //
@@ -29,10 +29,11 @@ public:
 		std::vector<std::tuple<std::shared_ptr<Texture2D>, NNTextureType>>& textures);
 	void Draw();
 	void DrawInstance();
-
 	//
-	std::vector<NNUInt>& GetIndexData();
-	std::vector<Vertex>& GetVertexData();
+	void SetDrawMode(const NNDrawMode mode);
+	//
+	std::vector<NNUInt>& GetIndexData() { return m_indices; }
+	std::vector<Vertex>& GetVertexData() { return m_vertices; };
 
 protected:
 	//

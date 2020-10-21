@@ -13,7 +13,7 @@ string GetDirectoryPath(const NNChar* filepath)
 	return result.substr(0, pos + 1);
 }
 
-shared_ptr<StaticMesh> StaticMesh::Create(const NNChar* filepath)
+shared_ptr<StaticMesh> StaticMesh::Create(const NNChar* filepath, const NNFloat scale)
 {
 	//
 	checkFileExist(filepath);
@@ -33,7 +33,7 @@ shared_ptr<StaticMesh> StaticMesh::Create(const NNChar* filepath)
 	dLog("[Info] ===== Loading model begined:  ===== \n");
 	dLog("    Total %d meshes: \n", scene->mNumMeshes);
 	// 从根节点开始遍历加载模型
-	result->ProcessNode(scene->mRootNode, scene);
+	result->ProcessNode(scene->mRootNode, scene, scale);
 	//
 	dLog("[Info] ===== Model loading finished. ===== \n\n");
 	//
@@ -60,7 +60,7 @@ void StaticMesh::DrawInstanced(const shared_ptr<Shader> pShader, const shared_pt
 
 }
 
-void StaticMesh::ProcessNode(aiNode* pNode, const aiScene* pScene) 
+void StaticMesh::ProcessNode(aiNode* pNode, const aiScene* pScene, const NNFloat scale)
 {
 	// 
 	dLog("    |-- Load %d meshes from a node. (%s)\n", pNode->mNumMeshes, pNode->mName.C_Str());
@@ -68,16 +68,16 @@ void StaticMesh::ProcessNode(aiNode* pNode, const aiScene* pScene)
 	for (NNUInt i = 0; i < pNode->mNumMeshes; ++i) 
 	{
 		aiMesh* pMesh = pScene->mMeshes[pNode->mMeshes[i]];
-		ProcessMesh(pMesh, pScene);
+		ProcessMesh(pMesh, pScene, scale);
 	}
 	// 递归处理子节点
 	for (NNUInt i = 0; i < pNode->mNumChildren; ++i)
 	{
-		this->ProcessNode(pNode->mChildren[i], pScene);
+		this->ProcessNode(pNode->mChildren[i], pScene, scale);
 	}
 }
 
-void StaticMesh::ProcessMesh(aiMesh* pMesh, const aiScene* pScene) {
+void StaticMesh::ProcessMesh(aiMesh* pMesh, const aiScene* pScene, const NNFloat scale) {
 	// 构造Mesh需要的数据
 	vector<Vertex> vertices;
 	vector<NNUInt> indices;
@@ -94,19 +94,21 @@ void StaticMesh::ProcessMesh(aiMesh* pMesh, const aiScene* pScene) {
 		tmpVec3.x = pMesh->mVertices[i].x;
 		tmpVec3.y = pMesh->mVertices[i].y;
 		tmpVec3.z = pMesh->mVertices[i].z;
-		vertex.mPosition = tmpVec3;
+		vertex.m_position = tmpVec3 * scale;
 		// 法线
-		if (pMesh->mNormals) {
+		if (pMesh->mNormals)
+		{
 			tmpVec3.x = pMesh->mNormals[i].x;
 			tmpVec3.y = pMesh->mNormals[i].y;
 			tmpVec3.z = pMesh->mNormals[i].z;
-			vertex.mNormal = tmpVec3;
+			vertex.m_normal = tmpVec3;
 		}
 		// 纹理
-		if (pMesh->mTextureCoords[0]) {
+		if (pMesh->mTextureCoords[0]) 
+		{
 			tmpVec2.x = pMesh->mTextureCoords[0][i].x;
 			tmpVec2.y = pMesh->mTextureCoords[0][i].y;
-			vertex.mTexcoord = tmpVec2;
+			vertex.m_texcoord = tmpVec2;
 		}
 		// 把顶点放进去
 		vertices.push_back(vertex);

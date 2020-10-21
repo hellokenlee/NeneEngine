@@ -105,6 +105,7 @@ enum NNVertexOrder {
 	typedef glm::vec3 NNVec3;
 	typedef glm::vec4 NNVec4;
 	typedef glm::mat4 NNMat4;
+	typedef glm::mat3 NNMat3;
 
 	// Math Functions
 	#define NNMat4Identity glm::mat4(1.0f)
@@ -119,6 +120,7 @@ enum NNVertexOrder {
 	#define NNCreateOrtho(left, right, bottom, top, near, far) glm::ortho(left, right, bottom, top, near, far)
 	#define NNCross(vec1, vec2) glm::cross(vec1, vec2)
 	#define NNNormalize(vec1) glm::normalize(vec1)
+	#define NNDot(vec1, vec2) glm::dot(vec1, vec2)
 	#define NNMat4ValPtr(mat) mat
 	#define NNMat4MulVec4(mat, vec) mat * vec
 	#define NNMat4Inverse(mat) glm::inverse(mat)
@@ -134,6 +136,7 @@ enum NNVertexOrder {
 		NN_POINT = GL_POINTS,
 		NN_LINE = GL_LINES,
 		NN_LINE_STRIP = GL_LINE_STRIP,
+		NN_LINE_LOOP = GL_LINE_LOOP,
 		NN_TRIANGLE = GL_TRIANGLES,
 		NN_TRIANGLE_STRIP = GL_TRIANGLE_STRIP,
 	};

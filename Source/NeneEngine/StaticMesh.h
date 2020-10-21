@@ -18,7 +18,7 @@ class StaticMesh : public Drawable
 {
 public:
 	//
-	static std::shared_ptr<StaticMesh> Create(const NNChar* filepath);
+	static std::shared_ptr<StaticMesh> Create(const NNChar* filepath, const NNFloat scale=1.0f);
 	//
 	virtual void Draw(const std::shared_ptr<Shader> pShader = nullptr,
 		const std::shared_ptr<Camera> pCamera = nullptr);
@@ -28,8 +28,8 @@ public:
 	virtual std::vector<std::shared_ptr<Mesh>>& GetMeshes() { return m_meshes; };
 protected:
 	//
-	virtual void ProcessNode(aiNode* pNode, const aiScene* pScene);
-	virtual void ProcessMesh(aiMesh* pMesh, const aiScene* pScene);
+	virtual void ProcessNode(aiNode* pNode, const aiScene* pScene, const NNFloat scale);
+	virtual void ProcessMesh(aiMesh* pMesh, const aiScene* pScene, const NNFloat scale);
 	virtual void ProcessTexture(aiMaterial* pMaterial, aiTextureType aiType, NNTextureType nnType, std::vector<std::tuple<std::shared_ptr<Texture2D>, NNTextureType>>& textures);
 
 protected:

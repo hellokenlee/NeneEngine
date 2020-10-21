@@ -65,9 +65,12 @@ void Utils::Init(const NNChar* name, NNUInt width, NNUInt height) {
 	}
 	//
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_TEXTURE_3D);
 	glEnable(GL_TEXTURE_2D);
-	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	// 忽略由glew引起的INVALID_ENUM错误
 	glGetError();
 	//

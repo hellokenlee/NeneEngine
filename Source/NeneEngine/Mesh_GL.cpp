@@ -40,12 +40,15 @@ MeshImpl::~MeshImpl()
 void MeshImpl::Draw()
 {
 	glBindVertexArray(m_vao);
-	if (m_ebo != 0)
 	{
-		glDrawElements(m_draw_mode, m_index_num, GL_UNSIGNED_INT, 0);
-	}
-	else {
-		glDrawArrays(m_draw_mode, 0, m_vertex_num);
+		if (m_ebo != 0)
+		{
+			glDrawElements(m_draw_mode, m_index_num, GL_UNSIGNED_INT, 0);
+		}
+		else
+		{
+			glDrawArrays(m_draw_mode, 0, m_vertex_num);
+		}
 	}
 	glBindVertexArray(0);
 }
@@ -128,6 +131,11 @@ void Mesh::Draw()
 void Mesh::DrawInstance()
 {
 
+}
+
+void Mesh::SetDrawMode(const NNDrawMode mode)
+{
+	m_impl->m_draw_mode = mode;
 }
 
 #endif

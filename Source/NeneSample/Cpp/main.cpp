@@ -5,6 +5,6 @@
 
 int main()
 {
-	lap::Main();
+	lappedtexture::Main();
 	return 0;
 }

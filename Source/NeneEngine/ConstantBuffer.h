@@ -9,7 +9,8 @@
 //
 
 template<typename T, std::size_t N=1>
-class ConstantBuffer {
+class ConstantBuffer
+{
 public:
 	// 构造
 	ConstantBuffer();

@@ -145,7 +145,7 @@ namespace hatching
 				ball->Draw(shader_praun);
 			}
 			//*/
-			//* <Real-Time Stroke Textures> Freud. et al.
+			/* <Real-Time Stroke Textures> Freud. et al.
 			{
 				Utils::Clear();
 				ca->Draw();
@@ -153,7 +153,7 @@ namespace hatching
 				ball->Draw(shader_fraud);
 			}
 			//*/
-			/* <Fine Tone Control in Harward Hatching> Praun et al. Scheme1
+			//* <Fine Tone Control in Harward Hatching> Praun et al. Scheme1
 			{
 				Utils::Clear();
 				ca->Draw();

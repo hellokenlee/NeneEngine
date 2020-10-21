@@ -48,7 +48,7 @@ Texture3D::~Texture3D()
 
 shared_ptr<Texture3D> Texture3D::Create(const vector<string>& filepaths)
 {
-	return Create({filepaths});
+	return Create(vector<vector<string>>{filepaths});
 }
 
 shared_ptr<Texture3D> Texture3D::Create(const std::vector<std::vector<string>>& mipmapfilepaths)
