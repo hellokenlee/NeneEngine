@@ -65,5 +65,5 @@ void EmitNormalVertices()
 
 void main()
 {
-	EmitTangentVertices();
+	EmitNormalVertices();
 }

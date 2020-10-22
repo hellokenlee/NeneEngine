@@ -76,7 +76,7 @@ namespace lappedtexture
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
-			ImGui::SliderInt("    ", &g_viewing_patch_index, 0, g_patches.size() - 1);
+			ImGui::SliderInt("    ", &g_viewing_patch_index, 0, int(g_patches.size()) - 1);
 			if (g_patches.size() == 0)
 			{
 				ImGui::PopItemFlag();
@@ -193,6 +193,7 @@ namespace lappedtexture
 				Utils::Clear();
 				ca->Draw();
 				// g_bunny->Draw(shader_flat);
+				// g_bunny->Draw(shader_debug);
 				// Draw the tex
 				tetxure2->Use(0);
 				quad->Draw(shader_2d_texture);
@@ -202,7 +203,7 @@ namespace lappedtexture
 				{
 					for (auto& patch : g_patches)
 					{
-						patch.DrawMesh(NNDrawMode::NN_TRIANGLE);
+						patch.DrawMesh();
 					}
 				}
 				// Draw viewing patch on texture for debug
@@ -211,12 +212,12 @@ namespace lappedtexture
 					tetxure2->Use(0);
 					shader_2d_color->Use();
 					{
-						CustomConstantBuffer.Data().color = NNVec4(0.0, 1.0, 0.0, 1.0);
+						CustomConstantBuffer.Data().color = NNVec4(0.0, 1.0, 0.0, 0.3);
 						CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
-						g_patches[g_viewing_patch_index].DrawMesh(NN_LINE_LOOP);
+						g_patches[g_viewing_patch_index].DrawMesh();
 						CustomConstantBuffer.Data().color = NNVec4(0.0, 0.0, 1.0, 1.0);
 						CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
-						g_patches[g_viewing_patch_index].DrawEdge(NN_LINE);
+						g_patches[g_viewing_patch_index].DrawEdge();
 					}
 				}
 				//

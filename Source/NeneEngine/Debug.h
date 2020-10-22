@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <string>
+#include "assert.h"
 
 //
 #ifndef IN

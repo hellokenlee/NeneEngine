@@ -45,5 +45,5 @@ void main()
 	//
 	vec3 light_dir = normalize(lights[0].position.xyz - position);
 	float diffuse = clamp(dot(light_dir, normal), 0.0, 1.0) * lights[0].color.r;
-	color_VS_out = vec3(diffuse);
+	color_VS_out = vec3(diffuse) + vec3(0.3, 0.3, 0.3);
 }

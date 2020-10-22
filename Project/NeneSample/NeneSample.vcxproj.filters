@@ -22,6 +22,9 @@
     <Filter Include="头文件\AntiAliasing">
       <UniqueIdentifier>{a99dcef8-c10c-4b90-9c43-bdaa921c7676}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\Hatching">
+      <UniqueIdentifier>{35ad966e-d988-4c5c-a52b-504ffef0a1e4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoBase.h">
@@ -48,13 +51,19 @@
     <ClInclude Include="..\..\Source\NeneSample\Cpp\Simple\Main.hpp">
       <Filter>头文件\Simple</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\Lap.hpp">
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexture.hpp">
+      <Filter>头文件\Hatching</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexturePatch.h">
       <Filter>头文件\Hatching</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\NeneSample\Cpp\Main.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexturePatch.cpp">
+      <Filter>源文件\Hatching</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

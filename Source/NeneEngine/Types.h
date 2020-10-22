@@ -92,6 +92,9 @@ enum NNVertexOrder {
 	#include "GLM/glm.hpp"
 	#include "GLM/gtc/matrix_transform.hpp"
 	#include "GLM/gtc/type_ptr.hpp"
+	#include "GLM/gtc/epsilon.hpp"
+	#include "GLM/gtx/rotate_vector.hpp"
+	#include "GLM/gtx/vector_angle.hpp"
 
 	// Types
 	typedef GLchar NNChar;
@@ -124,6 +127,8 @@ enum NNVertexOrder {
 	#define NNMat4ValPtr(mat) mat
 	#define NNMat4MulVec4(mat, vec) mat * vec
 	#define NNMat4Inverse(mat) glm::inverse(mat)
+	#define NNEpsilonEqual(vec1, vec2, epsilon) glm::epsilonEqual()
+	#define NNEpsilon(gen_type) glm::epsilon<gen_type>()
 	//
 	enum NNMouseButton {
 		NN_MOUSE_BUTTON_LEFT = GLFW_MOUSE_BUTTON_LEFT,

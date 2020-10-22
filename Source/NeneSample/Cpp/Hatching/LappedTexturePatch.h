@@ -16,13 +16,11 @@ public:
 	~LappedTexturePatch();
 	//
 	void Grow(std::set<NNUInt>& candidate_faces);
-	void DrawMesh(const NNDrawMode mode);
-	void DrawEdge(const NNDrawMode mode);
+	void DrawMesh();
+	void DrawEdge();
 	void Initialize(std::shared_ptr<Mesh> source_mesh, std::set<NNUInt>& candidate_faces);
 
 private:
-	//
-	void AddFace(NNUInt face);
 	//
 	void UpdateForRendering();
 
