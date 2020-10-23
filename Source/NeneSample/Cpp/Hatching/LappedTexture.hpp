@@ -71,13 +71,13 @@ namespace lappedtexture
 			ImGui::SliderFloat3("  ", g_tangent, -1.0f, 1.0f);
 			//
 			ImGui::Text("Patch View: ");
-			if (g_patches.size() == 0)
+			if (g_patches.size() == 0 || g_need_grow_patch)
 			{
 				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
 				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
 			}
 			ImGui::SliderInt("    ", &g_viewing_patch_index, 0, int(g_patches.size()) - 1);
-			if (g_patches.size() == 0)
+			if (g_patches.size() == 0 || g_need_grow_patch)
 			{
 				ImGui::PopItemFlag();
 				ImGui::PopStyleVar();
@@ -97,13 +97,6 @@ namespace lappedtexture
 		ImGui::End();
 	}
 
-	void AddPatch()
-	{
-		LappedTexturePatch patch;
-		patch.Initialize(g_bunny->GetMeshes()[0], g_candidate_faces);
-		g_patches.emplace_back(patch);
-	}
-
 	void InitPatch()
 	{
 		//
@@ -118,11 +111,6 @@ namespace lappedtexture
 		{
 			g_candidate_faces.insert(f);
 		}
-	}
-
-	void GrowPatch(const NNUInt index)
-	{
-		g_patches[g_viewing_patch_index].Grow(g_candidate_faces);
 	}
 	
 	void Main()
@@ -192,7 +180,7 @@ namespace lappedtexture
 				//
 				Utils::Clear();
 				ca->Draw();
-				g_bunny->Draw(shader_flat);
+				// g_bunny->Draw(shader_flat);
 				g_bunny->Draw(shader_debug);
 				// Draw the tex
 				tetxure2->Use(0);
@@ -238,15 +226,30 @@ namespace lappedtexture
 
 				printf("========== >>> Compiling Shaders <<< ===========\n");
 			}
-			if (g_need_add_patch)
+			if (g_need_add_patch && !g_need_grow_patch)
 			{
 				g_need_add_patch = false;
-				AddPatch();
+				//
+				if (g_candidate_faces.size() > 0)
+				{
+					LappedTexturePatch patch;
+					patch.Initialize(g_bunny->GetMeshes()[0], g_candidate_faces);
+					g_patches.emplace_back(patch);
+					g_viewing_patch_index = g_patches.size() - 1;
+				}
 			}
 			if (g_need_grow_patch)
 			{
-				g_need_grow_patch = false;
-				GrowPatch(g_viewing_patch_index);
+				LappedTexturePatch& patch = g_patches[g_viewing_patch_index];
+
+				if (patch.IsGrown())
+				{
+					g_need_grow_patch = false;
+				}
+				else
+				{
+					patch.Grow(g_candidate_faces);
+				}
 			}
 		}
 		// 

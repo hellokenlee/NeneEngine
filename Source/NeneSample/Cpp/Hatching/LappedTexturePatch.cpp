@@ -11,6 +11,61 @@ using namespace std;
 
 /** >>> Util Functions >>> */
 
+enum IntersectStatus
+{
+	INSIDE = 0,
+	INTERSECTING,
+	OVERLAPPING,
+	TOUCHING,
+	OUTSIDE,
+};
+
+/* Check whether P and Q lie on the same side of line AB */
+float Side(NNVec2 p, NNVec2 q, NNVec2 a, NNVec2 b)
+{
+	float z1 = (b.x - a.x) * (p.y - a.y) - (p.x - a.x) * (b.y - a.y);
+	float z2 = (b.x - a.x) * (q.y - a.y) - (q.x - a.x) * (b.y - a.y);
+	return z1 * z2;
+}
+
+/* Check whether segment P0P1 intersects with triangle t0t1t2 */
+IntersectStatus Intersect(NNVec2 p0, NNVec2 p1, NNVec2 t0, NNVec2 t1, NNVec2 t2)
+{
+	/* Check whether segment is outside one of the three half-planes
+	 * delimited by the triangle. */
+	float f1 = Side(p0, t2, t0, t1), f2 = Side(p1, t2, t0, t1);
+	float f3 = Side(p0, t0, t1, t2), f4 = Side(p1, t0, t1, t2);
+	float f5 = Side(p0, t1, t2, t0), f6 = Side(p1, t1, t2, t0);
+	/* Check whether triangle is totally inside one of the two half-planes
+	 * delimited by the segment. */
+	float f7 = Side(t0, t1, p0, p1);
+	float f8 = Side(t1, t2, p0, p1);
+
+	/* If segment is strictly outside triangle, or triangle is strictly
+	 * apart from the line, we're not intersecting */
+	if ((f1 < 0 && f2 < 0) || (f3 < 0 && f4 < 0) || (f5 < 0 && f6 < 0)
+		|| (f7 > 0 && f8 > 0))
+		return IntersectStatus::OUTSIDE;
+
+	/* If segment is aligned with one of the edges, we're overlapping */
+	if ((f1 == 0 && f2 == 0) || (f3 == 0 && f4 == 0) || (f5 == 0 && f6 == 0))
+		return IntersectStatus::OVERLAPPING;
+
+	/* If segment is outside but not strictly, or triangle is apart but
+	 * not strictly, we're touching */
+	if ((f1 <= 0 && f2 <= 0) || (f3 <= 0 && f4 <= 0) || (f5 <= 0 && f6 <= 0)
+		|| (f7 >= 0 && f8 >= 0))
+		return IntersectStatus::TOUCHING;
+
+	/* If both segment points are strictly inside the triangle, we
+	 * are not intersecting either */
+	if (f1 > 0 && f2 > 0 && f3 > 0 && f4 > 0 && f5 > 0 && f6 > 0)
+		return IntersectStatus::INSIDE;
+
+	/* Otherwise we're intersecting with at least one edge */
+	return IntersectStatus::INTERSECTING;
+}
+
 NNVec3 Barycentric2Cartesian(const NNVec3& a, const NNVec3& b, const NNVec3& c, const NNVec3& barycentric)
 {
 	return NNVec3(a * barycentric.x + b * barycentric.y + c * barycentric.z);
@@ -136,6 +191,12 @@ LappedTexturePatch::~LappedTexturePatch()
 void LappedTexturePatch::Grow(std::set<NNUInt>& candidate_faces)
 {
 	//
+	if (m_is_grown)
+	{
+		dLog("[Patch] The patch is grown.\n");
+		return;
+	}
+	//
 	vector<NNUInt>& indices = m_source_mesh->GetIndexData();
 	vector<Vertex>& vertices = m_source_mesh->GetVertexData();
 	//
@@ -169,7 +230,10 @@ void LappedTexturePatch::Grow(std::set<NNUInt>& candidate_faces)
 		NNVec3 n = NNNormalize((na + nb + nc) / 3.0f);
 		NNVec2 tc = SimilarTriangle3DTo2D(pa, pb, pc, na, ta, tb);
 		//
-		assert(IsNearlySame(vertices[diagonal_ic].m_texcoord, NNVec2(0.0f, 0.0f)));
+		if (!IsNearlySame(vertices[diagonal_ic].m_texcoord, NNVec2(0.0f, 0.0f)))
+		{
+			dLog("[Patch] Recover an vertex: %d in face: %d", diagonal_ic, face);
+		}
 		//
 		vertices[diagonal_ic].m_texcoord = tc;
 		//
@@ -203,7 +267,8 @@ void LappedTexturePatch::Grow(std::set<NNUInt>& candidate_faces)
 	}
 	else
 	{
-		dLog("[Error] Failed to grow patch! Unable to find adjacent face!\n");
+		m_is_grown = true;
+		dLog("[Patch] Failed to grow patch! Unable to find adjacent face!\n");
 	}
 }
 
@@ -212,6 +277,7 @@ void LappedTexturePatch::Initialize(std::shared_ptr<Mesh> source_mesh, std::set<
 	// Reference the mesh
 	m_source_mesh = source_mesh;
 	//
+	m_is_grown = false;
 	m_indices.clear();
 	m_indices_set.clear();
 	// Randomly choose a face
@@ -310,7 +376,7 @@ optional<Adjacency> LappedTexturePatch::FindNearestAdjacentFace(std::set<NNUInt>
 			current_adj = Adjacency{ face, ib, ic, ia };
 		}
 		//
-		if (current_adj.has_value())
+		if (current_adj.has_value() && IsValidAdjacency(*current_adj))
 		{
 			const NNVec3 pa = vertices[ia].m_position;
 			const NNVec3 pb = vertices[ib].m_position;
@@ -327,4 +393,24 @@ optional<Adjacency> LappedTexturePatch::FindNearestAdjacentFace(std::set<NNUInt>
 		}
 	}
 	return min_dis_adj;
+}
+
+bool LappedTexturePatch::IsValidAdjacency(const Adjacency& adjcency)
+{
+	//
+	const NNUInt ia = adjcency.shared_ia;
+	const NNUInt ib = adjcency.shared_ib;
+	//
+	const vector<Vertex>& vertices = m_source_mesh->GetVertexData();
+	//
+	const NNVec2 ta = vertices[ia].m_texcoord;
+	const NNVec2 tb = vertices[ib].m_texcoord;
+	//
+	vector<NNVec2> polygon = { NNVec2(0.2f, 0.2f), NNVec2(0.8f, 0.2f), NNVec2(0.8f, 0.8f), NNVec2(0.2f, 0.8f) };
+	// !TODO: 多边形三角化
+	bool ouside0 = Intersect(ta, tb, polygon[0], polygon[1], polygon[2]) == IntersectStatus::OUTSIDE;
+	bool ouside1 = Intersect(ta, tb, polygon[2], polygon[3], polygon[0]) == IntersectStatus::OUTSIDE;
+	//
+	// dLog("(%f, %f) - (%f, %f): %d, %d\n", ta.x, ta.y, tb.x, tb.y, ouside0, ouside1);
+	return !(ouside0 && ouside1);
 }

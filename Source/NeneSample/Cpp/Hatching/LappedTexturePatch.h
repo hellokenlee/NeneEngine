@@ -25,10 +25,13 @@ public:
 	~LappedTexturePatch();
 	//
 	void Grow(std::set<NNUInt>& candidate_faces);
+	bool IsGrown() { return m_is_grown; }
 	void DrawMesh();
 	void Initialize(std::shared_ptr<Mesh> source_mesh, std::set<NNUInt>& candidate_faces);
-
+	
 private:
+	//
+	bool IsValidAdjacency(const Adjacency& adjcency);
 	//
 	void UpdateForRendering();
 	//
@@ -37,6 +40,8 @@ private:
 private:
 	//
 	NNVec3 m_center;
+	//
+	bool m_is_grown;
 
 	// The patch vertex indices
 	std::vector<NNUInt> m_indices;

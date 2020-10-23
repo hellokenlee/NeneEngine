@@ -95,6 +95,7 @@ enum NNVertexOrder {
 	#include "GLM/gtc/epsilon.hpp"
 	#include "GLM/gtx/rotate_vector.hpp"
 	#include "GLM/gtx/vector_angle.hpp"
+	#include "GLM/gtx/intersect.hpp"
 
 	// Types
 	typedef GLchar NNChar;
