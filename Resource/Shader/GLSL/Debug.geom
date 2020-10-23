@@ -30,13 +30,12 @@ void EmitTangentVertices()
 	vec3 nc = normalize(normal_VS_out[2]);
 	vec3 normal = normalize((na + nb + nc) / 3.0);
 	//
-	// vec3 up = vec3(0.0, 1.0, 0.0);
 	vec3 tangent = normalize(up - (dot(up, normal) * normal));
 	//
 	cent = cent + normal * 0.01;
 	gl_Position = proj * view * vec4(cent, 1.0);
 	EmitVertex();
-	gl_Position = proj * view * vec4(cent + (tangent * 0.1), 1.0);
+	gl_Position = proj * view * vec4(cent + (tangent * 0.05), 1.0);
 	EmitVertex();
 	EndPrimitive();
 }
@@ -57,7 +56,7 @@ void EmitNormalVertices()
 	//
 	gl_Position = proj * view * vec4(cent, 1.0);
 	EmitVertex();
-	gl_Position = proj * view * vec4(cent + (normal * 0.1), 1.0);
+	gl_Position = proj * view * vec4(cent + (normal * 0.05), 1.0);
 	EmitVertex();
 	EndPrimitive();
 }
@@ -65,5 +64,5 @@ void EmitNormalVertices()
 
 void main()
 {
-	EmitNormalVertices();
+	EmitTangentVertices();
 }

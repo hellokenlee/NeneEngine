@@ -5,7 +5,16 @@
 #include <set>
 #include <deque>
 #include <vector>
+#include <optional>
 #include "NeneEngine/Nene.h"
+
+struct Adjacency
+{
+	NNUInt face;			// 面的序号
+	NNUInt shared_ia;		// 共边的A顶点
+	NNUInt shared_ib;		// 共边的B顶点
+	NNUInt diagonal_ic;		// 非共边的顶点
+};
 
 
 class LappedTexturePatch
@@ -17,24 +26,27 @@ public:
 	//
 	void Grow(std::set<NNUInt>& candidate_faces);
 	void DrawMesh();
-	void DrawEdge();
 	void Initialize(std::shared_ptr<Mesh> source_mesh, std::set<NNUInt>& candidate_faces);
 
 private:
 	//
 	void UpdateForRendering();
+	//
+	std::optional<Adjacency> FindNearestAdjacentFace(std::set<NNUInt>& candidate_faces);
 
 private:
+	//
+	NNVec3 m_center;
+
 	// The patch vertex indices
 	std::vector<NNUInt> m_indices;
-	// The source mesh which the patch from
-	std::shared_ptr<Mesh> m_source_mesh;
-	// An edge is represented by 2 indices of vertices [i] and [i + 1]
-	std::deque<NNUInt> m_outer_edges;
+	std::set<NNUInt> m_indices_set;
 
-	// 
+	// The source mesh this patch from
+	std::shared_ptr<Mesh> m_source_mesh;
+
+	// The patch for rendering on texture
 	std::shared_ptr<Mesh> m_patch_mesh;
-	std::shared_ptr<Mesh> m_outer_edge_mesh;
 };
 
 

@@ -11,12 +11,6 @@ using namespace std;
 
 /** >>> Util Functions >>> */
 
-struct Adjacency
-{
-	NNUInt face;
-	NNUInt shared_v0, shared_v1;
-};
-
 NNVec3 Barycentric2Cartesian(const NNVec3& a, const NNVec3& b, const NNVec3& c, const NNVec3& barycentric)
 {
 	return NNVec3(a * barycentric.x + b * barycentric.y + c * barycentric.z);
@@ -40,8 +34,6 @@ bool IsNearlySame(const NNVec3& pos0, const NNVec3& pos1)
 	auto result = glm::epsilonEqual(pos0, pos1, 0.0000001f);
 	return result.x && result.y && result.z;
 }
-
-
 
 NNVec2 SimilarTriangle3DTo2D(NNVec3 a_3d, NNVec3 b_3d, NNVec3 c_3d, NNVec3 n_3d, NNVec2 a_2d, NNVec2 b_2d)
 {
@@ -69,7 +61,35 @@ NNVec2 SimilarTriangle3DTo2D(NNVec3 a_3d, NNVec3 b_3d, NNVec3 c_3d, NNVec3 n_3d,
 	return c_2d;
 }
 
-optional<Adjacency> FindAdjacentFace(const std::tuple<NNUInt, NNUInt>& edge, const std::set<NNUInt> candidates, const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices)
+optional<Adjacency> FindAdjacentFace_SharedVertex(const std::tuple<NNUInt, NNUInt>& edge, const std::set<NNUInt> candidates, const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices)
+{
+	for (const NNUInt& face : candidates)
+	{
+		//
+		NNUInt ia = indices[face * 3 + 0];
+		NNUInt ib = indices[face * 3 + 1];
+		NNUInt ic = indices[face * 3 + 2];
+		//
+		const NNUInt& i0 = get<0>(edge);
+		const NNUInt& i1 = get<1>(edge);
+		// 相邻的三角形共享边的顶点顺序是相反的
+		if (i1 == ia && i0 == ib)
+		{
+			return Adjacency{ face, ia, ib, ic};
+		}
+		if (i1 == ib && i0 == ic)
+		{
+			return Adjacency{ face, ib, ic, ia };
+		}
+		if (i1 == ic && i0 == ia)
+		{
+			return Adjacency{ face, ic, ia, ib };
+		}
+	}
+	return nullopt;
+}
+
+optional<Adjacency> FindAdjacentFace_SeparateVertex(const std::tuple<NNUInt, NNUInt>& edge, const std::set<NNUInt> candidates, const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices)
 {
 	for (const NNUInt& face : candidates)
 	{
@@ -87,7 +107,7 @@ optional<Adjacency> FindAdjacentFace(const std::tuple<NNUInt, NNUInt>& edge, con
 		// 相邻的三角形共享边的顶点顺序是相反的
 		if (IsNearlySame(e1, av) && IsNearlySame(e0, bv))
 		{
-			return Adjacency{ face, ia, ib };
+			return Adjacency{ face, ia, ib, ic };
 		}
 		if (IsNearlySame(e1, bv) && IsNearlySame(e0, cv))
 		{
@@ -99,11 +119,6 @@ optional<Adjacency> FindAdjacentFace(const std::tuple<NNUInt, NNUInt>& edge, con
 		}
 	}
 	return nullopt;
-}
-
-NNVec2 CoordTagentToTexture(const NNVec2& tagnet_coord)
-{
-	return (tagnet_coord * TEXTURE_PASTING_SCALE) + NNVec2(0.5f, 0.5f);
 }
 
 /** <<< Util Functions <<< */
@@ -121,74 +136,70 @@ LappedTexturePatch::~LappedTexturePatch()
 void LappedTexturePatch::Grow(std::set<NNUInt>& candidate_faces)
 {
 	//
-	NNUInt ia_origin = m_outer_edges.front();
-	m_outer_edges.pop_front();
-	NNUInt ib_origin = m_outer_edges.front();
-	m_outer_edges.pop_front();
+	vector<NNUInt>& indices = m_source_mesh->GetIndexData();
+	vector<Vertex>& vertices = m_source_mesh->GetVertexData();
 	//
-	std::vector<NNUInt>& indices = m_source_mesh->GetIndexData();
-	std::vector<Vertex>& vertices = m_source_mesh->GetVertexData();
-	//
-	optional<Adjacency> adj = FindAdjacentFace(std::make_tuple(ia_origin, ib_origin), candidate_faces, indices, vertices);
+	optional<Adjacency> adj = FindNearestAdjacentFace(candidate_faces);
 	if (adj.has_value())
 	{
-		//
+		// 更新Patch的顶点
 		NNUInt face = adj->face;
 		candidate_faces.erase(face);
+		m_indices.push_back(indices[face * 3 + 0]);
+		m_indices.push_back(indices[face * 3 + 1]);
+		m_indices.push_back(indices[face * 3 + 2]);
+		m_indices_set.insert(indices[face * 3 + 0]);
+		m_indices_set.insert(indices[face * 3 + 1]);
+		m_indices_set.insert(indices[face * 3 + 2]);
+		
+		// 计算新增加的顶点的纹理坐标
+		NNUInt shared_ia = adj->shared_ia;
+		NNUInt shared_ib = adj->shared_ib;
+		NNUInt diagonal_ic = adj->diagonal_ic;
 		//
-		NNUInt ia_adjacent = indices[face * 3 + 0];
-		NNUInt ib_adjacent = indices[face * 3 + 1];
-		NNUInt ic_adjacent = indices[face * 3 + 2];
-		m_indices.push_back(ia_adjacent);
-		m_indices.push_back(ib_adjacent);
-		m_indices.push_back(ic_adjacent);
-		//
-		NNUInt shared_ia = adj->shared_v0;
-		NNUInt shared_ib = adj->shared_v1;
-		assert(IsNearlySame(vertices[shared_ia].m_position, vertices[ib_origin].m_position));
-		assert(IsNearlySame(vertices[shared_ib].m_position, vertices[ia_origin].m_position));
-		vertices[shared_ia].m_texcoord = vertices[ib_origin].m_texcoord;
-		vertices[shared_ib].m_texcoord = vertices[ia_origin].m_texcoord;
-		//
-		NNUInt remaining_ic;
-		if (shared_ia == ia_adjacent && shared_ib == ib_adjacent)
-		{
-			remaining_ic = ic_adjacent;
-		}
-		else if (shared_ia == ib_adjacent && shared_ib == ic_adjacent)
-		{
-			remaining_ic = ia_adjacent;
-		}
-		else if (shared_ia == ic_adjacent && shared_ib == ia_adjacent)
-		{
-			remaining_ic = ib_adjacent;
-		}
-		else
-		{
-			throw std::invalid_argument("Unshared edge!");
-		}
-		//
-		m_outer_edges.push_back(shared_ib);
-		m_outer_edges.push_back(remaining_ic);
-		m_outer_edges.push_back(remaining_ic);
-		m_outer_edges.push_back(shared_ia);
-		// Grow the triangle over the shared edge
 		NNVec3 pa = vertices[shared_ia].m_position;
 		NNVec3 pb = vertices[shared_ib].m_position;
-		NNVec3 pc = vertices[remaining_ic].m_position;
-		NNVec3 na = vertices[shared_ia].m_normal;
-		NNVec3 nb = vertices[shared_ib].m_normal;
-		NNVec3 nc = vertices[remaining_ic].m_normal;
-		assert(IsNearlySame(na, nb) && IsNearlySame(nb, nc));
+		NNVec3 pc = vertices[diagonal_ic].m_position;
 		NNVec2 ta = vertices[shared_ia].m_texcoord;
 		NNVec2 tb = vertices[shared_ib].m_texcoord;
-		NNVec2 tc = SimilarTriangle3DTo2D(pa, pb, pc, na,ta, tb);
 		//
-		vertices[remaining_ic].m_texcoord = tc;
+		NNVec3 na = vertices[shared_ia].m_normal;
+		NNVec3 nb = vertices[shared_ib].m_normal;
+		NNVec3 nc = vertices[diagonal_ic].m_normal;
+		NNVec3 n = NNNormalize((na + nb + nc) / 3.0f);
+		NNVec2 tc = SimilarTriangle3DTo2D(pa, pb, pc, na, ta, tb);
+		//
+		assert(IsNearlySame(vertices[diagonal_ic].m_texcoord, NNVec2(0.0f, 0.0f)));
+		//
+		vertices[diagonal_ic].m_texcoord = tc;
+		//
+		dLog("[Patch] Grow add face: %d; Remain: %zd faces;\n", face, candidate_faces.size());
+
+		// 合并已经覆盖的面
+		std::vector<NNUInt> covered_faces;
+		for (const NNUInt& c : candidate_faces)
+		{
+			const NNUInt ia = indices[c * 3 + 0];
+			const NNUInt ib = indices[c * 3 + 1];
+			const NNUInt ic = indices[c * 3 + 2];
+			bool has_ia = m_indices_set.find(ia) != m_indices_set.end();
+			bool has_ib = m_indices_set.find(ib) != m_indices_set.end();
+			bool has_ic = m_indices_set.find(ic) != m_indices_set.end();
+			if (has_ia && has_ib && has_ic)
+			{
+				covered_faces.push_back(c);
+				m_indices.push_back(ia);
+				m_indices.push_back(ib);
+				m_indices.push_back(ic);
+				dLog("[Patch] Expand covered face: %d due to grow of: %d", c, face);
+			}
+		}
+		for (auto c : covered_faces)
+		{
+			candidate_faces.erase(c);
+		}
 		//
 		UpdateForRendering();
-		// 
-		dLog("[Patch] Grow add face: %d; Remain: %zd faces;\n", face, candidate_faces.size());
 	}
 	else
 	{
@@ -196,20 +207,13 @@ void LappedTexturePatch::Grow(std::set<NNUInt>& candidate_faces)
 	}
 }
 
-void LappedTexturePatch::DrawMesh()
-{
-	m_patch_mesh->Draw();
-}
-
-void LappedTexturePatch::DrawEdge()
-{
-	m_outer_edge_mesh->Draw();
-}
-
 void LappedTexturePatch::Initialize(std::shared_ptr<Mesh> source_mesh, std::set<NNUInt>& candidate_faces)
 {
 	// Reference the mesh
 	m_source_mesh = source_mesh;
+	//
+	m_indices.clear();
+	m_indices_set.clear();
 	// Randomly choose a face
 	/* 
 	NNUInt face = rand() % NNUInt(candidate_faces.size());
@@ -217,59 +221,110 @@ void LappedTexturePatch::Initialize(std::shared_ptr<Mesh> source_mesh, std::set<
 	NNUInt face = *(candidate_faces.begin());
 	candidate_faces.erase(face);
 	// Add face for initialization
-	std::vector<NNUInt>& indices = m_source_mesh->GetIndexData();
-	std::vector<Vertex>& vertices = m_source_mesh->GetVertexData();
+	vector<NNUInt>& indices = m_source_mesh->GetIndexData();
+	vector<Vertex>& vertices = m_source_mesh->GetVertexData();
 	//
-	NNUInt ia = indices[face * 3 + 0];
-	NNUInt ib = indices[face * 3 + 1];
-	NNUInt ic = indices[face * 3 + 2];
+	const NNUInt ia = indices[face * 3 + 0];
+	const NNUInt ib = indices[face * 3 + 1];
+	const NNUInt ic = indices[face * 3 + 2];
 	m_indices.push_back(ia);
 	m_indices.push_back(ib);
 	m_indices.push_back(ic);
-	m_outer_edges.push_back(ia);
-	m_outer_edges.push_back(ib);
-	m_outer_edges.push_back(ib);
-	m_outer_edges.push_back(ic);
-	m_outer_edges.push_back(ic);
-	m_outer_edges.push_back(ia);
+	m_indices_set.insert(ia);
+	m_indices_set.insert(ib);
+	m_indices_set.insert(ic);
 	//
 	// Randomly choose a point in the face (!TODO: This is actually not uniform)
 	/* 
 	NNVec3 barycentric(float(rand() % PRECISION) / float(PRECISION), float(rand() % PRECISION) / float(PRECISION), float(rand() % PRECISION) / float(PRECISION));
 	NNVec3 center = Barycentric2Cartesian(vertices[ia].m_position, vertices[ib].m_position, vertices[ic].m_position, barycentric);
 	*/
-	NNVec3 center = (vertices[ia].m_position + vertices[ib].m_position + vertices[ic].m_position) / 3.0f;
+	m_center = (vertices[ia].m_position + vertices[ib].m_position + vertices[ic].m_position) / 3.0f;
 	// Calculate tagent and bitangent
 	NNVec3 tagent, bitangent, normal;
-	normal = (vertices[ia].m_normal + vertices[ib].m_normal + vertices[ic].m_normal) / 3.0f;
+	normal = NNNormalize((vertices[ia].m_normal + vertices[ib].m_normal + vertices[ic].m_normal) / 3.0f);
 	CalcTangentAndBitangent(vertices[ia].m_position, vertices[ib].m_position, vertices[ic].m_position, normal, tagent, bitangent);
 	// Form the texcoord of the vertices ( w is basically zero )
 	NNMat3 tbn(tagent, bitangent, normal);
 	NNMat3 tbn_inversed = glm::inverse(tbn);
-	NNVec3 center_in_tbn = tbn_inversed * center;
+	NNVec3 center_in_tbn = tbn_inversed * m_center;
 	NNVec3 vertex_a_in_tbn = tbn_inversed * vertices[ia].m_position - center_in_tbn;
 	NNVec3 vertex_b_in_tbn = tbn_inversed * vertices[ib].m_position - center_in_tbn;
 	NNVec3 vertex_c_in_tbn = tbn_inversed * vertices[ic].m_position - center_in_tbn;
 	//
-	vertices[ia].m_texcoord = CoordTagentToTexture(NNVec2(vertex_a_in_tbn.x, vertex_a_in_tbn.y));
-	vertices[ib].m_texcoord = CoordTagentToTexture(NNVec2(vertex_b_in_tbn.x, vertex_b_in_tbn.y));
-	vertices[ic].m_texcoord = CoordTagentToTexture(NNVec2(vertex_c_in_tbn.x, vertex_c_in_tbn.y));
+	vertices[ia].m_texcoord = (NNVec2(vertex_a_in_tbn.x, vertex_a_in_tbn.y) * TEXTURE_PASTING_SCALE) + NNVec2(0.5f, 0.5f);
+	vertices[ib].m_texcoord = (NNVec2(vertex_b_in_tbn.x, vertex_b_in_tbn.y) * TEXTURE_PASTING_SCALE) + NNVec2(0.5f, 0.5f);
+	vertices[ic].m_texcoord = (NNVec2(vertex_c_in_tbn.x, vertex_c_in_tbn.y) * TEXTURE_PASTING_SCALE) + NNVec2(0.5f, 0.5f);
 	//
 	UpdateForRendering();
 	//
-	dLog("[Patch] Initialze choose face: %d; Remain: %zd faces;\n", face, candidate_faces.size());
+	dLog("[Patch] Init add face: %d; Remain: %zd faces;\n", face, candidate_faces.size());
+}
+
+void LappedTexturePatch::DrawMesh()
+{
+	m_patch_mesh->Draw();
 }
 
 void LappedTexturePatch::UpdateForRendering()
 {
 	// Patch mesh
-	std::vector<NNUInt> indices = m_indices;
-	std::vector<Vertex> vertices = m_source_mesh->GetVertexData();
-	std::vector<std::tuple<std::shared_ptr<Texture2D>, NNTextureType>> textures;
+	vector<NNUInt> indices = m_indices;
+	vector<Vertex> vertices = m_source_mesh->GetVertexData();
+	vector<std::tuple<std::shared_ptr<Texture2D>, NNTextureType>> textures;
 	m_patch_mesh = Mesh::Create(vertices, indices, textures);
-	// Outer Edges
-	indices = std::vector<NNUInt>(m_outer_edges.begin(), m_outer_edges.end());
-	vertices = m_source_mesh->GetVertexData();
-	m_outer_edge_mesh = Mesh::Create(vertices, indices, textures);
-	m_outer_edge_mesh->SetDrawMode(NNDrawMode::NN_LINE);
+}
+
+optional<Adjacency> LappedTexturePatch::FindNearestAdjacentFace(std::set<NNUInt>& candidate_faces)
+{
+	//
+	const vector<NNUInt>& indices = m_source_mesh->GetIndexData();
+	const vector<Vertex>& vertices = m_source_mesh->GetVertexData();
+	//
+	NNFloat min_dis = 3.40281e+038f;
+	optional<Adjacency> min_dis_adj = nullopt;
+	//
+	for (const auto face : candidate_faces)
+	{
+		const NNUInt ia = indices[face * 3 + 0];
+		const NNUInt ib = indices[face * 3 + 1];
+		const NNUInt ic = indices[face * 3 + 2];
+		bool has_ia = m_indices_set.find(ia) != m_indices_set.end();
+		bool has_ib = m_indices_set.find(ib) != m_indices_set.end();
+		bool has_ic = m_indices_set.find(ic) != m_indices_set.end();
+		//
+		assert(int(has_ia) + int(has_ib) + int(has_ic) != 3);
+		//
+		optional<Adjacency> current_adj = nullopt;
+		//
+		if (has_ia && has_ib && !has_ic)
+		{
+			current_adj = Adjacency{face, ia, ib, ic};
+		}
+		if (has_ia && !has_ib && has_ic)
+		{
+			current_adj = Adjacency{ face, ic, ia, ib };
+		}
+		if (!has_ia && has_ib && has_ic)
+		{
+			current_adj = Adjacency{ face, ib, ic, ia };
+		}
+		//
+		if (current_adj.has_value())
+		{
+			const NNVec3 pa = vertices[ia].m_position;
+			const NNVec3 pb = vertices[ib].m_position;
+			const NNVec3 pc = vertices[ic].m_position;
+
+			const NNVec3 center = (pa + pb + pc) / 3.0f;
+			
+			NNFloat dis = glm::distance(center, m_center);
+			if (dis < min_dis)
+			{
+				min_dis = dis;
+				min_dis_adj = current_adj;
+			}
+		}
+	}
+	return min_dis_adj;
 }

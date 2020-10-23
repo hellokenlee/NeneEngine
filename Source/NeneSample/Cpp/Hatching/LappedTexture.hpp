@@ -192,8 +192,8 @@ namespace lappedtexture
 				//
 				Utils::Clear();
 				ca->Draw();
-				// g_bunny->Draw(shader_flat);
-				// g_bunny->Draw(shader_debug);
+				g_bunny->Draw(shader_flat);
+				g_bunny->Draw(shader_debug);
 				// Draw the tex
 				tetxure2->Use(0);
 				quad->Draw(shader_2d_texture);
@@ -206,18 +206,18 @@ namespace lappedtexture
 						patch.DrawMesh();
 					}
 				}
+
 				// Draw viewing patch on texture for debug
 				if (g_viewing_patch_index < g_patches.size())
 				{
 					tetxure2->Use(0);
 					shader_2d_color->Use();
 					{
-						CustomConstantBuffer.Data().color = NNVec4(0.0, 1.0, 0.0, 0.3);
+						CustomConstantBuffer.Data().color = NNVec4(0.0, 1.0, 0.0, 1.0);
 						CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
+						glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 						g_patches[g_viewing_patch_index].DrawMesh();
-						CustomConstantBuffer.Data().color = NNVec4(0.0, 0.0, 1.0, 1.0);
-						CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
-						g_patches[g_viewing_patch_index].DrawEdge();
+						glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 					}
 				}
 				//

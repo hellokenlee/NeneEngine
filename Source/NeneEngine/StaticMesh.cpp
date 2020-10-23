@@ -20,7 +20,7 @@ shared_ptr<StaticMesh> StaticMesh::Create(const NNChar* filepath, const NNFloat 
 	// 载入器
 	Assimp::Importer importer;
 	// 读取文件
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FixInfacingNormals);
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FixInfacingNormals);
 	// 错误检测
 	if (scene == nullptr || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
 		printf("[Error] Model Loading Error: %s\n\n", importer.GetErrorString());
@@ -122,7 +122,7 @@ void StaticMesh::ProcessMesh(aiMesh* pMesh, const aiScene* pScene, const NNFloat
 			indices.push_back(face.mIndices[j]);
 		}
 	}
-	//处理纹理数据
+	// 处理纹理数据
 	if (pMesh->mMaterialIndex >= 0) {
 		aiMaterial* material = pScene->mMaterials[pMesh->mMaterialIndex];
 		ProcessTexture(material, aiTextureType_DIFFUSE, DIFFUSE, textures);
