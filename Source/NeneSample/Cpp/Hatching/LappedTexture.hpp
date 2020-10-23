@@ -24,6 +24,7 @@ namespace lappedtexture
 	bool g_shader_update = false;
 	bool g_need_add_patch = false;
 	bool g_need_grow_patch = false;
+	bool g_need_optimaze_patch = false;
 	int g_viewing_patch_index = 0;
 
 	std::set<NNUInt> g_candidate_faces;
@@ -93,6 +94,12 @@ namespace lappedtexture
 			{
 				g_need_grow_patch = true;
 			}
+			ImGui::SameLine();
+			if (ImGui::Button("Optimaze Patch"))
+			{
+				g_need_optimaze_patch = true;
+			}
+
 		}
 		ImGui::End();
 	}
@@ -235,7 +242,7 @@ namespace lappedtexture
 					LappedTexturePatch patch;
 					patch.Initialize(g_bunny->GetMeshes()[0], g_candidate_faces);
 					g_patches.emplace_back(patch);
-					g_viewing_patch_index = g_patches.size() - 1;
+					g_viewing_patch_index = NNUInt(g_patches.size()) - 1;
 				}
 			}
 			if (g_need_grow_patch)
