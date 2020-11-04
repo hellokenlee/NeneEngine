@@ -3,10 +3,18 @@
 #define LAPPED_TEXTURE_PATCH
 
 #include <set>
+#include <map>
 #include <deque>
 #include <vector>
 #include <optional>
 #include "NeneEngine/Nene.h"
+#include "NeneEngine/Eigen/Dense"
+
+
+namespace Eigen
+{
+	typedef Matrix<float, 2, 3> Matrix2x3f;
+}
 
 struct Adjacency
 {
@@ -26,7 +34,11 @@ public:
 	//
 	void Grow(std::set<NNUInt>& candidate_faces);
 	bool IsGrown() { return m_is_grown; }
+	//
+	void Optimaze();
+	//
 	void DrawMesh();
+	//
 	void Initialize(std::shared_ptr<Mesh> source_mesh, std::set<NNUInt>& candidate_faces);
 	
 private:
@@ -46,6 +58,7 @@ private:
 	// The patch vertex indices
 	std::vector<NNUInt> m_indices;
 	std::set<NNUInt> m_indices_set;
+	std::map<NNUInt, Eigen::Matrix2x3f> m_face_phi;
 
 	// The source mesh this patch from
 	std::shared_ptr<Mesh> m_source_mesh;

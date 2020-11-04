@@ -2,7 +2,6 @@
 #include "Simple/Main.hpp"
 #include "Hatching/Main.hpp"
 #include "Hatching/LappedTexture.hpp"
-#include "NeneEngine/Eigen/Dense"
 
 
 int main()

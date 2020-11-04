@@ -12,6 +12,7 @@
 
 #include "LappedTexturePatch.h"
 
+
 namespace lappedtexture
 {
 	struct CustomCBDS
@@ -21,11 +22,14 @@ namespace lappedtexture
 		NNVec4 color;
 	};
 
+	bool g_consecutive = false;
 	bool g_shader_update = false;
 	bool g_need_add_patch = false;
 	bool g_need_grow_patch = false;
 	bool g_need_optimaze_patch = false;
 	int g_viewing_patch_index = 0;
+	NNVec3 g_camera_pos;
+	NNVec2 g_camera_rot;
 
 	std::set<NNUInt> g_candidate_faces;
 
@@ -55,6 +59,10 @@ namespace lappedtexture
 		{
 			g_need_grow_patch = true;
 		}
+		else if (k_event->mKey == NNKeyMap(0))
+		{
+			g_need_optimaze_patch = true;
+		}
 	}
 
 	void DrawGraphicUserInterfaces()
@@ -63,10 +71,13 @@ namespace lappedtexture
 		{
 			//
 			ImGui::SetWindowPos(ImVec2(10, 10));
-			ImGui::SetWindowSize(ImVec2(320, 240));
+			ImGui::SetWindowSize(ImVec2(320, 400));
 			//
 			ImGui::Text("Info:");
 			ImGui::Text("%.2f ms/frame (%.0f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			//
+			ImGui::Text("Camera: ");
+			ImGui::Text("(%.1f, %.1f, %.1f) | (%.1f, %.1f) ", g_camera_pos.x, g_camera_pos.y, g_camera_pos.z, g_camera_rot.x, g_camera_rot.y);
 			//
 			ImGui::Text("Tangent: ");
 			ImGui::SliderFloat3("  ", g_tangent, -1.0f, 1.0f);
@@ -85,6 +96,7 @@ namespace lappedtexture
 			}
 			//
 			ImGui::Text("Patch Control: ");
+			ImGui::Checkbox("Consecutive Grow", &g_consecutive);
 			if (ImGui::Button("Add Patch"))
 			{
 				g_need_add_patch = true;
@@ -99,7 +111,6 @@ namespace lappedtexture
 			{
 				g_need_optimaze_patch = true;
 			}
-
 		}
 		ImGui::End();
 	}
@@ -134,9 +145,9 @@ namespace lappedtexture
 		auto controls = UserInterface::Create(DrawGraphicUserInterfaces);
 		//
 		cc->m_speed = 3.0f;
-		cc->SetYaw(4.0f);
-		cc->SetPitch(-0.7f);
-		cc->SetPosition(NNVec3(4.0f, 5.0f, 4.0f));
+		cc->SetYaw(0.3);
+		cc->SetPitch(-0.3f);
+		cc->SetPosition(NNVec3(-4.7f, 4.7f, -0.2f));
 		//
 		g_bunny = StaticMesh::Create("Resource/Mesh/bunny/bunny.obj", 30.0f);
 		//
@@ -151,8 +162,9 @@ namespace lappedtexture
 		g_shaders.push_back(shader_2d_color);
 		auto shader_2d_texture = Shader::Create("Resource/Shader/GLSL/2DTexture.vert", "Resource/Shader/GLSL/2DTexture.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
 		g_shaders.push_back(shader_2d_texture);
+		auto shader_3d_color = Shader::Create("Resource/Shader/GLSL/3DColor.vert", "Resource/Shader/GLSL/3DColor.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
 		//
-		auto tetxure2 = Texture2D::Create("Resource/Texture/checkerboard_s.png");
+		auto tetxure2 = Texture2D::Create("Resource/Texture/splotch_checkboard.png");
 		//
 		auto quad = Geometry::CreateQuad();
 		//
@@ -187,7 +199,7 @@ namespace lappedtexture
 				//
 				Utils::Clear();
 				ca->Draw();
-				// g_bunny->Draw(shader_flat);
+				
 				g_bunny->Draw(shader_debug);
 				// Draw the tex
 				tetxure2->Use(0);
@@ -202,6 +214,15 @@ namespace lappedtexture
 					}
 				}
 
+				//
+				{
+					CustomConstantBuffer.Data().color = NNVec4(0.0, 1.0, 1.0, 1.0);
+					CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					g_bunny->Draw(shader_3d_color);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				}
+				
 				// Draw viewing patch on texture for debug
 				if (g_viewing_patch_index < g_patches.size())
 				{
@@ -216,7 +237,12 @@ namespace lappedtexture
 					}
 				}
 				//
-				controls->Draw();
+				{
+					g_camera_pos = cc->GetCamera()->GetPosition();
+					g_camera_rot.x = cc->GetCamera()->GetYaw();
+					g_camera_rot.y = cc->GetCamera()->GetPitch();
+					controls->Draw();
+				}
 			}
 			//
 			Utils::SwapBuffers();
@@ -247,16 +273,35 @@ namespace lappedtexture
 			}
 			if (g_need_grow_patch)
 			{
-				LappedTexturePatch& patch = g_patches[g_viewing_patch_index];
-
-				if (patch.IsGrown())
+				if (g_viewing_patch_index < g_patches.size())
 				{
-					g_need_grow_patch = false;
+					LappedTexturePatch& patch = g_patches[g_viewing_patch_index];
+					patch.Grow(g_candidate_faces);
+					if (g_consecutive)
+					{
+						if (patch.IsGrown())
+						{
+							g_need_grow_patch = false;
+						}
+					}
+					else
+					{
+						g_need_grow_patch = false;
+					}
 				}
 				else
 				{
-					patch.Grow(g_candidate_faces);
+					g_need_grow_patch = false;
 				}
+			}
+			if (g_need_optimaze_patch)
+			{
+				if (g_viewing_patch_index < g_patches.size())
+				{
+					LappedTexturePatch& patch = g_patches[g_viewing_patch_index];
+					patch.Optimaze();
+				}
+				g_need_optimaze_patch = false;
 			}
 		}
 		// 

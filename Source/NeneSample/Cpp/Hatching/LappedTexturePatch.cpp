@@ -1,6 +1,6 @@
 /*Copyright reserved by KenLee@2020 ken4000kl@gmail.com*/
 #include <optional>
-
+#include <iostream>
 #include "NeneEngine/Debug.h"
 #include "LappedTexturePatch.h"
 
@@ -8,8 +8,46 @@
 #define TEXTURE_PASTING_SCALE 1.0f
 
 using namespace std;
+using namespace glm;
+using namespace Eigen;
+
 
 /** >>> Util Functions >>> */
+
+Matrix2x3f CalcLinearTransformWithEigen(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector2f& ta, const Vector2f& tb, const Vector2f& tc)
+{
+	//
+	static const Vector3f e0(1.f, 0.f, 0.0f);
+	static const Vector3f e1(0.f, 1.f, 0.0f);
+	static const Vector3f e2(0.f, 0.f, 1.0f);
+	//
+	Matrix3f lsm;
+	lsm << a, b, c;
+	//
+	Vector3f xa = lsm.colPivHouseholderQr().solve(e0);
+	Vector2f col0 = xa[0] * ta + xa[1] * tb + xa[2] * tc;
+
+	Vector3f xb = lsm.colPivHouseholderQr().solve(e1);
+	Vector2f col1 = xb[0] * ta + xb[1] * tb + xb[2] * tc;
+
+	Vector3f xc = lsm.colPivHouseholderQr().solve(e2);
+	Vector2f col2 = xc[0] * ta + xc[1] * tb + xc[2] * tc;
+	//
+	Matrix2x3f phi;
+	phi << col0, col1, col2;
+	//
+	return phi;
+}
+
+Vector3f ToVector3f(const vec3& a)
+{
+	return Vector3f(a.x, a.y, a.z);
+}
+
+Vector2f ToVector2f(const vec2& a)
+{
+	return Vector2f(a.x, a.y);
+}
 
 enum IntersectStatus
 {
@@ -113,6 +151,10 @@ NNVec2 SimilarTriangle3DTo2D(NNVec3 a_3d, NNVec3 b_3d, NNVec3 c_3d, NNVec3 n_3d,
 	NNVec2 dir_ac_2d = glm::normalize(glm::rotate(dir_ab_2d, angle_bac));
 	NNVec2 c_2d = a_2d + (dir_ac_2d * len_ac_3d * len_ab_2d / len_ab_3d);
 	c_2d *= 0.001f;
+	//
+	c_2d = clamp(c_2d, 0.0f, 1.0f);
+	//
+	// assert(c_2d.x <= 1.0f && c_2d.x >= 0.0f && c_2d.y <= 1.0f && c_2d.y >= 0.0f);
 	return c_2d;
 }
 
@@ -227,17 +269,22 @@ void LappedTexturePatch::Grow(std::set<NNUInt>& candidate_faces)
 		NNVec3 na = vertices[shared_ia].m_normal;
 		NNVec3 nb = vertices[shared_ib].m_normal;
 		NNVec3 nc = vertices[diagonal_ic].m_normal;
-		NNVec3 n = NNNormalize((na + nb + nc) / 3.0f);
-		NNVec2 tc = SimilarTriangle3DTo2D(pa, pb, pc, na, ta, tb);
+		NNVec3 nf = NNNormalize((na + nb + nc) / 3.0f);
+		NNVec2 tc = SimilarTriangle3DTo2D(pa, pb, pc, nf, ta, tb);
 		//
 		if (!IsNearlySame(vertices[diagonal_ic].m_texcoord, NNVec2(0.0f, 0.0f)))
 		{
-			dLog("[Patch] Recover an vertex: %d in face: %d", diagonal_ic, face);
+			dLog("[Patch] Recover an vertex: %d in face: %d\n", diagonal_ic, face);
 		}
 		//
 		vertices[diagonal_ic].m_texcoord = tc;
 		//
-		dLog("[Patch] Grow add face: %d; Remain: %zd faces;\n", face, candidate_faces.size());
+		dLog("[Patch] Grow %dth face of patch.\n", int(m_indices.size() / 3));
+		dLog("[Patch] Grow add face: %d; Remain: %zd faces; Segment((%f, %f), (%f, %f))\n", face, candidate_faces.size(), ta.x, -ta.y, tb.x, -tb.y);
+
+		// 计算线性变换矩阵
+		// Matrix2x3f phi = CalcLinearTransformWithEigen(ToVector3f(pa), ToVector3f(pb), ToVector3f(pc), ToVector2f(ta), ToVector2f(tb), ToVector2f(tc));
+		// m_face_phi.insert(make_pair(face, phi));
 
 		// 合并已经覆盖的面
 		std::vector<NNUInt> covered_faces;
@@ -249,13 +296,61 @@ void LappedTexturePatch::Grow(std::set<NNUInt>& candidate_faces)
 			bool has_ia = m_indices_set.find(ia) != m_indices_set.end();
 			bool has_ib = m_indices_set.find(ib) != m_indices_set.end();
 			bool has_ic = m_indices_set.find(ic) != m_indices_set.end();
+			// 上面新增的顶点导致这个面的三个顶点都被覆盖
 			if (has_ia && has_ib && has_ic)
 			{
 				covered_faces.push_back(c);
+				//
 				m_indices.push_back(ia);
 				m_indices.push_back(ib);
 				m_indices.push_back(ic);
-				dLog("[Patch] Expand covered face: %d due to grow of: %d", c, face);
+				//
+				NNVec3 pa = vertices[ia].m_position;
+				NNVec3 pb = vertices[ib].m_position;
+				NNVec3 pc = vertices[ic].m_position;
+				NNVec2 ta = vertices[ia].m_texcoord;
+				NNVec2 tb = vertices[ib].m_texcoord;
+				NNVec2 tc = vertices[ic].m_texcoord;
+				//
+				// Matrix2x3f phi = CalcLinearTransformWithEigen(ToVector3f(pa), ToVector3f(pb), ToVector3f(pc), ToVector2f(ta), ToVector2f(tb), ToVector2f(tc));
+				// m_face_phi.insert(make_pair(face, phi));
+				//
+				NNVec3 tab(tb.x - ta.x, tb.y - ta.y, 0.0f);
+				NNVec3 tbc(tc.x - tb.x, tc.y - tb.y, 0.0f);
+				NNVec3 direction = cross(tab, tbc);
+				// 新增的点导致了这个面和已有的面重叠
+				if (direction.z < 0.0f)
+				{
+					//
+					NNVec3 na = vertices[ia].m_normal;
+					NNVec3 nb = vertices[ib].m_normal;
+					NNVec3 nc = vertices[ic].m_normal;
+					NNVec3 nf = NNNormalize((na + nb + nc) / 3.0f);
+					//
+					if (ia == diagonal_ic)
+					{
+						NNVec2 new_ta = SimilarTriangle3DTo2D(pb, pc, pa, nf, tb, tc);
+						vertices[ia].m_texcoord = new_ta;
+					}
+					else if (ib == diagonal_ic)
+					{
+						NNVec2 new_tb = SimilarTriangle3DTo2D(pc, pa, pb, nf, tc, ta);
+						vertices[ib].m_texcoord = new_tb;
+					}
+					else if (ic == diagonal_ic)
+					{
+						NNVec2 new_tc = SimilarTriangle3DTo2D(pa, pb, pc, nf, ta, tb);
+						vertices[ic].m_texcoord = new_tc;
+					}
+					else
+					{
+						assert(false);
+					}
+					//
+					dLog("!!! [Patch] Adjust face\n");
+				}
+				//
+				dLog("[Patch] Expand covered face: %d due to grow of: %d\n", c, face);
 			}
 		}
 		for (auto c : covered_faces)
@@ -269,6 +364,14 @@ void LappedTexturePatch::Grow(std::set<NNUInt>& candidate_faces)
 	{
 		m_is_grown = true;
 		dLog("[Patch] Failed to grow patch! Unable to find adjacent face!\n");
+	}
+}
+
+void LappedTexturePatch::Optimaze()
+{
+	for (auto&[face, phi] : m_face_phi)
+	{
+		cout << face <<endl << phi << endl << endl;
 	}
 }
 
@@ -321,6 +424,15 @@ void LappedTexturePatch::Initialize(std::shared_ptr<Mesh> source_mesh, std::set<
 	vertices[ia].m_texcoord = (NNVec2(vertex_a_in_tbn.x, vertex_a_in_tbn.y) * TEXTURE_PASTING_SCALE) + NNVec2(0.5f, 0.5f);
 	vertices[ib].m_texcoord = (NNVec2(vertex_b_in_tbn.x, vertex_b_in_tbn.y) * TEXTURE_PASTING_SCALE) + NNVec2(0.5f, 0.5f);
 	vertices[ic].m_texcoord = (NNVec2(vertex_c_in_tbn.x, vertex_c_in_tbn.y) * TEXTURE_PASTING_SCALE) + NNVec2(0.5f, 0.5f);
+	//
+	NNVec3 pa = vertices[ia].m_position;
+	NNVec3 pb = vertices[ib].m_position;
+	NNVec3 pc = vertices[ic].m_position;
+	NNVec2 ta = vertices[ia].m_texcoord;
+	NNVec2 tb = vertices[ib].m_texcoord;
+	NNVec2 tc = vertices[ic].m_texcoord;
+	// Matrix2x3f phi = CalcLinearTransformWithEigen(ToVector3f(pa), ToVector3f(pb), ToVector3f(pc), ToVector2f(ta), ToVector2f(tb), ToVector2f(tc));
+	// m_face_phi.insert(make_pair(face, phi));
 	//
 	UpdateForRendering();
 	//
@@ -406,11 +518,44 @@ bool LappedTexturePatch::IsValidAdjacency(const Adjacency& adjcency)
 	const NNVec2 ta = vertices[ia].m_texcoord;
 	const NNVec2 tb = vertices[ib].m_texcoord;
 	//
-	vector<NNVec2> polygon = { NNVec2(0.2f, 0.2f), NNVec2(0.8f, 0.2f), NNVec2(0.8f, 0.8f), NNVec2(0.2f, 0.8f) };
-	// !TODO: 多边形三角化
-	bool ouside0 = Intersect(ta, tb, polygon[0], polygon[1], polygon[2]) == IntersectStatus::OUTSIDE;
-	bool ouside1 = Intersect(ta, tb, polygon[2], polygon[3], polygon[0]) == IntersectStatus::OUTSIDE;
+	static const vector<tuple<NNVec2, NNVec2, NNVec2>> polygon_hull = {
+		{{0.54248366 * 0.8 + 0.1, (1.0 - 0.02614379) * 0.8 + 0.1}, {0.41993464 * 0.8 + 0.1, (1.0 - 0.02941176) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.41993464 * 0.8 + 0.1, (1.0 - 0.02941176) * 0.8 + 0.1}, {0.35130719 * 0.8 + 0.1, (1.0 - 0.26797386) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.35130719 * 0.8 + 0.1, (1.0 - 0.26797386) * 0.8 + 0.1}, {0.10457516 * 0.8 + 0.1, (1.0 - 0.30228758) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.10457516 * 0.8 + 0.1, (1.0 - 0.30228758) * 0.8 + 0.1}, {0.05882353 * 0.8 + 0.1, (1.0 - 0.33660131) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.05882353 * 0.8 + 0.1, (1.0 - 0.33660131) * 0.8 + 0.1}, {0.06045752 * 0.8 + 0.1, (1.0 - 0.43464052) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.06045752 * 0.8 + 0.1, (1.0 - 0.43464052) * 0.8 + 0.1}, {0.17973856 * 0.8 + 0.1, (1.0 - 0.48366013) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.17973856 * 0.8 + 0.1, (1.0 - 0.48366013) * 0.8 + 0.1}, {0.11111111 * 0.8 + 0.1, (1.0 - 0.73529412) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.11111111 * 0.8 + 0.1, (1.0 - 0.73529412) * 0.8 + 0.1}, {0.14869281 * 0.8 + 0.1, (1.0 - 0.76143791) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.14869281 * 0.8 + 0.1, (1.0 - 0.76143791) * 0.8 + 0.1}, {0.24019608 * 0.8 + 0.1, (1.0 - 0.69607843) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.24019608 * 0.8 + 0.1, (1.0 - 0.69607843) * 0.8 + 0.1}, {0.26797386 * 0.8 + 0.1, (1.0 - 0.75653595) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.26797386 * 0.8 + 0.1, (1.0 - 0.75653595) * 0.8 + 0.1}, {0.20588235 * 0.8 + 0.1, (1.0 - 0.88071895) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.20588235 * 0.8 + 0.1, (1.0 - 0.88071895) * 0.8 + 0.1}, {0.21568627 * 0.8 + 0.1, (1.0 - 0.96405229) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.21568627 * 0.8 + 0.1, (1.0 - 0.96405229) * 0.8 + 0.1}, {0.34640523 * 0.8 + 0.1, (1.0 - 0.97222222) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.34640523 * 0.8 + 0.1, (1.0 - 0.97222222) * 0.8 + 0.1}, {0.52287582 * 0.8 + 0.1, (1.0 - 0.83333333) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.52287582 * 0.8 + 0.1, (1.0 - 0.83333333) * 0.8 + 0.1}, {0.69934641 * 0.8 + 0.1, (1.0 - 0.94281046) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.69934641 * 0.8 + 0.1, (1.0 - 0.94281046) * 0.8 + 0.1}, {0.78431373 * 0.8 + 0.1, (1.0 - 0.92320261) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.78431373 * 0.8 + 0.1, (1.0 - 0.92320261) * 0.8 + 0.1}, {0.84313725 * 0.8 + 0.1, (1.0 - 0.82189542) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.84313725 * 0.8 + 0.1, (1.0 - 0.82189542) * 0.8 + 0.1}, {0.79738562 * 0.8 + 0.1, (1.0 - 0.72058824) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.79738562 * 0.8 + 0.1, (1.0 - 0.72058824) * 0.8 + 0.1}, {0.79738562 * 0.8 + 0.1, (1.0 - 0.63888889) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.79738562 * 0.8 + 0.1, (1.0 - 0.63888889) * 0.8 + 0.1}, {0.93464052 * 0.8 + 0.1, (1.0 - 0.53921569) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.93464052 * 0.8 + 0.1, (1.0 - 0.53921569) * 0.8 + 0.1}, {0.92647059 * 0.8 + 0.1, (1.0 - 0.38562092) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.92647059 * 0.8 + 0.1, (1.0 - 0.38562092) * 0.8 + 0.1}, {0.85130719 * 0.8 + 0.1, (1.0 - 0.31535948) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.85130719 * 0.8 + 0.1, (1.0 - 0.31535948) * 0.8 + 0.1}, {0.86274510 * 0.8 + 0.1, (1.0 - 0.11437908) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.86274510 * 0.8 + 0.1, (1.0 - 0.11437908) * 0.8 + 0.1}, {0.81699346 * 0.8 + 0.1, (1.0 - 0.07843137) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.81699346 * 0.8 + 0.1, (1.0 - 0.07843137) * 0.8 + 0.1}, {0.66339869 * 0.8 + 0.1, (1.0 - 0.10620915) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+		{{0.66339869 * 0.8 + 0.1, (1.0 - 0.10620915) * 0.8 + 0.1}, {0.54248366 * 0.8 + 0.1, (1.0 - 0.02614379) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},
+	};
 	//
-	// dLog("(%f, %f) - (%f, %f): %d, %d\n", ta.x, ta.y, tb.x, tb.y, ouside0, ouside1);
-	return !(ouside0 && ouside1);
+	for (const auto& triangle : polygon_hull)
+	{
+		if (Intersect(ta, tb, get<0>(triangle), get<1>(triangle), get<2>(triangle)) <= IntersectStatus::INTERSECTING)
+		{
+			return true;
+		}
+	}
+	//
+	// dLog("Segment((%f, %f), (%f, %f))\n", ta.x, ta.y, tb.x, tb.y);
+	//
+	return false;
 }

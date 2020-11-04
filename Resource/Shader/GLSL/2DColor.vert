@@ -12,11 +12,12 @@ out vec2 uv_VS_out;
 
 void main()
 {
-	vec2 uv = uv_VS_in * 2.0 - vec2(1.0, 1.0);
+	vec2 uv = uv_VS_in; 
+	uv = uv * 2.0 - vec2(1.0, 1.0);
 	vec2 texsize = textureSize(tex0, 0);
 	vec2 screensize = vec2(1600, 900);
 	vec2 scale = texsize / screensize;
-	vec2 offset = vec2(1.0, 1.0) - (texsize / screensize * 0.5);
+	vec2 offset = vec2(0.8, 0.8) - (texsize / screensize * 0.5);
 	vec2 position = (uv * scale * PREVIEW_SCALE) + offset;
 	gl_Position = vec4(position, 0.0, 1.0f);
 	uv_VS_out = uv_VS_in;

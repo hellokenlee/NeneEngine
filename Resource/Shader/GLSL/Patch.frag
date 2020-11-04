@@ -8,5 +8,5 @@ out vec4 color_FS_out;
 
 void main() 
 {
-	color_FS_out = vec4(texture(tex0, texcoord_VS_out).rgb, 1.0);
+	color_FS_out = texture(tex0, texcoord_VS_out).rgba;
 }
