@@ -11,7 +11,8 @@
 //    RenderTarget: 
 //
 
-class RenderTarget {
+class RenderTarget
+{
 public:
 	//
 	static std::shared_ptr<RenderTarget> Create(const NNUInt& width, const NNUInt& height, const NNUInt& count);
@@ -23,6 +24,8 @@ public:
 	//
 	const std::shared_ptr<Texture2D> GetColorTex(const NNUInt& idx);
 	const std::shared_ptr<Texture2D> GetDepthStencilTex();
+	//
+	void SavePixelData(const NNChar* filepath);
 	//
 	virtual void Begin();
 	virtual void End();
@@ -45,9 +48,9 @@ protected:
 	ID3D11DepthStencilView* mpPrevDSV;
 #endif
 protected:
-	RenderTarget();
-	RenderTarget(const RenderTarget& rhs);
-	RenderTarget& operator=(const RenderTarget& rhs);
+	RenderTarget() = default;
+	RenderTarget(const RenderTarget& rhs) = delete;
+	RenderTarget& operator=(const RenderTarget& rhs) = delete;
 };
 
 #endif // RENDER_TARGET_H

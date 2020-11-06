@@ -18,13 +18,16 @@ void GenerateTextures(vector<GLuint> IN tex_ids)
 Texture2D::Texture2D() : Texture(), mTextureID(0), mMode(AS_COLOR) {}
 
 
-Texture2D::~Texture2D() {
-	if (mTextureID != 0) {
+Texture2D::~Texture2D()
+{
+	if (mTextureID != 0)
+	{
 		glDeleteTextures(1, &mTextureID);
 	}
 }
 
-shared_ptr<Texture2D> Texture2D::CreateFromMemory(const NNUInt& width, const NNUInt& height, const NNUInt& iformat, const NNUInt& format, const NNUInt& type, const void *pInitData) {
+shared_ptr<Texture2D> Texture2D::CreateFromMemory(const NNUInt& width, const NNUInt& height, const NNUInt& iformat, const NNUInt& format, const NNUInt& type, const void *pInitData)
+{
 	//
 	GLuint texID = 0;
 	glGenTextures(1, &texID);
@@ -34,15 +37,19 @@ shared_ptr<Texture2D> Texture2D::CreateFromMemory(const NNUInt& width, const NNU
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//
-	if (texID == 0) {
+	if (texID == 0)
+	{
 		return nullptr;
 	}
 	Texture2D* ret = new Texture2D();
 	ret->mTextureID = texID;
+	ret->m_width = width;
+	ret->m_height = height;
 	return shared_ptr<Texture2D>(ret);
 }
 
-shared_ptr<Texture2D> Texture2D::CreateMultisample(const NNUInt& width, const NNUInt& height, const NNUInt& samples, const NNUInt& iformat) {
+shared_ptr<Texture2D> Texture2D::CreateMultisample(const NNUInt& width, const NNUInt& height, const NNUInt& samples, const NNUInt& iformat) 
+{
 	//
 	GLuint texID = 0;
 	glGenTextures(1, &texID);
@@ -55,11 +62,14 @@ shared_ptr<Texture2D> Texture2D::CreateMultisample(const NNUInt& width, const NN
 	}
 	Texture2D* ret = new Texture2D();
 	ret->mTextureID = texID;
+	ret->m_width = width;
+	ret->m_height = height;
 	return shared_ptr<Texture2D>(ret);
 }
 
 
-shared_ptr<Texture2D> Texture2D::Create(const NNChar* filepath) {
+shared_ptr<Texture2D> Texture2D::Create(const NNChar* filepath)
+{
 	return Create(vector<const NNChar*>({filepath}));
 }
 
@@ -76,6 +86,8 @@ shared_ptr<Texture2D> Texture2D::Create(vector<const NNChar*> filepaths)
 		return nullptr;
 	}
 	//
+	GLuint width = 0, height = 0;
+	//
 	glBindTexture(GL_TEXTURE_2D, texID);
 	{
 		//
@@ -85,11 +97,11 @@ shared_ptr<Texture2D> Texture2D::Create(vector<const NNChar*> filepaths)
 			const char* filepath = filepaths[idx];
 			shared_ptr<NNByte[]> image_data = nullptr;
 			//
-			GLuint width, height;
 			NNColorFormat format;
 			//
 			image_data = LoadImage(filepath, width, height, format);
-			if (image_data == nullptr || width == 0 || height == 0) {
+			if (image_data == nullptr || width == 0 || height == 0)
+			{
 				dLog("[Error] Broken image data! Could not load texture(%s)\n", filepath);
 				continue;
 			}
@@ -109,15 +121,19 @@ shared_ptr<Texture2D> Texture2D::Create(vector<const NNChar*> filepaths)
 	//
 	Texture2D* ret = new Texture2D();
 	ret->mTextureID = texID;
+	ret->m_width = width;
+	ret->m_height = height;
 	return shared_ptr<Texture2D>(ret);
 }
 
-void Texture2D::Use(const NNUInt& slot) {
+void Texture2D::Use(const NNUInt& slot) 
+{
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, mTextureID);
 }
 
-void Texture2D::SetMode(NNTextureMode m) {
+void Texture2D::SetMode(NNTextureMode m)
+{
 	if (m == mMode) {
 		return;
 	}
@@ -144,6 +160,34 @@ void Texture2D::SetMode(NNTextureMode m) {
 		break;
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+shared_ptr<NNByte[]> Texture2D::GetPixelData()
+{
+	//
+	if (mTextureID == 0)
+	{
+		return nullptr;
+	}
+	//
+	NNByte* buffer = new NNByte[m_width * m_height * 4 * sizeof(NNByte)];
+	//
+	glBindTexture(GL_TEXTURE_2D, mTextureID);
+	{
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, buffer);
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+	//
+	return shared_ptr<NNByte[]>(buffer);
+}
+
+void Texture2D::SavePixelData(const NNChar* filepath)
+{
+	shared_ptr<NNByte[]> bits = GetPixelData();
+	if (bits != nullptr)
+	{
+		SaveImage(bits, m_width, m_height, NNColorFormat::RGBA, filepath);
+	}
 }
 
 #endif // NENE_GL

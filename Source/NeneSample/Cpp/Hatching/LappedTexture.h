@@ -22,7 +22,8 @@ namespace lappedtexture
 		NNVec4 color;
 	};
 
-	bool g_consecutive = false;
+	bool g_consecutive_add = true;
+	bool g_consecutive_grow = true;
 	bool g_shader_update = false;
 	bool g_need_add_patch = false;
 	bool g_need_grow_patch = false;
@@ -96,7 +97,8 @@ namespace lappedtexture
 			}
 			//
 			ImGui::Text("Patch Control: ");
-			ImGui::Checkbox("Consecutive Grow", &g_consecutive);
+			ImGui::Checkbox("Consecutive Grow", &g_consecutive_grow);
+			ImGui::Checkbox("Add After Consecutive Grow", &g_consecutive_grow);
 			if (ImGui::Button("Add Patch"))
 			{
 				g_need_add_patch = true;
@@ -145,7 +147,7 @@ namespace lappedtexture
 		auto controls = UserInterface::Create(DrawGraphicUserInterfaces);
 		//
 		cc->m_speed = 3.0f;
-		cc->SetYaw(0.3);
+		cc->SetYaw(0.3f);
 		cc->SetPitch(-0.3f);
 		cc->SetPosition(NNVec3(-4.7f, 4.7f, -0.2f));
 		//
@@ -164,7 +166,7 @@ namespace lappedtexture
 		g_shaders.push_back(shader_2d_texture);
 		auto shader_3d_color = Shader::Create("Resource/Shader/GLSL/3DColor.vert", "Resource/Shader/GLSL/3DColor.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
 		//
-		auto tetxure2 = Texture2D::Create("Resource/Texture/splotch_checkboard.png");
+		auto texture_patch = Texture2D::Create("Resource/Texture/splotch_checkboard.png");
 		//
 		auto quad = Geometry::CreateQuad();
 		//
@@ -202,10 +204,10 @@ namespace lappedtexture
 				
 				g_bunny->Draw(shader_debug);
 				// Draw the tex
-				tetxure2->Use(0);
+				texture_patch->Use(0);
 				quad->Draw(shader_2d_texture);
 				// Draw the patches
-				tetxure2->Use(0);
+				texture_patch->Use(0);
 				shader_patch->Use();
 				{
 					for (auto& patch : g_patches)
@@ -214,7 +216,7 @@ namespace lappedtexture
 					}
 				}
 
-				//
+				/*
 				{
 					CustomConstantBuffer.Data().color = NNVec4(0.0, 1.0, 1.0, 1.0);
 					CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
@@ -222,11 +224,12 @@ namespace lappedtexture
 					g_bunny->Draw(shader_3d_color);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				}
+				*/
 				
 				// Draw viewing patch on texture for debug
 				if (g_viewing_patch_index < g_patches.size())
 				{
-					tetxure2->Use(0);
+					texture_patch->Use(0);
 					shader_2d_color->Use();
 					{
 						CustomConstantBuffer.Data().color = NNVec4(0.0, 1.0, 0.0, 1.0);
@@ -236,6 +239,12 @@ namespace lappedtexture
 						glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 					}
 				}
+
+				if (g_viewing_patch_index < g_patches.size() && g_patches[g_viewing_patch_index].IsGrown())
+				{
+					g_patches[g_viewing_patch_index].CalcNotFullyCoveredFaces(g_candidate_faces);
+				}
+
 				//
 				{
 					g_camera_pos = cc->GetCamera()->GetPosition();
@@ -246,6 +255,7 @@ namespace lappedtexture
 			}
 			//
 			Utils::SwapBuffers();
+			
 			//
 			if (g_shader_update)
 			{
@@ -266,9 +276,13 @@ namespace lappedtexture
 				if (g_candidate_faces.size() > 0)
 				{
 					LappedTexturePatch patch;
-					patch.Initialize(g_bunny->GetMeshes()[0], g_candidate_faces);
+					patch.Initialize(g_bunny->GetMeshes()[0], g_candidate_faces, texture_patch);
 					g_patches.emplace_back(patch);
 					g_viewing_patch_index = NNUInt(g_patches.size()) - 1;
+				}
+				if (g_consecutive_add)
+				{
+					g_need_grow_patch = true;
 				}
 			}
 			if (g_need_grow_patch)
@@ -277,11 +291,15 @@ namespace lappedtexture
 				{
 					LappedTexturePatch& patch = g_patches[g_viewing_patch_index];
 					patch.Grow(g_candidate_faces);
-					if (g_consecutive)
+					if (g_consecutive_grow)
 					{
 						if (patch.IsGrown())
 						{
 							g_need_grow_patch = false;
+							if (g_consecutive_add)
+							{
+								g_need_add_patch = true;
+							}
 						}
 					}
 					else
@@ -303,7 +321,9 @@ namespace lappedtexture
 				}
 				g_need_optimaze_patch = false;
 			}
+
 		}
+		
 		// 
 		Utils::Terminate();
 	}

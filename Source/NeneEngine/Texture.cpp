@@ -5,7 +5,25 @@
 
 using namespace std;
 
-shared_ptr<NNByte[]> Texture::LoadImage(const NNChar* filepath, NNUInt& width, NNUInt& height, NNColorFormat &format) {
+
+void Texture::SaveImage(std::shared_ptr<NNByte[]> bits, const NNUInt& width, const NNUInt& height, const NNColorFormat &format, const NNChar* filepath)
+{
+	int bpp = 32;
+	int pitch = ((((bpp * width) + 31) / 32) * 4);
+	FIBITMAP *p_image = FreeImage_ConvertFromRawBits(bits.get(), width, height, pitch, bpp, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK);
+	if (p_image != nullptr)
+	{
+		FREE_IMAGE_FORMAT format = FreeImage_GetFIFFromFilename(filepath);
+		if (format != FIF_UNKNOWN)
+		{
+			FreeImage_Save(format, p_image, filepath);
+		}
+		FreeImage_Unload(p_image);
+	}
+}
+
+shared_ptr<NNByte[]> Texture::LoadImage(const NNChar* filepath, NNUInt& width, NNUInt& height, NNColorFormat &format)
+{
 	// 检查文件
 	checkFileExist(filepath);
 	// 图片格式
@@ -16,21 +34,26 @@ shared_ptr<NNByte[]> Texture::LoadImage(const NNChar* filepath, NNUInt& width, N
 	FIBITMAP *pImage = nullptr;
 	// 获取格式
 	fileFormat = FreeImage_GetFileType(filepath, 0);
-	if (fileFormat == FIF_UNKNOWN) {
+	if (fileFormat == FIF_UNKNOWN) 
+	{
 		fileFormat = FreeImage_GetFIFFromFilename(filepath);
 	}
-	if (fileFormat == FIF_UNKNOWN) {
+	if (fileFormat == FIF_UNKNOWN)
+	{
 		dLog("[Error] Unknown image type (%s)\n", filepath);
 		return nullptr;
 	}
 	// 载入图片
-	if (FreeImage_FIFSupportsReading(fileFormat)) {
+	if (FreeImage_FIFSupportsReading(fileFormat))
+	{
 		pImage = FreeImage_Load(fileFormat, filepath);
 	}
-	else {
+	else
+	{
 		dLog("[Error] Unsupported image type (%s)\n", filepath);
 	}
-	if (!pImage) {
+	if (!pImage)
+	{
 		dLog("[Error] Failed to load image! (%s)\n", filepath);
 		return nullptr;
 	}

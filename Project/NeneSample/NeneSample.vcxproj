@@ -136,12 +136,15 @@
     <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoNOAA.hpp" />
     <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\DemoTSAA.hpp" />
     <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\Main.hpp" />
-    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexture.hpp" />
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTextureMesh.h" />
     <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexturePatch.h" />
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTextureUtility.h" />
     <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\Main.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTextureMesh.cpp" />
     <ClCompile Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexturePatch.cpp" />
+    <ClCompile Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTextureUtility.cpp" />
     <ClCompile Include="..\..\Source\NeneSample\Cpp\Main.cpp" />
     <ClInclude Include="..\..\Source\NeneSample\Cpp\Simple\Main.hpp" />
   </ItemGroup>

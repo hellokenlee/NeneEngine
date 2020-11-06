@@ -12,8 +12,8 @@ class MeshImpl
 {
 public:
 	//
-	MeshImpl();
 	~MeshImpl();
+	MeshImpl(GLuint vao, GLuint vbo, GLuint ebo, GLuint index_num, GLuint vertex_num);
 	//
 	void Draw();
 public:
@@ -22,13 +22,15 @@ public:
 	GLuint m_vbo;
 	GLuint m_ebo;
 	//
-	NNUInt m_index_num;
-	NNUInt m_vertex_num;
+	GLuint m_index_num;
+	GLuint m_vertex_num;
 	//
 	NNDrawMode m_draw_mode;
 };
 
-MeshImpl::MeshImpl(): m_vao(0), m_vbo(0), m_ebo(0), m_index_num(0), m_vertex_num(0), m_draw_mode(NNDrawMode::NN_TRIANGLE) {}
+MeshImpl::MeshImpl(GLuint vao, GLuint vbo, GLuint ebo, GLuint index_num, GLuint vertex_num)
+	: m_vao(vao), m_vbo(vbo), m_ebo(ebo), m_index_num(index_num), m_vertex_num(vertex_num), m_draw_mode(NNDrawMode::NN_TRIANGLE)
+{}
 
 MeshImpl::~MeshImpl()
 {
@@ -64,8 +66,42 @@ Mesh::~Mesh()
 	}
 }
 
-shared_ptr<Mesh> Mesh::Create(vector<Vertex>& vertices, vector<NNUInt>& indices,
-	vector<tuple<shared_ptr<Texture2D>, NNTextureType>>& textures)
+shared_ptr<Mesh> Mesh::Create(const vector<Vertex>& vertices)
+{
+	//
+	GLuint vao, vbo, ebo;
+	// 
+	glGenBuffers(1, &(vbo));
+	glGenVertexArrays(1, &(vao));
+	// 
+	glBindVertexArray(vao);
+	{
+		// VBO
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+		// POS
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(0 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(0);
+		// NORMAL
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
+		// TEXCOORD
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(6 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
+	}
+	glBindVertexArray(0);
+	//
+	Mesh* result = new Mesh();
+	//
+	result->m_impl = new MeshImpl(vao, vbo, 0, 0, (NNUInt)vertices.size());
+	//
+	result->m_vertices = vertices;
+	//
+	return shared_ptr<Mesh>(result);
+}
+
+shared_ptr<Mesh> Mesh::Create(const vector<Vertex>& vertices, const vector<NNUInt>& indices,
+	const vector<tuple<shared_ptr<Texture2D>, NNTextureType>>& textures)
 {
 	//
 	GLuint vao, vbo, ebo;
@@ -101,18 +137,11 @@ shared_ptr<Mesh> Mesh::Create(vector<Vertex>& vertices, vector<NNUInt>& indices,
 	}
 	//
 	Mesh* result = new Mesh();
-	result->m_impl = new MeshImpl();
-	// 
-	result->m_impl->m_index_num = (NNUInt)indices.size();
-	result->m_impl->m_vertex_num = (NNUInt)vertices.size();
+	result->m_impl = new MeshImpl(vao, vbo, ebo, (NNUInt)indices.size(), (NNUInt)vertices.size());
 	//
-	result->m_indices = std::move(indices);
-	result->m_vertices = std::move(vertices);
-	result->m_textures = std::move(textures);
-	//
-	result->m_impl->m_vao = vao;
-	result->m_impl->m_vbo = vbo;
-	result->m_impl->m_ebo = ebo;
+	result->m_indices = indices;
+	result->m_vertices = vertices;
+	result->m_textures = textures;
 	//
 	return shared_ptr<Mesh>(result);
 }

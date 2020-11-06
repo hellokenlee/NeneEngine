@@ -26,6 +26,7 @@ public:
 		const std::shared_ptr<Camera> pCamera = nullptr);
 
 	virtual std::vector<std::shared_ptr<Mesh>>& GetMeshes() { return m_meshes; };
+	virtual const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const { return m_meshes; }
 protected:
 	//
 	virtual void ProcessNode(aiNode* pNode, const aiScene* pScene, const NNFloat scale);

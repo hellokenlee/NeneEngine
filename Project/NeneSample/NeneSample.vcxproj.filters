@@ -51,10 +51,13 @@
     <ClInclude Include="..\..\Source\NeneSample\Cpp\Simple\Main.hpp">
       <Filter>头文件\Simple</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexture.hpp">
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexturePatch.h">
       <Filter>头文件\Hatching</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexturePatch.h">
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTextureMesh.h">
+      <Filter>头文件\Hatching</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTextureUtility.h">
       <Filter>头文件\Hatching</Filter>
     </ClInclude>
   </ItemGroup>
@@ -63,6 +66,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexturePatch.cpp">
+      <Filter>源文件\Hatching</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTextureMesh.cpp">
+      <Filter>源文件\Hatching</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTextureUtility.cpp">
       <Filter>源文件\Hatching</Filter>
     </ClCompile>
   </ItemGroup>

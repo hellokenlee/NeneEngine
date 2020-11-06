@@ -9,7 +9,8 @@
 //    Texture2D: Single Image Texture Class
 //
 
-class Texture2D : public Texture {
+class Texture2D : public Texture 
+{
 public:
 	//
 	~Texture2D();
@@ -28,8 +29,14 @@ public:
 	virtual void Use(const NNUInt& slot = 0);
 	// 
 	virtual void SetMode(NNTextureMode m);
+	//
+	virtual std::shared_ptr<NNByte[]> GetPixelData();
+	virtual void SavePixelData(const NNChar* filepath);
+
 protected:
 	NNTextureMode mMode;
+	NNUInt m_width, m_height;
+
 #if defined NENE_GL
 	GLuint mTextureID;
 #elif defined NENE_DX

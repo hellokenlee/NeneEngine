@@ -24,9 +24,13 @@ struct Vertex
 class Mesh 
 {
 public:
+	//
 	~Mesh();
-	static std::shared_ptr<Mesh> Create(std::vector<Vertex>& vertices, std::vector<NNUInt>& indices,
-		std::vector<std::tuple<std::shared_ptr<Texture2D>, NNTextureType>>& textures);
+	//
+	static std::shared_ptr<Mesh> Create(const std::vector<Vertex>& vertices);
+	static std::shared_ptr<Mesh> Create(const std::vector<Vertex>& vertices,const std::vector<NNUInt>& indices,
+		const std::vector<std::tuple<std::shared_ptr<Texture2D>, NNTextureType>>& textures);
+	//
 	void Draw();
 	void DrawInstance();
 	//
@@ -34,6 +38,9 @@ public:
 	//
 	std::vector<NNUInt>& GetIndexData() { return m_indices; }
 	std::vector<Vertex>& GetVertexData() { return m_vertices; };
+	//
+	const std::vector<NNUInt>& GetIndexData() const { return m_indices; }
+	const std::vector<Vertex>& GetVertexData() const { return m_vertices; }
 
 protected:
 	//

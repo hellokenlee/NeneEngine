@@ -6,7 +6,6 @@
 
 using namespace std;
 
-RenderTarget::RenderTarget() : mFBO(0) {}
 
 RenderTarget::~RenderTarget() {
 	if (mFBO != 0) {
@@ -14,41 +13,43 @@ RenderTarget::~RenderTarget() {
 	}
 }
 
-shared_ptr<RenderTarget> RenderTarget::Create(const NNUInt& width, const NNUInt& height, const NNUInt& count) {
-	// 构造对象
+shared_ptr<RenderTarget> RenderTarget::Create(const NNUInt& width, const NNUInt& height, const NNUInt& count)
+{
+	// 
 	RenderTarget *ret = new RenderTarget();
 	ret->mWidth = width;
 	ret->mHeight = height;
-	// 帧缓冲对象
+	// Framebuffer
 	GLuint FBO;
 	glGenFramebuffers(1, &FBO);
 	ret->mFBO = FBO;
-	// 颜色附件
-	for (unsigned int i = 0; i < count; ++i) {
+	// Color textures
+	for (unsigned int i = 0; i < count; ++i)
+	{
 		ret->mColorTexes.push_back(Texture2D::CreateFromMemory(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE));
 	}
-	// 深度模板附件
+	// DepthStencil textures
 	ret->mDepthStencilTex = Texture2D::CreateFromMemory(width, height, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
-	// 绑定附件
+	// 
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-		// 颜色
+		// Bind as color attacments
 		vector<unsigned int> attachments;
 		for (unsigned int i = 0; i < count; ++i) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, ret->mColorTexes[i]->mTextureID, 0);
 			attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
 		}
-		// 深度模板
+		// Bind as depthstencil attacments
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, ret->mDepthStencilTex->mTextureID, 0);
-		// 检查
+		// 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 			dLog("[Error] Framebuffer init faild!");
 			delete ret;
 			return nullptr;
 		}
-		// 指定是否有多个颜色缓冲区 (Multiple Render Target)
+		// Check if multi render targets is used
 		glDrawBuffers((NNUInt)attachments.size(), attachments.data());
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	// 返回
+	// 
 	return shared_ptr<RenderTarget>(ret);
 }
 
@@ -108,14 +109,32 @@ const shared_ptr<Texture2D> RenderTarget::GetDepthStencilTex() {
 	return mDepthStencilTex;
 }
 
-void RenderTarget::Begin() {
+void RenderTarget::Begin()
+{
 	glBindFramebuffer(GL_FRAMEBUFFER, mFBO);
+	glViewport(0, 0, mWidth, mHeight);
 }
 
-void RenderTarget::End() {
+void RenderTarget::End()
+{
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, Utils::GetWindowWidth(), Utils::GetWindowHeight());
 }
 
+void RenderTarget::SavePixelData(const NNChar* filepath)
+{
+	//
+	NNByte* buffer = new NNByte[mWidth * mHeight * 4 * sizeof(NNByte)];
+	glBindFramebuffer(GL_FRAMEBUFFER, mFBO);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	{
+		glReadPixels(0, 0, mWidth, mHeight, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//
+	shared_ptr<NNByte[]> bits = shared_ptr<NNByte[]>(buffer);
+	Texture::SaveImage(bits, mWidth, mHeight, NNColorFormat::RGBA, filepath);
+}
 
 
 #endif // NENE_GL

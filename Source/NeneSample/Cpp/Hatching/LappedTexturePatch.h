@@ -8,29 +8,30 @@
 #include <vector>
 #include <optional>
 #include "NeneEngine/Nene.h"
-#include "NeneEngine/Eigen/Dense"
+#include "LappedTextureUtility.h"
 
-
-namespace Eigen
+enum AdjacencyCase
 {
-	typedef Matrix<float, 2, 3> Matrix2x3f;
-}
+	AB = 0,
+	BC = 1,
+	CA = 2,
+};
 
 struct Adjacency
 {
-	NNUInt face;			// 面的序号
-	NNUInt shared_ia;		// 共边的A顶点
-	NNUInt shared_ib;		// 共边的B顶点
-	NNUInt diagonal_ic;		// 非共边的顶点
+	NNUInt ori_patch_face;
+	NNUInt new_patch_face;
+	AdjacencyCase adj_case;
 };
-
 
 class LappedTexturePatch
 {
 public:
 	//
-	LappedTexturePatch();
 	~LappedTexturePatch();
+	LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex> vertices, std::set<NNUInt>& faces);
+	//
+	void SetTexture(std::shared_ptr<Texture2D> tex) { m_patch_texture = tex; }
 	//
 	void Grow(std::set<NNUInt>& candidate_faces);
 	bool IsGrown() { return m_is_grown; }
@@ -39,32 +40,61 @@ public:
 	//
 	void DrawMesh();
 	//
-	void Initialize(std::shared_ptr<Mesh> source_mesh, std::set<NNUInt>& candidate_faces);
+	void DrawAndUpdateFaceCoverage();
+	//
+	void Initialize(std::shared_ptr<Mesh> source_mesh, std::set<NNUInt>& candidate_faces, std::shared_ptr<Texture2D> patch_tex);
 	
+
 private:
 	//
 	bool IsValidAdjacency(const Adjacency& adjcency);
 	//
-	void UpdateForRendering();
+	void AddSourceFaceToPatch(const NNUInt& face);
+	void CheckAndAddCoveredFaceToPatch();
+	std::optional<Adjacency> AddNearestAdjacentFaceToPatch();
+
+private:
 	//
-	std::optional<Adjacency> FindNearestAdjacentFace(std::set<NNUInt>& candidate_faces);
+	std::set<NNUInt>& m_candidate_faces;
+	std::shared_ptr<Texture2D> m_patch_texture;
+	const std::vector<NNUInt>& m_source_indices;
+	const std::vector<Vertex>& m_source_vertices;
+
+private:
+	//
+	bool m_is_grown;
+	bool m_is_optimazed;
+	//
+	NNVec3 m_center_position;
+	NNUInt m_patch_faces_num;
+	std::vector<Vertex> m_patch_vertices;
+	std::vector<NNUInt> m_patch_source_indices;
+	//
 
 private:
 	//
 	NNVec3 m_center;
 	//
-	bool m_is_grown;
+
 
 	// The patch vertex indices
 	std::vector<NNUInt> m_indices;
 	std::set<NNUInt> m_indices_set;
 	std::map<NNUInt, Eigen::Matrix2x3f> m_face_phi;
 
-	// The source mesh this patch from
-	std::shared_ptr<Mesh> m_source_mesh;
 
 	// The patch for rendering on texture
 	std::shared_ptr<Mesh> m_patch_mesh;
+
+	//
+	std::shared_ptr<Texture2D> m_patch_tex;
+
+	//
+	std::vector<NNUInt> m_faces;
+	std::shared_ptr<Shape> m_coverage_mesh;
+	std::shared_ptr<RenderTarget> m_coverage_rtt;
+	std::shared_ptr<Shader> m_shader_coverage;
+	
 };
 
 
