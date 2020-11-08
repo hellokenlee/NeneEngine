@@ -3,6 +3,7 @@
 #define SHADER_H
 
 #include <array>
+#include <vector>
 #include <string>
 #include <memory>
 
@@ -40,10 +41,15 @@ public:
 	// Check the compile informations
 	bool CheckCompileInfo(const NNShaderType st);
 
+	static void RecompileAllShaders();
+
 private:
 	ShaderImpl* m_impl;
 	NNVertexFormat m_vf;
 	std::array<std::string, NNShaderType::NNShaderTypeNum> m_filepaths;
+
+private:
+	static std::vector<std::weak_ptr<Shader>> s_all_shaders;
 
 private:
 	// 

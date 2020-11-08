@@ -12,9 +12,12 @@ public:
 	~LappedTextureMesh();
 	LappedTextureMesh(std::shared_ptr<StaticMesh> static_mesh);
 	//
-	const LappedTexturePatch& AddPatch();
-	const LappedTexturePatch& GetPatch(const NNUInt& i) { return m_patches[i]; }
+	NNUInt AddPatch();
+	NNUInt PatchCount() { return NNUInt(m_patches.size()); }
+	LappedTexturePatch& GetPatch(const NNUInt& i) { return m_patches[i]; }
 	//
+	void Draw();
+	void DrawDebug(const NNUInt& i);
 
 private:
 	//
@@ -22,6 +25,13 @@ private:
 	//
 	std::set<NNUInt> m_candidate_faces;
 	std::vector<LappedTexturePatch> m_patches;
+	//
+	std::shared_ptr<Shape> m_debug_quad;
+	std::shared_ptr<Texture2D> m_patch_texture;	
+	std::shared_ptr<Shader> m_patch_debug_shader;
+	std::shared_ptr<Shader> m_texture_debug_shader;
+	std::shared_ptr<Shader> m_patch_rendering_shader;
+	
 };
 
 

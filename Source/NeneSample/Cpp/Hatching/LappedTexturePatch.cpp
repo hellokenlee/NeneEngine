@@ -11,32 +11,66 @@ using namespace std;
 #define COVERAGE_TEXTURE_SIZE 512
 #define COVERAGE_ALPHA_THRESHOLD 10
 
-#define A(f) (f * 3 + 0)
-#define B(f) (f * 3 + 1)
-#define C(f) (f * 3 + 2)
+#define IA(f) (f * 3 + 0)
+#define IB(f) (f * 3 + 1)
+#define IC(f) (f * 3 + 2)
+#define ADJ_SHARE_I0(f, offset) (f * 3 + ((0 + offset) % 3))
+#define ADJ_SHARE_I1(f, offset) (f * 3 + ((1 + offset) % 3))
+#define ADJ_DIAGO_I2(f, offset) (f * 3 + ((2 + offset) % 3))
 
+
+NNUInt LappedTexturePatch::AddSourceFaceToPatch(const NNUInt& sface)
+{
+	//
+	m_candidate_faces.erase(sface);
+	//
+	for (size_t si_it = IA(sface); si_it <= IC(sface); ++si_it)
+	{
+		//
+		NNUInt si = m_source_indices[si_it];
+		//
+		NNUInt pi;
+		auto pi_it = m_source_to_patch_index.find(si);
+		if (pi_it != m_source_to_patch_index.end())
+		{
+			pi = pi_it->second;
+		}
+		else
+		{
+			pi = NNUInt(m_patch_vertices.size());
+			m_source_to_patch_index.insert(make_pair(si, pi));
+			Vertex pvertex = m_source_vertices[si];
+			pvertex.m_texcoord *= 0.0f;
+			m_patch_vertices.emplace_back(pvertex);
+		}
+		m_patch_indices.push_back(pi);
+	}
+	//
+	return NNUInt((m_patch_indices.size() / 3) - 1);
+}
 
 LappedTexturePatch::~LappedTexturePatch()
 {}
 
-LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex> vertices, std::set<NNUInt>& faces):
-	m_source_indices(indices), m_source_vertices(vertices), m_candidate_faces(faces), m_is_grown(false), m_is_optimazed(false), m_patch_faces_num(0)
+LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, std::set<NNUInt>& faces):
+	m_source_indices(indices), m_source_vertices(vertices), m_candidate_faces(faces), m_is_grown(false), m_is_optimazed(false)
 {
 	// 初始面
 	// NNUInt face = rand() % NNUInt(candidate_faces.size());
-	NNUInt face = *(m_candidate_faces.begin());
+	NNUInt sface = *(m_candidate_faces.begin());
 	//
-	CopySourceFaceToPatch(face);
-	const NNUInt pia = m_patch_vertices.size() - 3;
-	const NNUInt pib = m_patch_vertices.size() - 2;
-	const NNUInt pic = m_patch_vertices.size() - 1;
+	NNUInt pface = AddSourceFaceToPatch(sface);
+	//
+	const NNUInt pia = m_patch_indices[IA(pface)];
+	const NNUInt pib = m_patch_indices[IB(pface)];
+	const NNUInt pic = m_patch_indices[IC(pface)];
 	
 	// 选择面内一个点
 	// float b0 = float(rand() % PRECISION) / float(PRECISION);
 	// float b1 = float(rand() % PRECISION) / float(PRECISION);
 	// float b2 = float(rand() % PRECISION) / float(PRECISION);
 	// NNVec3 barycentric(b0, b1, b2);
-	// NNVec3 center = Barycentric2Cartesian(vertices[ia].m_position, vertices[ib].m_position, vertices[ic].m_position, barycentric);
+	// NNVec3 m_center_position = Barycentric2Cartesian(vertices[ia].m_position, vertices[ib].m_position, vertices[ic].m_position, barycentric);
 	m_center_position = (m_patch_vertices[pia].m_position + m_patch_vertices[pib].m_position + m_patch_vertices[pic].m_position) / 3.0f;
 
 	// 选择的点对准切线空间的原点
@@ -47,7 +81,7 @@ LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const
 	// 计算纹理坐标 注意最后一个分量应为零
 	NNMat3 tbn(tagent, bitangent, normal);
 	NNMat3 tbn_inversed = glm::inverse(tbn);
-	NNVec3 center_in_tbn = tbn_inversed * m_center;
+	NNVec3 center_in_tbn = tbn_inversed * m_center_position;
 	NNVec3 vertex_a_in_tbn = tbn_inversed * m_patch_vertices[pia].m_position - center_in_tbn;
 	NNVec3 vertex_b_in_tbn = tbn_inversed * m_patch_vertices[pib].m_position - center_in_tbn;
 	NNVec3 vertex_c_in_tbn = tbn_inversed * m_patch_vertices[pic].m_position - center_in_tbn;
@@ -56,39 +90,18 @@ LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const
 	m_patch_vertices[pib].m_texcoord = (NNVec2(vertex_b_in_tbn.x, vertex_b_in_tbn.y) * TEXTURE_PASTING_SCALE) + NNVec2(0.5f, 0.5f);
 	m_patch_vertices[pic].m_texcoord = (NNVec2(vertex_c_in_tbn.x, vertex_c_in_tbn.y) * TEXTURE_PASTING_SCALE) + NNVec2(0.5f, 0.5f);
 	//
-	m_patch_mesh = Mesh::Create(m_patch_vertices);
+	m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
 	//
-	dLog("[Patch] Init add face: %d; Remain: %zd faces;\n", face, m_candidate_faces.size());
+	dLog("[Patch] Init add face: %d; Remain: %zd faces; (%d, %d, %d)", sface, m_candidate_faces.size(), m_source_indices[IA(sface)], m_source_indices[IB(sface)], m_source_indices[IC(sface)]);
 }
 
-void LappedTexturePatch::CopySourceFaceToPatch(const NNUInt& face)
+void LappedTexturePatch::Draw()
 {
-	//
-	m_candidate_faces.erase(face);
-	//
-	const NNUInt sia = m_source_indices[A(face)];
-	const NNUInt sib = m_source_indices[B(face)];
-	const NNUInt sic = m_source_indices[C(face)];
-	//
-	Vertex va = m_source_vertices[sia];
-	Vertex vb = m_source_vertices[sib];
-	Vertex vc = m_source_vertices[sic];
-	//
-	va.m_texcoord *= 0.0f;
-	vb.m_texcoord *= 0.0f;
-	vc.m_texcoord *= 0.0f;
-	//
-	m_patch_vertices.emplace_back(va);
-	m_patch_source_indices.push_back(sia);
-	m_patch_vertices.emplace_back(vb);
-	m_patch_source_indices.push_back(sib);
-	m_patch_vertices.emplace_back(vc);
-	m_patch_source_indices.push_back(sic);
-	//
-	m_patch_faces_num += 1;
+	m_patch_rendering_mesh->Draw();
 }
 
-void LappedTexturePatch::Grow(std::set<NNUInt>& candidate_faces)
+
+void LappedTexturePatch::Grow()
 {
 	//
 	if (m_is_grown)
@@ -97,155 +110,132 @@ void LappedTexturePatch::Grow(std::set<NNUInt>& candidate_faces)
 		return;
 	}
 	//
-	optional<Adjacency> adjaceny = CopyNearestAdjacentFaceToPatch();
+	optional<Adjacency> adjaceny = FindNearestAdjacentFace();
 	//
 	if (not adjaceny.has_value())
 	{
 		m_is_grown = true;
+		m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
 	}
 	//
 	else
 	{
+		// 加入邻接三角形
+		NNUInt pface = AddSourceFaceToPatch(adjaceny->aface);
+
 		// 计算非共边顶点的纹理坐标
-		NNUInt s_pia = (m_patch_vertices.size() - 3 + adjaceny->adj_case) % 3;
-		NNUInt s_pib = (m_patch_vertices.size() - 2 + adjaceny->adj_case) % 3;
-		NNUInt d_pic = (m_patch_vertices.size() - 1 + adjaceny->adj_case) % 3;
+		const NNUInt s_si0 = m_source_indices[ADJ_SHARE_I0(adjaceny->aface, adjaceny->acase)];
+		const NNUInt s_si1 = m_source_indices[ADJ_SHARE_I1(adjaceny->aface, adjaceny->acase)];
+		const NNUInt d_si2 = m_source_indices[ADJ_DIAGO_I2(adjaceny->aface, adjaceny->acase)];
+
+		const NNUInt s_pi0 = m_source_to_patch_index[s_si0];
+		const NNUInt s_pi1 = m_source_to_patch_index[s_si1];
+		const NNUInt d_pi2 = m_source_to_patch_index[d_si2];
 		//
-		NNVec3 pa = m_patch_vertices[s_pia].m_position;
-		NNVec3 pb = m_patch_vertices[s_pib].m_position;
-		NNVec3 pc = m_patch_vertices[d_pic].m_position;
+		NNVec3 p0 = m_patch_vertices[s_pi0].m_position;
+		NNVec3 p1 = m_patch_vertices[s_pi1].m_position;
+		NNVec3 p2 = m_patch_vertices[d_pi2].m_position;
 		//
-		NNVec2 ta = m_patch_vertices[s_pia].m_texcoord;
-		NNVec2 tb = m_patch_vertices[s_pib].m_texcoord;
+		NNVec2 t0 = m_patch_vertices[s_pi0].m_texcoord;
+		NNVec2 t1 = m_patch_vertices[s_pi1].m_texcoord;
 		//
-		NNVec3 na = m_source_vertices[s_pia].m_normal;
-		NNVec3 nb = m_source_vertices[s_pib].m_normal;
-		NNVec3 nc = m_source_vertices[d_pic].m_normal;
+		NNVec3 n0 = m_source_vertices[s_pi0].m_normal;
+		NNVec3 n1 = m_source_vertices[s_pi1].m_normal;
+		NNVec3 n2 = m_source_vertices[d_pi2].m_normal;
 		//
-		NNVec3 nf = NNNormalize((na + nb + nc) / 3.0f);
-		NNVec2 tc = SimilarTriangle3DTo2D(pa, pb, pc, nf, ta, tb);
+		NNVec3 nf = NNNormalize((n0 + n1 + n2) / 3.0f);
+		NNVec2 t2 = SimilarTriangle3DTo2D(p0, p1, p2, nf, t0, t1);
 		//
-		m_patch_vertices[d_pic].m_texcoord = tc;
+		assert(m_patch_vertices[d_pi2].m_texcoord.x == 0.0f and m_patch_vertices[d_pi2].m_texcoord.y == 0.0f);
 		//
-		dLog("[Patch] Grow %dth face of patch.\n", m_patch_faces_num);
+		m_patch_vertices[d_pi2].m_texcoord = t2;
 		//
-		m_patch_mesh = Mesh::Create(m_patch_vertices);
+		dLog("[Patch] {%f, %f}", t2.x, t2.y);
+		dLog("[Patch] Grow patch with %dth face: %d; (%d %d %d)", pface, adjaceny->aface, s_si0, s_si1, d_si2);
+		// 检查是否同时覆盖掉了其他面
+		CheckAndAddCoveredFaceToPatch(*adjaceny);
+
+		//
+		m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
 	}
 	
 }
 
-/** This function must be called before swapbufer. */
-void LappedTexturePatch::CalcNotFullyCoveredFaces(std::set<NNUInt>& recover_faces)
+void LappedTexturePatch::CheckAndAddCoveredFaceToPatch(const Adjacency& adjacency)
 {
-	//
-	if (m_is_calced_coverage)
+	std::vector<NNUInt> face2add;
+	for (NNUInt sface : m_candidate_faces)
 	{
-		return;
-	}
-	// 创建渲染资源
-	if (m_shader_coverage == nullptr)
-	{
-		m_shader_coverage = Shader::Create("Resource/Shader/GLSL/Coverage.vert", "Resource/Shader/GLSL/Coverage.frag", POSITION);
-	}
-	if (m_coverage_rtt == nullptr)
-	{
-		m_coverage_rtt = RenderTarget::Create(COVERAGE_TEXTURE_SIZE, COVERAGE_TEXTURE_SIZE, 1);
-	}
-
-	// 创建网格资源
-	if (m_coverage_mesh == nullptr)
-	{
-		const vector<NNUInt>& indices = m_source_mesh->GetIndexData();
-		const vector<Vertex>& vertices = m_source_mesh->GetVertexData();
-		vector<NNFloat> coverage_vertices;
-		for (const NNUInt face : m_faces)
+		//
+		const NNUInt sia = m_source_indices[IA(sface)];
+		const NNUInt sib = m_source_indices[IB(sface)];
+		const NNUInt sic = m_source_indices[IC(sface)];
+		//
+		bool has_ia = m_source_to_patch_index.find(sia) != m_source_to_patch_index.end();
+		bool has_ib = m_source_to_patch_index.find(sib) != m_source_to_patch_index.end();
+		bool has_ic = m_source_to_patch_index.find(sic) != m_source_to_patch_index.end();
+		// 三个顶点都被覆盖了
+		if (has_ia && has_ib && has_ic)
 		{
-			for (int v = 0; v < 3; ++v)
+			face2add.push_back(sface);
+		}
+	}
+	for (NNUInt sface : face2add)
+	{
+		const NNUInt pface = AddSourceFaceToPatch(sface);
+		const NNUInt pia = m_patch_indices[IA(pface)];
+		const NNUInt pib = m_patch_indices[IB(pface)];
+		const NNUInt pic = m_patch_indices[IC(pface)];
+		//
+		NNVec3 pa = m_patch_vertices[pia].m_position;
+		NNVec3 pb = m_patch_vertices[pib].m_position;
+		NNVec3 pc = m_patch_vertices[pic].m_position;
+		NNVec2 ta = m_patch_vertices[pia].m_texcoord;
+		NNVec2 tb = m_patch_vertices[pib].m_texcoord;
+		NNVec2 tc = m_patch_vertices[pic].m_texcoord;
+		//
+		NNVec3 tab(tb.x - ta.x, tb.y - ta.y, 0.0f);
+		NNVec3 tbc(tc.x - tb.x, tc.y - tb.y, 0.0f);
+		NNVec3 tnormal = glm::cross(tab, tbc);
+		//
+		dLog("[Patch] Grow patch with %dth face: %d deu to merge.", pface, sface);
+		//
+		if (tnormal.z < 0.0f)
+		{
+			//
+			NNVec3 pna = m_patch_vertices[pia].m_normal;
+			NNVec3 pnb = m_patch_vertices[pib].m_normal;
+			NNVec3 pnc = m_patch_vertices[pic].m_normal;
+			NNVec3 pnf = NNNormalize((pna + pnb + pnc) / 3.0f);
+			//
+			const NNUInt d_si2 = m_source_indices[ADJ_DIAGO_I2(adjacency.aface, adjacency.acase)];
+			const NNUInt d_pi2 = m_source_to_patch_index[d_si2];
+			//
+			NNVec2 d_pt;
+			//
+			if (pia != d_pi2 and pib != d_pi2 and pic != d_pi2)
 			{
-				NNUInt i = indices[face * 3 + v];
-				NNVec2 t = vertices[i].m_texcoord;
-				coverage_vertices.push_back(t.x);
-				coverage_vertices.push_back(t.y);
-				coverage_vertices.push_back(float(face));
+				assert(false);
 			}
-		}
-		m_coverage_mesh = Shape::Create(coverage_vertices, POSITION);
-	}
-
-	// 绘制覆盖情况
-	m_coverage_rtt->Begin();
-	{
-		Utils::Clear();
-		m_shader_coverage->Use();
-		m_patch_tex->Use(0);
-		m_coverage_mesh->Draw();
-	}
-	m_coverage_rtt->End();
-	
-	//
-	m_coverage_rtt->GetColorTex(0)->SavePixelData("debug.png");
-	//*
-	shared_ptr<NNByte[]> bits = m_coverage_rtt->GetColorTex(0)->GetPixelData();
-	assert(bits != nullptr);
-	//
-	std::set<NNUInt> readd_faces;
-	//
-	for (NNUInt y = 0; y < COVERAGE_TEXTURE_SIZE; ++y)
-	{
-		for (NNUInt x = 0; x < COVERAGE_TEXTURE_SIZE; ++x)
-		{
-			//
-			NNByte b = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 0];
-			NNByte g = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 1];
-			NNByte r = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 2];
-			NNByte a = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 3];
-			//
-			NNUInt face = (NNUInt(r) << 8) + NNUInt(g);
-			//
-			bool covered = b > COVERAGE_ALPHA_THRESHOLD;
-			//
-			if (not covered)
+			else if (pia == d_pi2)
 			{
-				readd_faces.insert(face);
+				m_patch_vertices[pia].m_texcoord = SimilarTriangle3DTo2D(pb, pc, pa, pnf, tb, tc);
+				d_pt = m_patch_vertices[pia].m_texcoord;
 			}
+			else if (pib == d_pi2)
+			{
+				m_patch_vertices[pib].m_texcoord = SimilarTriangle3DTo2D(pc, pa, pb, pnf, tc, ta);
+				d_pt = m_patch_vertices[pia].m_texcoord;
+			}
+			else if (pic == d_pi2)
+			{
+				m_patch_vertices[pic].m_texcoord = SimilarTriangle3DTo2D(pa, pb, pc, pnf, ta, tb);
+				d_pt = m_patch_vertices[pia].m_texcoord;
+			}
+			dLog("[Patch] {%f, %f}", d_pt.x, d_pt.y);
+			dLog("[Patch] Adjust face: %d", sface);
 		}
 	}
-	// Check
-	{
-		for (auto f : readd_faces)
-		{
-			assert(find(m_faces.begin(), m_faces.end(), f) != m_faces.end());
-			recover_faces.insert(f);
-		}
-		dLog("[Patch] Re-add %zd not fully coverd faces in %zd patch faces\n", readd_faces.size(), m_faces.size());
-	}
-	//*/
-	m_is_calced_coverage = true;
-}
-
-void LappedTexturePatch::Optimaze()
-{
-	for (auto&[face, phi] : m_face_phi)
-	{
-		cout << face <<endl << phi << endl << endl;
-	}
-}
-
-
-void LappedTexturePatch::DrawMesh()
-{
-	m_patch_mesh->Draw();
-}
-
-void LappedTexturePatch::DrawFaceCoverage()
-{
-	
-}
-
-void LappedTexturePatch::UpdateForRendering()
-{
-	// Patch mesh
-
 }
 
 optional<Adjacency> LappedTexturePatch::FindNearestAdjacentFace()
@@ -254,57 +244,49 @@ optional<Adjacency> LappedTexturePatch::FindNearestAdjacentFace()
 	NNFloat min_dis = 3.40281e+038f;
 	optional<Adjacency> min_dis_adj = nullopt;
 	//
-	for (NNUInt index = 0; index < m_patch_source_indices.size(); ++index)
+	for (NNUInt sface : m_candidate_faces)
 	{
 		//
-		NNUInt ori_f = m_patch_source_faces[index];
+		const NNUInt sia = m_source_indices[IA(sface)];
+		const NNUInt sib = m_source_indices[IB(sface)];
+		const NNUInt sic = m_source_indices[IC(sface)];
+		//
+		bool share_ia = m_source_to_patch_index.find(sia) != m_source_to_patch_index.end();
+		bool share_ib = m_source_to_patch_index.find(sib) != m_source_to_patch_index.end();
+		bool share_ic = m_source_to_patch_index.find(sic) != m_source_to_patch_index.end();
 		//
 		optional<Adjacency> adjaceny = nullopt;
 		//
-		for (NNUInt can_f : m_candidate_faces)
+		if (share_ia and share_ib and share_ic)
 		{
-			//
-			const NNUInt ia = m_source_indices[A(can_f)];
-			const NNUInt ib = m_source_indices[B(can_f)];
-			const NNUInt ic = m_source_indices[C(can_f)];
-			//
-			const auto ori_f_beg = m_source_indices.begin() + (ori_f * 3);
-			const auto ori_f_end = m_source_indices.begin() + (ori_f * 3 + 3);
-			bool share_ia = find(ori_f_beg, ori_f_end, ia) != m_source_indices.end();
-			bool share_ib = find(ori_f_beg, ori_f_end, ib) != m_source_indices.end();
-			bool share_ic = find(ori_f_beg, ori_f_end, ic) != m_source_indices.end();
-			// 
-			if (share_ia and share_ib and share_ic)
-			{
-				assert(false);
-			}
-			// 当前三角形边 AB 是公共边
-			else if (share_ia and share_ib)
-			{
-				adjaceny = Adjacency{ index, can_f, ia, ib, ic };
-			}
-			// 当前三角形边 BC 是公共边
-			else if (share_ib and share_ic)
-			{
-				adjaceny = Adjacency{ index, can_f, ib, ic, ia };
-			}
-			// 当前三角形边 CA 是公共边
-			else if (share_ib and share_ic)
-			{
-				adjaceny = Adjacency{ index, can_f, ic, ia, ib };
-			}
+			assert(false);
+		}
+		// 当前三角形边 AB 是公共边
+		else if (share_ia and share_ib)
+		{
+			adjaceny = Adjacency{ sface, AdjacencyCase::AB };
+		}
+		// 当前三角形边 BC 是公共边
+		else if (share_ib and share_ic)
+		{
+			adjaceny = Adjacency{ sface, AdjacencyCase::BC };
+		}
+		// 当前三角形边 CA 是公共边
+		else if (share_ic and share_ia)
+		{
+			adjaceny = Adjacency{ sface, AdjacencyCase::CA };
 		}
 		//
-		if (adjaceny.has_value() && IsValidAdjacency(*adjaceny))
+		if (adjaceny.has_value() and IsValidAdjacency(*adjaceny))
 		{
 			//
-			const NNVec3 pa = m_source_vertices[adjaceny->s_ia].m_position;
-			const NNVec3 pb = m_source_vertices[adjaceny->s_ib].m_position;
-			const NNVec3 pc = m_source_vertices[adjaceny->d_ic].m_position;
+			const NNVec3 pa = m_source_vertices[sia].m_position;
+			const NNVec3 pb = m_source_vertices[sib].m_position;
+			const NNVec3 pc = m_source_vertices[sic].m_position;
 			//
-			const NNVec3 center = (pa + pb + pc) / 3.0f;
-			
-			NNFloat dis = glm::distance(center, m_center);
+			const NNVec3 center_position = (pa + pb + pc) / 3.0f;
+
+			NNFloat dis = glm::distance(center_position, m_center_position);
 
 			if (dis < min_dis)
 			{
@@ -313,6 +295,7 @@ optional<Adjacency> LappedTexturePatch::FindNearestAdjacentFace()
 			}
 		}
 	}
+	//
 	return min_dis_adj;
 }
 
@@ -322,11 +305,13 @@ bool LappedTexturePatch::IsValidAdjacency(const Adjacency& adjcency)
 
 	
 	// 检查是否在补丁块的区域中
-	const NNUInt ia = adjcency.s_ia;
-	const NNUInt ib = adjcency.s_ia;
+	const NNUInt share_si0 = m_source_indices[ADJ_SHARE_I0(adjcency.aface, adjcency.acase)];
+	const NNUInt share_si1 = m_source_indices[ADJ_SHARE_I1(adjcency.aface, adjcency.acase)];
+	const NNUInt share_pi0 = m_source_to_patch_index[share_si0];
+	const NNUInt share_pi1 = m_source_to_patch_index[share_si1];
 	//
-	const NNVec2 ta = m_patch_vertices[adjcency.patch_face_idx].m_texcoord;
-	const NNVec2 tb = m_patch_vertices[ib].m_texcoord;
+	const NNVec2 ta = m_patch_vertices[share_pi0].m_texcoord;
+	const NNVec2 tb = m_patch_vertices[share_pi1].m_texcoord;
 	//
 	static const vector<tuple<NNVec2, NNVec2, NNVec2>> polygon_hull = {
 		{{0.54248366 * 0.8 + 0.1, (1.0 - 0.02614379) * 0.8 + 0.1}, {0.41993464 * 0.8 + 0.1, (1.0 - 0.02941176) * 0.8 + 0.1}, {0.48202614 * 0.8 + 0.1, (1.0 - 0.37908497) * 0.8 + 0.1}},

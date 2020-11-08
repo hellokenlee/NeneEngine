@@ -60,6 +60,9 @@
     <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTextureUtility.h">
       <Filter>头文件\Hatching</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexture.hpp">
+      <Filter>头文件\Hatching</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\NeneSample\Cpp\Main.cpp">

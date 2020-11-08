@@ -104,6 +104,8 @@ bool ShaderImpl::CheckComplieInfo(const NNShaderType st)
 
 /** GL Implementation <<< */
 
+std::vector<std::weak_ptr<Shader>> Shader::s_all_shaders;
+
 Shader::~Shader()
 {
 	if (m_impl != nullptr)
@@ -139,7 +141,8 @@ shared_ptr<Shader> Shader::CreateFromSource(const NNChar *vs_source, const NNCha
 		return nullptr;
 	}
 	//
-	Shader* result = new Shader();
+	shared_ptr<Shader> result(new Shader());
+	//
 	result->m_impl = new ShaderImpl();
 	result->m_impl->m_program_id = pid;
 	// Compile
@@ -153,8 +156,10 @@ shared_ptr<Shader> Shader::CreateFromSource(const NNChar *vs_source, const NNCha
 	}
 	//
 	result->SetLayoutFormat(vf);
+	//
+	s_all_shaders.push_back(result);
 	// 
-	return shared_ptr<Shader>(result);
+	return (result);
 }
 
 bool Shader::AddOptionalShader(const NNChar *filepath, const NNShaderType st, const bool& try_link)
@@ -234,6 +239,19 @@ bool Shader::CheckLinkInfo()
 bool Shader::CheckCompileInfo(const NNShaderType st)
 {
 	return m_impl->CheckComplieInfo(st);
+}
+
+void Shader::RecompileAllShaders()
+{
+	printf("========== >>> Compiling Shaders >>> ===========\n");
+	for (auto wshader : s_all_shaders)
+	{
+		if (not wshader.expired())
+		{
+			wshader.lock()->Recompile();
+		}
+	}
+	printf("========== >>> Compiling Shaders <<< ===========\n");
 }
 
 #endif

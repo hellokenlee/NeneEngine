@@ -69,7 +69,7 @@ Mesh::~Mesh()
 shared_ptr<Mesh> Mesh::Create(const vector<Vertex>& vertices)
 {
 	//
-	GLuint vao, vbo, ebo;
+	GLuint vao, vbo;
 	// 
 	glGenBuffers(1, &(vbo));
 	glGenVertexArrays(1, &(vao));
