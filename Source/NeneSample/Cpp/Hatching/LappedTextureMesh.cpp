@@ -41,7 +41,7 @@ NNUInt LappedTextureMesh::AddPatch()
 {
 	//
 	const std::shared_ptr<Mesh> mesh = m_source_mesh.GetMeshes()[0];
-	LappedTexturePatch patch(mesh->GetIndexData(), mesh->GetVertexData(), m_source_equivalent_indices, m_candidate_faces);
+	LappedTexturePatch patch(mesh->GetIndexData(), mesh->GetVertexData(), m_source_adjacent_faces, m_candidate_faces);
 	//
 	m_patches.emplace_back(patch);
 	//
