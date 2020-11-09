@@ -6,7 +6,7 @@ LappedTextureMesh::~LappedTextureMesh()
 {}
 
 LappedTextureMesh::LappedTextureMesh(std::shared_ptr<StaticMesh> static_mesh):
-	m_source(*static_mesh)
+	m_source_mesh(*static_mesh)
 {
 	//
 	m_debug_quad = Geometry::CreateQuad();
@@ -17,7 +17,10 @@ LappedTextureMesh::LappedTextureMesh(std::shared_ptr<StaticMesh> static_mesh):
 	m_texture_debug_shader = Shader::Create("Resource/Shader/GLSL/2DTexture.vert", "Resource/Shader/GLSL/2DTexture.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
 	m_patch_rendering_shader = Shader::Create("Resource/Shader/GLSL/Patch.vert", "Resource/Shader/GLSL/Patch.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
 	//
-	const std::vector<NNUInt>& indices = m_source.GetMeshes()[0]->GetIndexData();
+	m_coverage_shader = Shader::Create("Resource/Shader/GLSL/Coverage.vert", "Resource/Shader/GLSL/Coverage.frag", NNVertexFormat::POSITION_TEXTURE);
+	m_coverage_rtt = RenderTarget::Create(4096, 4096, 1);
+	//
+	const std::vector<NNUInt>& indices = m_source_mesh.GetMeshes()[0]->GetIndexData();
 	//
 	for (NNUInt f = 0; f < NNUInt(indices.size()) / 3; ++f)
 	{
@@ -28,7 +31,7 @@ LappedTextureMesh::LappedTextureMesh(std::shared_ptr<StaticMesh> static_mesh):
 NNUInt LappedTextureMesh::AddPatch()
 {
 	//
-	const std::shared_ptr<Mesh> mesh = m_source.GetMeshes()[0];
+	const std::shared_ptr<Mesh> mesh = m_source_mesh.GetMeshes()[0];
 	LappedTexturePatch patch(mesh->GetIndexData(), mesh->GetVertexData(), m_candidate_faces);
 	//
 	m_patches.emplace_back(patch);
@@ -61,4 +64,23 @@ void LappedTextureMesh::DrawDebug(const NNUInt& i)
 		m_patches[i].Draw();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
+}
+
+void LappedTextureMesh::DrawAndCalcFaceCoverage()
+{
+	//
+	m_coverage_rtt->Begin();
+	{
+		Utils::Clear();
+		m_coverage_shader->Use();
+		m_patch_texture->Use(0);
+		for (const auto& patch : m_patches)
+		{
+			patch.DrawCoverage();
+		}
+	}
+	m_coverage_rtt->End();
+	
+	//
+	m_coverage_rtt->GetColorTex(0)->SavePixelData("coverage.png");
 }

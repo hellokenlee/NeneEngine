@@ -26,6 +26,7 @@ namespace lappedtexture
 	bool g_consecutive_grow = false;
 	bool g_need_add_patch = false;
 	bool g_need_grow_patch = false;
+	bool g_need_update_coverage = false;
 
 	NNVec3 g_camera_pos;
 	NNVec2 g_camera_rot;
@@ -95,6 +96,11 @@ namespace lappedtexture
 				{
 					g_need_grow_patch = true;
 				}
+				ImGui::SameLine();
+				if (ImGui::Button("Update Coverage"))
+				{
+					g_need_update_coverage = true;
+				}
 			}
 		}
 		ImGui::End();
@@ -118,7 +124,7 @@ namespace lappedtexture
 		cc->SetPitch(-0.3f);
 		cc->SetPosition(NNVec3(-4.7f, 4.7f, -0.2f));
 		//
-		auto bunny = StaticMesh::Create("Resource/Mesh/bunny/bunny.obj", 30.0f);
+		auto bunny = StaticMesh::Create("Resource/Mesh/bunny/bunny_with_uv.obj", 30.0f);
 		//
 		auto shader_debug = Shader::Create("Resource/Shader/GLSL/Debug.vert", "Resource/Shader/GLSL/Debug.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE, true);
 		shader_debug->AddOptionalShader("Resource/Shader/GLSL/Debug.geom", NNShaderType::GEOMETRY_SHADER, true);
@@ -159,18 +165,28 @@ namespace lappedtexture
 				Utils::Clear();
 				ca->Draw();
 				//
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				CustomConstantBuffer.Data().color = NNVec4(0.0, 1.0, 1.0, 1.0);
-				CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
-				bunny->Draw(shader_3d_color);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				{
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					CustomConstantBuffer.Data().color = NNVec4(0.0, 1.0, 1.0, 1.0);
+					CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
+					bunny->Draw(shader_3d_color);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				}
 				
 				// Draw the patches
-				CustomConstantBuffer.Data().color = NNVec4(0.0, 1.0, 0.0, 1.0);
-				CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
-				g_lapped_mesh->Draw();
-				g_lapped_mesh->DrawDebug(g_viewing_patch_index);
+				{
+					CustomConstantBuffer.Data().color = NNVec4(0.0, 1.0, 0.0, 1.0);
+					CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
+					g_lapped_mesh->Draw();
+					g_lapped_mesh->DrawDebug(g_viewing_patch_index);
+				}
 				
+				// 
+				if (g_need_update_coverage)
+				{
+					g_need_update_coverage = false;
+					g_lapped_mesh->DrawAndCalcFaceCoverage();
+				}
 			}
 
 			// Interface Pass

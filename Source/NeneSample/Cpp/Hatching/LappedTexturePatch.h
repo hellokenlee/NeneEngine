@@ -33,10 +33,11 @@ public:
 	void Grow();
 	bool IsGrown() { return m_is_grown; }
 	//
-	void Draw();
+	void Draw() const;
 	//
-	void DrawAndCalcFaceCoverage();
-
+	void DrawCoverage() const;
+	//
+	void GenerateCoverageMesh();
 
 private:
 	//
@@ -63,11 +64,12 @@ private:
 	NNVec3 m_center_position;
 	std::vector<NNUInt> m_patch_indices;
 	std::vector<Vertex> m_patch_vertices;
+	std::vector<NNUInt> m_coverage_faces;
 	//
 	std::map<NNUInt, NNUInt> m_source_to_patch_index;
 	//
 	std::shared_ptr<Mesh> m_patch_rendering_mesh;
-
+	std::shared_ptr<Shape> m_patch_coverage_mesh;
 };
 
 #endif // LAPPED_TEXTURE_PATCH

@@ -24,6 +24,8 @@ NNUInt LappedTexturePatch::AddSourceFaceToPatch(const NNUInt& sface)
 	//
 	m_candidate_faces.erase(sface);
 	//
+	m_coverage_faces.push_back(sface);
+	//
 	for (size_t si_it = IA(sface); si_it <= IC(sface); ++si_it)
 	{
 		//
@@ -95,11 +97,50 @@ LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const
 	dLog("[Patch] Init add face: %d; Remain: %zd faces; (%d, %d, %d)", sface, m_candidate_faces.size(), m_source_indices[IA(sface)], m_source_indices[IB(sface)], m_source_indices[IC(sface)]);
 }
 
-void LappedTexturePatch::Draw()
+void LappedTexturePatch::Draw() const
 {
 	m_patch_rendering_mesh->Draw();
 }
 
+void LappedTexturePatch::DrawCoverage() const
+{
+	//
+	if (m_patch_coverage_mesh == nullptr)
+	{
+		return;
+	}
+	//
+	m_patch_coverage_mesh->Draw();
+}
+
+void LappedTexturePatch::GenerateCoverageMesh()
+{
+	// vertices:
+	//		vec3: (SrcTexCoordU, SrcTexCoordV, FaceIndex)
+	//		vec2: (PatchTexCoordU, PatchTexCoordV)
+	std::vector<NNFloat> vertices(m_coverage_faces.size() * 3 * 5);
+	for (size_t fid = 0; fid < m_coverage_faces.size(); ++fid)
+	{
+		const NNUInt sface = m_coverage_faces[fid];
+		for (NNUInt vid = 0; vid < 3; ++vid)
+		{
+			const NNUInt si = m_source_indices[sface * 3 + vid];
+			const Vertex& sv = m_source_vertices[si];
+			//
+			vertices[(fid * 15) + (vid * 5) + 0] = sv.m_texcoord.x;
+			vertices[(fid * 15) + (vid * 5) + 1] = sv.m_texcoord.y;
+			//
+			vertices[(fid * 15) + (vid * 5) + 2] = float(sface);
+			//
+			const NNUInt pi = m_source_to_patch_index[si];
+			const Vertex pv = m_patch_vertices[pi];
+			vertices[(fid * 15) + (vid * 5) + 3] = pv.m_texcoord.x;
+			vertices[(fid * 15) + (vid * 5) + 4] = pv.m_texcoord.y;
+		}
+	}
+	m_patch_coverage_mesh = Shape::Create(vertices, NNVertexFormat::POSITION_TEXTURE);
+	dLog("[Patch] Regenerate coverage mesh for patch.\n");
+}
 
 void LappedTexturePatch::Grow()
 {
@@ -114,8 +155,12 @@ void LappedTexturePatch::Grow()
 	//
 	if (not adjaceny.has_value())
 	{
+		//
 		m_is_grown = true;
 		m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
+		dLog("[Patch] No adjacency found for this patch.\n");
+		//
+		GenerateCoverageMesh();
 	}
 	//
 	else

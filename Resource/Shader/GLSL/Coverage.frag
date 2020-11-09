@@ -7,7 +7,6 @@ in float faceid_VS_out;
 
 out vec4 color_FS_out;
 
-
 void main()
 {
 	// RG encode an uint face id up to 2^16
@@ -18,9 +17,9 @@ void main()
 	uint face_g = (face & 0x00FF) >> 0;
 	//
 	color_FS_out.a = 1.0;
-	//
+	
 	color_FS_out.r = float(face_r) / 255.0;
 	color_FS_out.g = float(face_g) / 255.0;
-	//
+	
 	color_FS_out.b = texture(tex0, uv_VS_out).a;
 }

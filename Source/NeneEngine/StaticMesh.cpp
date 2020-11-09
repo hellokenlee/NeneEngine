@@ -40,7 +40,7 @@ shared_ptr<StaticMesh> StaticMesh::Create(const NNChar* filepath, const NNFloat 
 	return shared_ptr<StaticMesh>(result);
 }
 
-void StaticMesh::Draw(const shared_ptr<Shader> shader, const shared_ptr<Camera> camera) 
+void StaticMesh::Draw(const shared_ptr<Shader> shader, const shared_ptr<Camera> camera)
 {
 	// 
 	if (shader) shader->Use();
@@ -55,7 +55,7 @@ void StaticMesh::Draw(const shared_ptr<Shader> shader, const shared_ptr<Camera> 
 	}
 }
 
-void StaticMesh::DrawInstanced(const shared_ptr<Shader> pShader, const shared_ptr<Camera> pCamera) 
+void StaticMesh::DrawInstanced(const shared_ptr<Shader> pShader, const shared_ptr<Camera> pCamera)
 {
 
 }

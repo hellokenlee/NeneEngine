@@ -44,3 +44,5 @@ Project/**/*.obj
 *.pidb
 *.svclog
 *.scc
+debug.png
+coverage.png
