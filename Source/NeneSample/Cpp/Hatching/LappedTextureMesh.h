@@ -16,6 +16,8 @@ public:
 	NNUInt PatchCount() { return NNUInt(m_patches.size()); }
 	LappedTexturePatch& GetPatch(const NNUInt& i) { return m_patches[i]; }
 	//
+	void SetNeedToUpdateFaceCoverage() { m_need_to_update_coverage = true; };
+	//
 	void Draw();
 	void DrawDebug(const NNUInt& i);
 	void DrawAndCalcFaceCoverage();
@@ -23,6 +25,7 @@ public:
 private:
 	//
 	const StaticMesh& m_source_mesh;
+
 	//
 	std::set<NNUInt> m_candidate_faces;
 	std::vector<LappedTexturePatch> m_patches;
@@ -34,6 +37,7 @@ private:
 	std::shared_ptr<Shader> m_patch_rendering_shader;
 	
 	//
+	bool m_need_to_update_coverage;
 	std::shared_ptr<Mesh> m_coverage_mesh;
 	std::shared_ptr<Shader> m_coverage_shader;
 	std::shared_ptr<RenderTarget> m_coverage_rtt;

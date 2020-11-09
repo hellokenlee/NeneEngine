@@ -8,15 +8,13 @@ using namespace std;
 
 #define PRECISION 1000000
 #define TEXTURE_PASTING_SCALE 1.0f
-#define COVERAGE_TEXTURE_SIZE 512
-#define COVERAGE_ALPHA_THRESHOLD 10
 
 #define IA(f) (f * 3 + 0)
 #define IB(f) (f * 3 + 1)
 #define IC(f) (f * 3 + 2)
-#define ADJ_SHARE_I0(f, offset) (f * 3 + ((0 + offset) % 3))
-#define ADJ_SHARE_I1(f, offset) (f * 3 + ((1 + offset) % 3))
-#define ADJ_DIAGO_I2(f, offset) (f * 3 + ((2 + offset) % 3))
+#define ADJ_SHARE_I0(f, acase) (f * 3 + ((0 + acase) % 3))
+#define ADJ_SHARE_I1(f, acase) (f * 3 + ((1 + acase) % 3))
+#define ADJ_DIAGO_I2(f, acase) (f * 3 + ((2 + acase) % 3))
 
 
 NNUInt LappedTexturePatch::AddSourceFaceToPatch(const NNUInt& sface)

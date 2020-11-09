@@ -96,11 +96,13 @@ namespace lappedtexture
 				{
 					g_need_grow_patch = true;
 				}
+				/*
 				ImGui::SameLine();
 				if (ImGui::Button("Update Coverage"))
 				{
 					g_need_update_coverage = true;
 				}
+				*/
 			}
 		}
 		ImGui::End();
@@ -182,11 +184,15 @@ namespace lappedtexture
 				}
 				
 				// 
+				/*
 				if (g_need_update_coverage)
 				{
 					g_need_update_coverage = false;
 					g_lapped_mesh->DrawAndCalcFaceCoverage();
 				}
+				*/
+				//
+				g_lapped_mesh->DrawAndCalcFaceCoverage();
 			}
 
 			// Interface Pass
@@ -227,6 +233,7 @@ namespace lappedtexture
 							{
 								g_need_add_patch = true;
 							}
+							g_lapped_mesh->SetNeedToUpdateFaceCoverage();
 						}
 					}
 					else
