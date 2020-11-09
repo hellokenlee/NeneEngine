@@ -139,9 +139,9 @@ void LappedTexturePatch::Grow()
 		NNVec2 t0 = m_patch_vertices[s_pi0].m_texcoord;
 		NNVec2 t1 = m_patch_vertices[s_pi1].m_texcoord;
 		//
-		NNVec3 n0 = m_source_vertices[s_pi0].m_normal;
-		NNVec3 n1 = m_source_vertices[s_pi1].m_normal;
-		NNVec3 n2 = m_source_vertices[d_pi2].m_normal;
+		NNVec3 n0 = m_patch_vertices[s_pi0].m_normal;
+		NNVec3 n1 = m_patch_vertices[s_pi1].m_normal;
+		NNVec3 n2 = m_patch_vertices[d_pi2].m_normal;
 		//
 		NNVec3 nf = NNNormalize((n0 + n1 + n2) / 3.0f);
 		NNVec2 t2 = SimilarTriangle3DTo2D(p0, p1, p2, nf, t0, t1);

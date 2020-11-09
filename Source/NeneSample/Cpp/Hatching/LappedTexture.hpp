@@ -197,7 +197,7 @@ namespace lappedtexture
 			}
 			if (g_need_grow_patch)
 			{
-				if (g_viewing_patch_index < g_lapped_mesh->PatchCount())
+				if (NNUInt(g_viewing_patch_index) < g_lapped_mesh->PatchCount())
 				{
 					//
 					g_lapped_mesh->GetPatch(g_viewing_patch_index).Grow();
