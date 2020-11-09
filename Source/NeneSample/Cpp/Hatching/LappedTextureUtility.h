@@ -28,6 +28,8 @@ bool IsNearlySame(const NNVec2& pos0, const NNVec2& pos1);
 
 bool IsNearlySame(const NNVec3& pos0, const NNVec3& pos1);
 
+NNVec3 RandomPositionInTriangle(const NNVec3& a, const NNVec3& b, const NNVec3& c);
+
 NNVec2 SimilarTriangle3DTo2D(NNVec3 a_3d, NNVec3 b_3d, NNVec3 c_3d, NNVec3 n_3d, NNVec2 a_2d, NNVec2 b_2d);
 
 void CalcTangentAndBitangent(const NNVec3& a, const NNVec3& b, const NNVec3& c, const NNVec3& normal, NNVec3& tangent, NNVec3& bitangent);

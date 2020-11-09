@@ -52,8 +52,8 @@ NNUInt LappedTexturePatch::AddSourceFaceToPatch(const NNUInt& sface)
 LappedTexturePatch::~LappedTexturePatch()
 {}
 
-LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, std::set<NNUInt>& faces):
-	m_source_indices(indices), m_source_vertices(vertices), m_candidate_faces(faces), m_is_grown(false), m_is_optimazed(false)
+LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, const std::vector<std::set<NNUInt>>& adjfaces, std::set<NNUInt>& faces):
+	m_source_indices(indices), m_source_vertices(vertices), m_candidate_faces(faces), m_source_adjacent_faces(adjfaces), m_is_grown(false), m_is_optimazed(false)
 {
 	// 初始面
 	// NNUInt face = rand() % NNUInt(candidate_faces.size());
@@ -66,11 +66,7 @@ LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const
 	const NNUInt pic = m_patch_indices[IC(pface)];
 	
 	// 选择面内一个点
-	// float b0 = float(rand() % PRECISION) / float(PRECISION);
-	// float b1 = float(rand() % PRECISION) / float(PRECISION);
-	// float b2 = float(rand() % PRECISION) / float(PRECISION);
-	// NNVec3 barycentric(b0, b1, b2);
-	// NNVec3 m_center_position = Barycentric2Cartesian(vertices[ia].m_position, vertices[ib].m_position, vertices[ic].m_position, barycentric);
+	// m_center_position = RandomPositionInTriangle(m_patch_vertices[pia].m_position, m_patch_vertices[pib].m_position, m_patch_vertices[pic].m_position);
 	m_center_position = (m_patch_vertices[pia].m_position + m_patch_vertices[pib].m_position + m_patch_vertices[pic].m_position) / 3.0f;
 
 	// 选择的点对准切线空间的原点
@@ -199,9 +195,8 @@ void LappedTexturePatch::Grow()
 		CheckAndAddCoveredFaceToPatch(*adjaceny);
 
 		//
-		m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
+		// m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
 	}
-	
 }
 
 void LappedTexturePatch::CheckAndAddCoveredFaceToPatch(const Adjacency& adjacency)

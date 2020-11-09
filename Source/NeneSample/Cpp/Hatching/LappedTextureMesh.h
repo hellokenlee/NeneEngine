@@ -23,9 +23,11 @@ public:
 	void DrawAndCalcFaceCoverage();
 
 private:
+	void BuildAdjacentFaceRelation();
+
+private:
 	//
 	const StaticMesh& m_source_mesh;
-
 	//
 	std::set<NNUInt> m_candidate_faces;
 	std::vector<LappedTexturePatch> m_patches;
@@ -35,12 +37,13 @@ private:
 	std::shared_ptr<Shader> m_patch_debug_shader;
 	std::shared_ptr<Shader> m_texture_debug_shader;
 	std::shared_ptr<Shader> m_patch_rendering_shader;
-	
 	//
 	bool m_need_to_update_coverage;
 	std::shared_ptr<Mesh> m_coverage_mesh;
 	std::shared_ptr<Shader> m_coverage_shader;
 	std::shared_ptr<RenderTarget> m_coverage_rtt;
+	//
+	std::vector<std::set<NNUInt>> m_source_adjacent_faces;
 };
 
 

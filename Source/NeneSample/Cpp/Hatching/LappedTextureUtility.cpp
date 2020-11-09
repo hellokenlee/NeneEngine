@@ -4,6 +4,10 @@
 
 using namespace std;
 
+#define PRECISION 1000000
+#define INV_PRECISION 0.000001f
+
+
 Eigen::Matrix2x3f CalcLinearTransformWithEigen(const Eigen::Vector3f& a, const Eigen::Vector3f& b, const Eigen::Vector3f& c, const Eigen::Vector2f& ta, const Eigen::Vector2f& tb, const Eigen::Vector2f& tc)
 {
 	//
@@ -89,14 +93,23 @@ void CalcTangentAndBitangent(const NNVec3& a, const NNVec3& b, const NNVec3& c, 
 
 bool IsNearlySame(const NNVec2& pos0, const NNVec2& pos1)
 {
-	auto result = glm::epsilonEqual(pos0, pos1, 0.00001f);
+	auto result = glm::epsilonEqual(pos0, pos1, INV_PRECISION);
 	return result.x && result.y;
 }
 
 bool IsNearlySame(const NNVec3& pos0, const NNVec3& pos1)
 {
-	auto result = glm::epsilonEqual(pos0, pos1, 0.0000001f);
+	auto result = glm::epsilonEqual(pos0, pos1, INV_PRECISION);
 	return result.x && result.y && result.z;
+}
+
+NNVec3 RandomPositionInTriangle(const NNVec3& a, const NNVec3& b, const NNVec3& c)
+{
+	float b0 = float(rand() % PRECISION) / float(PRECISION);
+	float b1 = float(rand() % PRECISION) / float(PRECISION);
+	float b2 = float(rand() % PRECISION) / float(PRECISION);
+	NNVec3 barycentric(b0, b1, b2);
+	return Barycentric2Cartesian(a, b, c, barycentric);;
 }
 
 NNVec2 SimilarTriangle3DTo2D(NNVec3 a_3d, NNVec3 b_3d, NNVec3 c_3d, NNVec3 n_3d, NNVec2 a_2d, NNVec2 b_2d)

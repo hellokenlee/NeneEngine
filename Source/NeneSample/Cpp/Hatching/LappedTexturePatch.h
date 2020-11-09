@@ -28,7 +28,7 @@ class LappedTexturePatch
 public:
 	//
 	~LappedTexturePatch();
-	LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, std::set<NNUInt>& faces);
+	LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, const std::vector<std::set<NNUInt>>& adjfaces, std::set<NNUInt>& faces);
 	//
 	void Grow();
 	bool IsGrown() { return m_is_grown; }
@@ -55,6 +55,7 @@ private:
 	//
 	const std::vector<NNUInt>& m_source_indices;
 	const std::vector<Vertex>& m_source_vertices;
+	const std::vector<std::set<NNUInt>>& m_source_adjacent_faces;
 
 private:
 	//
