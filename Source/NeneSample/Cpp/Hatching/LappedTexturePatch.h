@@ -10,25 +10,13 @@
 #include "NeneEngine/Nene.h"
 #include "LappedTextureUtility.h"
 
-enum AdjacencyCase
-{
-	AB = 0,
-	BC = 1,
-	CA = 2,
-};
-
-struct Adjacency
-{
-	NNUInt aface;
-	AdjacencyCase acase;
-};
 
 class LappedTexturePatch
 {
 public:
 	//
 	~LappedTexturePatch();
-	LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, const std::vector<std::set<NNUInt>>& adjfaces, std::set<NNUInt>& faces);
+	LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, const std::vector<std::map<NNUInt, FaceAdjacency>>& face_adjs, std::set<NNUInt>& faces);
 	//
 	void Grow();
 	bool IsGrown() { return m_is_grown; }
@@ -38,16 +26,15 @@ public:
 	void DrawCoverage() const;
 	//
 	void GenerateCoverageMesh();
-
 private:
 	//
-	bool IsValidAdjacency(const Adjacency& adjcency);
+	bool IsValidAdjacency(const FaceAdjacency& adj);
+	//
+	bool IsInPatchHull(const NNVec2& ta, const NNVec2& tb);
 	//
 	NNUInt AddSourceFaceToPatch(const NNUInt& sface);
 	//
-	std::optional<Adjacency> FindNearestAdjacentFace();
-	//
-	void CheckAndAddCoveredFaceToPatch(const Adjacency& adjcency);
+	std::optional<NNUInt> AddNearestAdjacentFaceToPatch();
 		
 private:
 	//
@@ -55,7 +42,7 @@ private:
 	//
 	const std::vector<NNUInt>& m_source_indices;
 	const std::vector<Vertex>& m_source_vertices;
-	const std::vector<std::set<NNUInt>>& m_source_adjacent_faces;
+	const std::vector<std::map<NNUInt, FaceAdjacency>>& m_source_face_adjacencies;
 
 private:
 	//

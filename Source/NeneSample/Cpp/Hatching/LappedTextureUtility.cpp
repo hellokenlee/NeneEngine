@@ -140,3 +140,28 @@ NNVec2 SimilarTriangle3DTo2D(NNVec3 a_3d, NNVec3 b_3d, NNVec3 c_3d, NNVec3 n_3d,
 	//
 	return c_2d;
 }
+
+optional<FaceAdjacency> CalcAdjacentEdge(const std::vector<NNUInt> indices, const std::vector<Vertex> vertices, const NNUInt src_face, const NNUInt dst_face)
+{
+	for (NNUInt src_edge = AdjacentEdge::AB; src_edge <= AdjacentEdge::CA; ++src_edge)
+	{
+		//
+		const NNVec3 src_p0 = vertices[indices[SRC_ADJ_SHARE_I0(src_face, src_edge)]].m_position;
+		const NNVec3 src_p1 = vertices[indices[SRC_ADJ_SHARE_I1(src_face, src_edge)]].m_position;
+		const NNVec3 src_p2 = vertices[indices[SRC_ADJ_DIAGO_I2(src_face, src_edge)]].m_position;
+		// 
+		for (NNUInt dst_edge = AdjacentEdge::AB; dst_edge <= AdjacentEdge::CA; ++dst_edge)
+		{
+			// 相邻的三角形邻接边的顶点顺序相反
+			const NNVec3 dst_p0 = vertices[indices[DST_ADJ_SHARE_I0(dst_face, dst_edge)]].m_position;
+			const NNVec3 dst_p1 = vertices[indices[DST_ADJ_SHARE_I1(dst_face, dst_edge)]].m_position;
+			const NNVec3 dst_p2 = vertices[indices[DST_ADJ_DIAGO_I2(dst_face, dst_edge)]].m_position;
+			//
+			if (IsNearlySame(src_p0, dst_p0) and IsNearlySame(src_p1, dst_p1) and not IsNearlySame(src_p2, dst_p2))
+			{
+				return FaceAdjacency{ src_face, dst_face, AdjacentEdge(src_edge), AdjacentEdge(dst_edge) };
+			}
+		}
+	}
+	return nullopt;
+}
