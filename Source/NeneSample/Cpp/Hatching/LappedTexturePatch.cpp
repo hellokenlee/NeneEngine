@@ -49,11 +49,11 @@ NNUInt LappedTexturePatch::AddSourceFaceToPatch(const NNUInt& sface)
 LappedTexturePatch::~LappedTexturePatch()
 {}
 
-LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, const std::vector<std::unordered_map<NNUInt, FaceAdjacency>>& face_adjs, std::set<NNUInt>& faces):
-	m_source_indices(indices), m_source_vertices(vertices), m_candidate_faces(faces), m_source_face_adjacencies(face_adjs), m_is_grown(false), m_is_optimazed(false)
+LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, const std::vector<std::unordered_map<NNUInt, FaceAdjacency>>& face_adjs, std::unordered_set<NNUInt>& faces):
+	m_source_indices(indices), m_source_vertices(vertices), m_candidate_faces(faces), m_source_face_adjacencies(face_adjs), m_is_grown(false), m_update_mesh_after_growth(true)
 {
 	// 初始面
-	// NNUInt face = rand() % NNUInt(candidate_faces.size());
+	// NNUInt sface = rand() % NNUInt(m_candidate_faces.size());
 	NNUInt sface = *(m_candidate_faces.begin());
 	//
 	NNUInt pface = AddSourceFaceToPatch(sface);
@@ -148,13 +148,16 @@ void LappedTexturePatch::Grow()
 		//
 		m_is_grown = true;
 		m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
-		dLog("[Patch] No adjacency found for this patch.\n");
+		dLog("[Patch] No adjacency found for this patch. Patch face num: %zd; Remain face num: %zd\n", m_source_coverage_faces.size(), m_candidate_faces.size());
 		//
 		GenerateCoverageMesh();
 	}
 	else
 	{
-		m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
+		if (m_update_mesh_after_growth)
+		{
+			m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
+		}
 	}
 }
 
@@ -197,39 +200,74 @@ optional<NNUInt> LappedTexturePatch::AddNearestAdjacentFaceToPatch()
 		// 加到当前区域中
 		NNUInt pface = AddSourceFaceToPatch(min_dis_adj->dst_face);
 		// 拷贝相邻边的顶点的纹理坐标
-		const NNUInt src_share_si0 = m_source_indices[SRC_ADJ_SHARE_I0(min_dis_adj->src_face, min_dis_adj->src_edge)];
-		const NNUInt src_share_si1 = m_source_indices[SRC_ADJ_SHARE_I1(min_dis_adj->src_face, min_dis_adj->src_edge)];
-		const NNUInt dst_share_si0 = m_source_indices[DST_ADJ_SHARE_I0(min_dis_adj->dst_face, min_dis_adj->dst_edge)];
-		const NNUInt dst_share_si1 = m_source_indices[DST_ADJ_SHARE_I1(min_dis_adj->dst_face, min_dis_adj->dst_edge)];
-		const NNUInt dst_diago_si2 = m_source_indices[DST_ADJ_DIAGO_I2(min_dis_adj->dst_face, min_dis_adj->dst_edge)];
-		const NNUInt src_share_pi0 = m_source_to_patch_index[src_share_si0];
-		const NNUInt src_share_pi1 = m_source_to_patch_index[src_share_si1];
-		const NNUInt dst_share_pi0 = m_source_to_patch_index[dst_share_si0];
-		const NNUInt dst_share_pi1 = m_source_to_patch_index[dst_share_si1];
-		const NNUInt dst_diago_pi2 = m_source_to_patch_index[dst_diago_si2];
-		m_patch_vertices[dst_share_pi0].m_texcoord = m_patch_vertices[src_share_pi0].m_texcoord;
-		m_patch_vertices[dst_share_pi1].m_texcoord = m_patch_vertices[src_share_pi1].m_texcoord;
-		// 同时与区域其他三角形相邻
-
+		CopyPatchAdjacencyVertexTexcoord(*min_dis_adj, false);
+		//
+		bool need_to_calc_texcoord = true;
+		for (const auto& kv : m_source_face_adjacencies[min_dis_adj->dst_face])
+		{
+			const NNUInt& other_face = kv.first;
+			if (other_face != min_dis_adj->src_face and m_source_coverage_faces.find(other_face) != m_source_coverage_faces.end())
+			{
+				const FaceAdjacency& other_adj = kv.second;
+				CopyPatchAdjacencyVertexTexcoord(other_adj, true);
+				need_to_calc_texcoord = false;
+				dLog("[Patch] Grow with face that all vertices is in patch! (%d: %d, %d)", min_dis_adj->dst_face, min_dis_adj->src_face, other_face);
+				break;
+			}
+		}
 		// 计算非相邻边顶点的纹理坐标
-		NNVec3 p0 = m_patch_vertices[dst_share_pi0].m_position;
-		NNVec3 p1 = m_patch_vertices[dst_share_pi1].m_position;
-		NNVec3 p2 = m_patch_vertices[dst_diago_pi2].m_position;
-		//
-		NNVec2 t0 = m_patch_vertices[dst_share_pi0].m_texcoord;
-		NNVec2 t1 = m_patch_vertices[dst_share_pi1].m_texcoord;
-		//
-		NNVec3 n0 = m_patch_vertices[dst_share_pi0].m_normal;
-		NNVec3 n1 = m_patch_vertices[dst_share_pi1].m_normal;
-		NNVec3 n2 = m_patch_vertices[dst_diago_pi2].m_normal;
-		//
-		NNVec3 nf = NNNormalize((n0 + n1 + n2) / 3.0f);
-		NNVec2 t2 = SimilarTriangle3DTo2D(p0, p1, p2, nf, t0, t1);
-		m_patch_vertices[dst_diago_pi2].m_texcoord = t2;
+		if (need_to_calc_texcoord)
+		{
+			//
+			const NNUInt dst_share_pi0 = m_source_to_patch_index[m_source_indices[DST_ADJ_SHARE_I0(min_dis_adj->dst_face, min_dis_adj->dst_edge)]];
+			const NNUInt dst_share_pi1 = m_source_to_patch_index[m_source_indices[DST_ADJ_SHARE_I1(min_dis_adj->dst_face, min_dis_adj->dst_edge)]];
+			const NNUInt dst_diago_pi2 = m_source_to_patch_index[m_source_indices[DST_ADJ_DIAGO_I2(min_dis_adj->dst_face, min_dis_adj->dst_edge)]];
+			//
+			NNVec3 p0 = m_patch_vertices[dst_share_pi0].m_position;
+			NNVec3 p1 = m_patch_vertices[dst_share_pi1].m_position;
+			NNVec3 p2 = m_patch_vertices[dst_diago_pi2].m_position;
+			//
+			NNVec2 t0 = m_patch_vertices[dst_share_pi0].m_texcoord;
+			NNVec2 t1 = m_patch_vertices[dst_share_pi1].m_texcoord;
+			//
+			NNVec3 n0 = m_patch_vertices[dst_share_pi0].m_normal;
+			NNVec3 n1 = m_patch_vertices[dst_share_pi1].m_normal;
+			NNVec3 n2 = m_patch_vertices[dst_diago_pi2].m_normal;
+			//
+			NNVec3 nf = NNNormalize((n0 + n1 + n2) / 3.0f);
+			NNVec2 t2 = SimilarTriangle3DTo2D(p0, p1, p2, nf, t0, t1);
+			m_patch_vertices[dst_diago_pi2].m_texcoord = t2;
+		}
+		dLog("[Patch] Grow add %zdth face: %d;", m_source_coverage_faces.size(), min_dis_adj->dst_face);
 		return pface;
 	}
 
 	return nullopt;
+}
+
+void LappedTexturePatch::CopyPatchAdjacencyVertexTexcoord(const FaceAdjacency& adj, const bool& dst_to_src)
+{
+	//
+	const NNUInt src_share_si0 = m_source_indices[SRC_ADJ_SHARE_I0(adj.src_face, adj.src_edge)];
+	const NNUInt src_share_si1 = m_source_indices[SRC_ADJ_SHARE_I1(adj.src_face, adj.src_edge)];
+	const NNUInt dst_share_si0 = m_source_indices[DST_ADJ_SHARE_I0(adj.dst_face, adj.dst_edge)];
+	const NNUInt dst_share_si1 = m_source_indices[DST_ADJ_SHARE_I1(adj.dst_face, adj.dst_edge)];
+	//
+	const NNUInt src_share_pi0 = m_source_to_patch_index[src_share_si0];
+	const NNUInt src_share_pi1 = m_source_to_patch_index[src_share_si1];
+	const NNUInt dst_share_pi0 = m_source_to_patch_index[dst_share_si0];
+	const NNUInt dst_share_pi1 = m_source_to_patch_index[dst_share_si1];
+	//
+	if (dst_to_src)
+	{
+		m_patch_vertices[src_share_pi0].m_texcoord = m_patch_vertices[dst_share_pi0].m_texcoord;
+		m_patch_vertices[src_share_pi1].m_texcoord = m_patch_vertices[dst_share_pi1].m_texcoord;
+	}
+	else
+	{
+		m_patch_vertices[dst_share_pi0].m_texcoord = m_patch_vertices[src_share_pi0].m_texcoord;
+		m_patch_vertices[dst_share_pi1].m_texcoord = m_patch_vertices[src_share_pi1].m_texcoord;
+	}
 }
 
 bool LappedTexturePatch::IsValidAdjacency(const FaceAdjacency& adj)
@@ -260,6 +298,11 @@ bool LappedTexturePatch::IsValidAdjacency(const FaceAdjacency& adj)
 	//
 	NNVec3 t01(t1.x - t0.x, t1.y - t0.y, 0.0f);
 	NNVec3 t12(t2.x - t1.x, t2.y - t1.y, 0.0f);
+	//
+	if (t2.x < -0.1f or t2.x > 1.1f or t2.y < -0.1f or t2.y > 1.1f)
+	{
+		return false;
+	}
 	//
 	if (glm::cross(t01, t12).z < 0.0f)
 	{

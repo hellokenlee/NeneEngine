@@ -27,6 +27,7 @@ namespace lappedtexture
 	bool g_need_add_patch = false;
 	bool g_need_grow_patch = false;
 	bool g_need_update_coverage = false;
+	bool g_need_snap_texcoord = false;
 
 	NNVec3 g_camera_pos;
 	NNVec2 g_camera_rot;
@@ -77,11 +78,7 @@ namespace lappedtexture
 			//
 			if (g_lapped_mesh)
 			{
-				if (g_lapped_mesh->PatchCount() > 0)
-				{
-					ImGui::Text("Patch View: ");
-					ImGui::SliderInt("    ", &g_viewing_patch_index, 0, int(g_lapped_mesh->PatchCount()) - 1);
-				}
+				
 				//
 				ImGui::Text("Patch Control: ");
 				ImGui::Checkbox("Consecutive Add", &g_consecutive_add);
@@ -96,13 +93,17 @@ namespace lappedtexture
 				{
 					g_need_grow_patch = true;
 				}
-				/*
 				ImGui::SameLine();
-				if (ImGui::Button("Update Coverage"))
+				if (ImGui::Button("Snap Texcoord"))
 				{
-					g_need_update_coverage = true;
+					g_need_snap_texcoord = true;
 				}
-				*/
+				//
+				if (g_lapped_mesh->PatchCount() > 0)
+				{
+					ImGui::Text("Patch Selecting: ");
+					ImGui::SliderInt("    ", &g_viewing_patch_index, 0, int(g_lapped_mesh->PatchCount()) - 1);
+				}
 			}
 		}
 		ImGui::End();
@@ -194,9 +195,22 @@ namespace lappedtexture
 				}
 				*/
 				//
-				g_lapped_mesh->DrawAndCalcFaceCoverage();
-			}
+				{
+					g_lapped_mesh->DrawAndCalcFaceCoverage();
+				}
 
+				// Highline Selected Patch
+				if (NNUInt(g_viewing_patch_index) < g_lapped_mesh->PatchCount())
+				{
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					CustomConstantBuffer.Data().color = NNVec4(1.0, 0.0, 0.0, 1.0);
+					CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
+					shader_3d_color->Use();
+					g_lapped_mesh->GetPatch(g_viewing_patch_index).Draw();
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				}
+			}
+			
 			// Interface Pass
 			{
 				g_camera_pos = cc->GetCamera()->GetPosition();
@@ -207,7 +221,7 @@ namespace lappedtexture
 			//
 			Utils::SwapBuffers();
 			
-			// Handle Interfaces
+			// Handle Interface Actions
 			if (g_need_add_patch && !g_need_grow_patch)
 			{
 				g_need_add_patch = false;
@@ -221,6 +235,7 @@ namespace lappedtexture
 			}
 			if (g_need_grow_patch)
 			{
+				g_need_grow_patch = false;
 				if (NNUInt(g_viewing_patch_index) < g_lapped_mesh->PatchCount())
 				{
 					//
@@ -230,23 +245,26 @@ namespace lappedtexture
 					{
 						if (g_lapped_mesh->GetPatch(g_viewing_patch_index).IsGrown())
 						{
-							g_need_grow_patch = false;
 							if (g_consecutive_add)
 							{
 								g_need_add_patch = true;
 							}
 							g_lapped_mesh->SetNeedToUpdateFaceCoverage();
 						}
-					}
-					else
-					{
-						g_need_grow_patch = false;
+						else
+						{
+							g_need_grow_patch = true;
+						}
 					}
 				}
-				else
+			}
+			if (g_need_snap_texcoord)
+			{
+				if (NNUInt(g_viewing_patch_index) < g_lapped_mesh->PatchCount())
 				{
-					g_need_grow_patch = false;
+					g_lapped_mesh->DrawAndSaveLappedCoord();
 				}
+				g_need_snap_texcoord = false;
 			}
 		}
 		

@@ -128,8 +128,16 @@ void Utils::ClearColor(NNFloat r, NNFloat g, NNFloat b) {
 	glClearColor(r, g, b, 1.0f);
 }
 
-void Utils::Clear() {
+void Utils::Clear() 
+{
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Utils::Clear(const NNFloat& r, const NNFloat& g, const  NNFloat& b, const NNFloat& a)
+{
+	glClearColor(r, g, b, a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(mBGColor[0], mBGColor[1], mBGColor[2], mBGColor[3]);
 }
 
 void Utils::SwapBuffers() {

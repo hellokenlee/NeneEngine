@@ -1,6 +1,7 @@
 ﻿/*Copyright reserved by KenLee@2018 hellokenlee@163.com*/
 
 #include "Debug.h"
+#include "Utils.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -15,12 +16,14 @@ void _dCheckFileExist(const char* fileName) {
 #ifdef _WIN32
 	if (_access(fileName, 0) == -1) {
 		printf("[Error] File not exist! (%s)\n\n", fileName);
+		Utils::Terminate();
 		system("PAUSE");
 		exit(-1);
 	}
 #else
 	if (access(fileName, F_OK)) {
 		printf("[Error] File not exist! (%s)\n\n", fileName);
+		Utils::Terminate();
 		system("PAUSE");
 		exit(-1);
 	}

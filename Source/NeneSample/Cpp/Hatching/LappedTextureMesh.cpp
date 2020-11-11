@@ -1,5 +1,7 @@
 /*Copyright reserved by KenLee@2020 ken4000kl@gmail.com*/
 
+#include <array>
+#include <bitset>
 #include "NeneEngine/Debug.h"
 #include "LappedTextureMesh.h"
 
@@ -7,6 +9,7 @@ using namespace std;
 
 #define COVERAGE_TEXTURE_SIZE 4096
 #define COVERAGE_ALPHA_THRESHOLD 10
+#define MAX_SOURCE_FACE_COUNT 16348
 
 
 struct FaceEdge
@@ -24,17 +27,9 @@ LappedTextureMesh::~LappedTextureMesh()
 LappedTextureMesh::LappedTextureMesh(const char* filepath):
 	m_source_mesh(nullptr), m_need_to_update_coverage(false)
 {
+	
 	//
-	m_debug_quad = Geometry::CreateQuad();
-	//
-	m_patch_texture = Texture2D::Create("Resource/Texture/splotch_checkboard.png");
-	//
-	m_patch_debug_shader = Shader::Create("Resource/Shader/GLSL/2DColor.vert", "Resource/Shader/GLSL/2DColor.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
-	m_texture_debug_shader = Shader::Create("Resource/Shader/GLSL/2DTexture.vert", "Resource/Shader/GLSL/2DTexture.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
-	m_patch_rendering_shader = Shader::Create("Resource/Shader/GLSL/Patch.vert", "Resource/Shader/GLSL/Patch.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
-	//
-	m_coverage_shader = Shader::Create("Resource/Shader/GLSL/Coverage.vert", "Resource/Shader/GLSL/Coverage.frag", NNVertexFormat::POSITION_TEXTURE);
-	m_coverage_rtt = RenderTarget::Create(4096, 4096, 1);
+	CreateShaderAndTextures();
 	// 
 	ReadOBJFileAndBuildSourceFaceAdjacencies(filepath);
 	//
@@ -50,16 +45,7 @@ LappedTextureMesh::LappedTextureMesh(std::shared_ptr<Mesh> static_mesh):
 	m_source_mesh(static_mesh), m_need_to_update_coverage(false)
 {
 	//
-	m_debug_quad = Geometry::CreateQuad();
-	//
-	m_patch_texture = Texture2D::Create("Resource/Texture/splotch_checkboard.png");
-	//
-	m_patch_debug_shader = Shader::Create("Resource/Shader/GLSL/2DColor.vert", "Resource/Shader/GLSL/2DColor.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
-	m_texture_debug_shader = Shader::Create("Resource/Shader/GLSL/2DTexture.vert", "Resource/Shader/GLSL/2DTexture.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
-	m_patch_rendering_shader = Shader::Create("Resource/Shader/GLSL/Patch.vert", "Resource/Shader/GLSL/Patch.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
-	//
-	m_coverage_shader = Shader::Create("Resource/Shader/GLSL/Coverage.vert", "Resource/Shader/GLSL/Coverage.frag", NNVertexFormat::POSITION_TEXTURE);
-	m_coverage_rtt = RenderTarget::Create(4096, 4096, 1);
+	CreateShaderAndTextures();
 	//
 	const std::vector<NNUInt>& indices = m_source_mesh->GetIndexData();
 	//
@@ -75,6 +61,23 @@ LappedTextureMesh::LappedTextureMesh(std::shared_ptr<Mesh> static_mesh):
 		BuildSourceFaceAdjacencies();
 		WriteSourceFaceAdjacencies();
 	}
+}
+
+void LappedTextureMesh::CreateShaderAndTextures()
+{
+	//
+	m_debug_quad = Geometry::CreateQuad();
+	//
+	m_patch_texture = Texture2D::Create("Resource/Texture/splotch_checkboard.png");
+	//
+	m_patch_debug_shader = Shader::Create("Resource/Shader/GLSL/2DColor.vert", "Resource/Shader/GLSL/2DColor.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
+	m_texture_debug_shader = Shader::Create("Resource/Shader/GLSL/2DTexture.vert", "Resource/Shader/GLSL/2DTexture.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
+	m_patch_rendering_shader = Shader::Create("Resource/Shader/GLSL/Patch.vert", "Resource/Shader/GLSL/Patch.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
+	//
+	m_coverage_rtt = RenderTarget::Create(4096, 4096, 1);
+	m_coverage_shader = Shader::Create("Resource/Shader/GLSL/Coverage.vert", "Resource/Shader/GLSL/Coverage.frag", NNVertexFormat::POSITION_TEXTURE);
+	m_lapped_coord_rtt = RenderTarget::Create(4096, 4096, 1);
+	m_lapped_coord_shader = Shader::Create("Resource/Shader/GLSL/LappedCoord.vert", "Resource/Shader/GLSL/LappedCoord.frag", NNVertexFormat::POSITION_TEXTURE);
 }
 
 void LappedTextureMesh::ReadOBJFileAndBuildSourceFaceAdjacencies(const char* filepath)
@@ -137,9 +140,9 @@ void LappedTextureMesh::ReadOBJFileAndBuildSourceFaceAdjacencies(const char* fil
 	unordered_map<NNUInt, NNUInt> vertex_map;
 	//
 	unordered_map<NNUInt, FaceEdge> edge_map;
-	const NNUInt face_count = NNUInt(positions_indices.size() / 3);
+	m_source_face_count = NNUInt(positions_indices.size() / 3);
 	//
-	for (NNUInt f = 0; f < face_count; ++f)
+	for (NNUInt f = 0; f < m_source_face_count; ++f)
 	{
 		NNVec3 ab = positions[positions_indices[f * 3 + 1]] - positions[positions_indices[f * 3 + 0]];
 		NNVec3 bc = positions[positions_indices[f * 3 + 2]] - positions[positions_indices[f * 3 + 1]];
@@ -168,7 +171,7 @@ void LappedTextureMesh::ReadOBJFileAndBuildSourceFaceAdjacencies(const char* fil
 	}
 	//
 	m_source_face_adjacencies.clear();
-	m_source_face_adjacencies.resize(face_count);
+	m_source_face_adjacencies.resize(m_source_face_count);
 	for (const auto& keyvalue : edge_map)
 	{
 		const FaceEdge& cur_edge = keyvalue.second;
@@ -184,12 +187,20 @@ void LappedTextureMesh::ReadOBJFileAndBuildSourceFaceAdjacencies(const char* fil
 	m_source_mesh = Mesh::Create(vertices, indices, {});
 }
 
+bool LappedTextureMesh::IsFilled()
+{
+	return m_candidate_faces.size() == 0;
+}
+
 NNUInt LappedTextureMesh::AddPatch()
 {
-	//
-	LappedTexturePatch patch(m_source_mesh->GetIndexData(), m_source_mesh->GetVertexData(), m_source_face_adjacencies, m_candidate_faces);
-	//
-	m_patches.emplace_back(patch);
+	if (not IsFilled())
+	{
+		//
+		LappedTexturePatch patch(m_source_mesh->GetIndexData(), m_source_mesh->GetVertexData(), m_source_face_adjacencies, m_candidate_faces);
+		//
+		m_patches.emplace_back(patch);
+	}
 	//
 	return NNUInt(m_patches.size() - 1);
 }
@@ -223,6 +234,22 @@ void LappedTextureMesh::DrawDebug(const NNUInt& i)
 	}
 }
 
+void LappedTextureMesh::DrawAndSaveLappedCoord()
+{
+	m_lapped_coord_rtt->Begin();
+	{
+		Utils::Clear();
+		m_lapped_coord_shader->Use();
+		for (const auto& patch : m_patches)
+		{
+			patch.DrawCoverage();
+		}
+	}
+	m_lapped_coord_rtt->End();
+
+	m_lapped_coord_rtt->GetColorTex(0)->SavePixelData("LappedCoord.png");
+}
+
 void LappedTextureMesh::DrawAndCalcFaceCoverage()
 {
 	//
@@ -234,7 +261,7 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 	//
 	m_coverage_rtt->Begin();
 	{
-		Utils::Clear();
+		Utils::Clear(0.0, 0.0, 0.0, 0.0);
 		m_coverage_shader->Use();
 		m_patch_texture->Use(0);
 		for (const auto& patch : m_patches)
@@ -248,35 +275,67 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 	shared_ptr<NNByte[]> bits = m_coverage_rtt->GetColorTex(0)->GetPixelData();
 	assert(bits != nullptr);
 	//
-	std::set<NNUInt> readd_faces;
+	bitset<MAX_SOURCE_FACE_COUNT> uncovered_faces;
+	for (const auto& face : m_candidate_faces)
+	{
+		uncovered_faces.set(face);
+	}
+	//
+	array<NNUInt, MAX_SOURCE_FACE_COUNT> faces_total_pixel {};
+	array<NNUInt, MAX_SOURCE_FACE_COUNT> faces_covered_pixel {};
+	//
 	for (NNUInt y = 0; y < COVERAGE_TEXTURE_SIZE; ++y)
 	{
 		for (NNUInt x = 0; x < COVERAGE_TEXTURE_SIZE; ++x)
 		{
+			// 提前一下剪枝
+			NNByte a = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 3];
+			if (NNUInt(a) < 1)
+			{
+				continue;
+			}
 			//
 			NNByte b = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 0];
 			NNByte g = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 1];
 			NNByte r = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 2];
-			NNByte a = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 3];
+			
 			//
 			NNUInt face = (NNUInt(r) << 8) + NNUInt(g);
 			//
-			bool covered = b > COVERAGE_ALPHA_THRESHOLD;
+			bool covered = b < COVERAGE_ALPHA_THRESHOLD;
 			//
-			if (not covered)
+			if (not uncovered_faces.test(face))
 			{
-				readd_faces.insert(face);
+				++(faces_total_pixel[face]);
+				if (covered)
+				{
+					++faces_covered_pixel[face];
+				}
 			}
 		}
 	}
 	//
-	for (const auto face : readd_faces)
+	std::unordered_set<NNUInt> faces_to_readd;
+	for (NNUInt face = 0; face < m_source_face_count; ++face)
+	{
+		if (faces_total_pixel[face] > 0)
+		{
+			float coverage = float(faces_covered_pixel[face]) / float(faces_total_pixel[face]);
+			if (coverage < 0.95f)
+			{
+				faces_to_readd.insert(face);
+			}
+		}
+	}
+	//
+	for (const auto face : faces_to_readd)
 	{
 		m_candidate_faces.insert(face);
-		dLog("[Coverage] Re-add candidate face: %d", face);
 	}
 	//
 	m_coverage_rtt->GetColorTex(0)->SavePixelData("coverage.png");
+	//
+	dLog("[Coverage] Re-add candidate %zd faces; Remain uncovered face num: %zd", faces_to_readd.size(), m_candidate_faces.size());
 }
 
 bool LappedTextureMesh::ReadSourceFaceAdjacencies()

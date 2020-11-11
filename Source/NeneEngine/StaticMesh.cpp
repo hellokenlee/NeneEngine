@@ -23,7 +23,7 @@ shared_ptr<StaticMesh> StaticMesh::Create(const NNChar* filepath, const NNFloat 
 	const aiScene* scene = importer.ReadFile(filepath, aiProcess_GenUVCoords | aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FixInfacingNormals);
 	// 错误检测
 	if (scene == nullptr || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
-		printf("[Error] Model Loading Error: %s\n\n", importer.GetErrorString());
+		printf("[Error] Model Loading Error: %s\n", importer.GetErrorString());
 		return nullptr;
 	}
 	// 文件目录
@@ -31,12 +31,12 @@ shared_ptr<StaticMesh> StaticMesh::Create(const NNChar* filepath, const NNFloat 
 	result->m_filepath = filepath;
 	result->m_dirpath = GetDirectoryPath(filepath);
 	// 
-	dLog("[Info] ===== Loading model begined:  ===== \n");
-	dLog("    Total %d meshes: \n", scene->mNumMeshes);
+	dLog("[Info] ===== Loading model begined:  ===== ");
+	dLog("    Total %d meshes: ", scene->mNumMeshes);
 	// 从根节点开始遍历加载模型
 	result->ProcessNode(scene->mRootNode, scene, scale);
 	//
-	dLog("[Info] ===== Model loading finished. ===== \n\n");
+	dLog("[Info] ===== Model loading finished. ===== \n");
 	//
 	return shared_ptr<StaticMesh>(result);
 }
@@ -50,7 +50,7 @@ void StaticMesh::Draw(const shared_ptr<Shader> shader, const shared_ptr<Camera> 
 	NeneCB::Instance().PerObject().Data().model = mModelMat;
 	NeneCB::Instance().PerObject().Update(PER_OBJECT_SLOT);
 	// 绘制所有网格
-	for (NNUInt i = 0; i < m_meshes.size(); ++i) 
+	for (NNUInt i = 0; i < m_meshes.size(); ++i)
 	{
 		m_meshes[i]->Draw();
 	}
@@ -64,9 +64,9 @@ void StaticMesh::DrawInstanced(const shared_ptr<Shader> pShader, const shared_pt
 void StaticMesh::ProcessNode(aiNode* pNode, const aiScene* pScene, const NNFloat scale)
 {
 	// 
-	dLog("    |-- Load %d meshes from a node. (%s)\n", pNode->mNumMeshes, pNode->mName.C_Str());
+	dLog("    |-- Load %d meshes from a node. (%s)", pNode->mNumMeshes, pNode->mName.C_Str());
 	// 处理当前节点网格
-	for (NNUInt i = 0; i < pNode->mNumMeshes; ++i) 
+	for (NNUInt i = 0; i < pNode->mNumMeshes; ++i)
 	{
 		aiMesh* pMesh = pScene->mMeshes[pNode->mMeshes[i]];
 		ProcessMesh(pMesh, pScene, scale);
@@ -84,9 +84,9 @@ void StaticMesh::ProcessMesh(aiMesh* pMesh, const aiScene* pScene, const NNFloat
 	vector<NNUInt> indices;
 	vector<tuple<shared_ptr<Texture2D>, NNTextureType>> textures;
 	//
-	dLog("        |-- Load %d vertices from a mesh.\n", pMesh->mNumVertices);
+	dLog("        |-- Load %d vertices from a mesh.", pMesh->mNumVertices);
 	// 处理顶点数据
-	for (NNUInt i = 0; i < pMesh->mNumVertices; ++i) 
+	for (NNUInt i = 0; i < pMesh->mNumVertices; ++i)
 	{
 		Vertex vertex;
 		NNVec3 tmpVec3;
@@ -105,7 +105,7 @@ void StaticMesh::ProcessMesh(aiMesh* pMesh, const aiScene* pScene, const NNFloat
 			vertex.m_normal = tmpVec3;
 		}
 		// 纹理
-		if (pMesh->mTextureCoords[0]) 
+		if (pMesh->mTextureCoords[0])
 		{
 			tmpVec2.x = pMesh->mTextureCoords[0][i].x;
 			tmpVec2.y = pMesh->mTextureCoords[0][i].y;
@@ -115,10 +115,10 @@ void StaticMesh::ProcessMesh(aiMesh* pMesh, const aiScene* pScene, const NNFloat
 		vertices.push_back(vertex);
 	}
 	// 处理索引数据
-	for (NNUInt i = 0; i < pMesh->mNumFaces; i++) 
+	for (NNUInt i = 0; i < pMesh->mNumFaces; i++)
 	{
 		aiFace face = pMesh->mFaces[i];
-		for (NNUInt j = 0; j < face.mNumIndices; j++) 
+		for (NNUInt j = 0; j < face.mNumIndices; j++)
 		{
 			indices.push_back(face.mIndices[j]);
 		}
@@ -131,11 +131,11 @@ void StaticMesh::ProcessMesh(aiMesh* pMesh, const aiScene* pScene, const NNFloat
 		ProcessTexture(material, aiTextureType_HEIGHT, NORMAL, textures);
 	}
 	// Debug 输出
-	dLog("        |-- Process mesh with:\n");
-	dLog("            HasNormal   : %s.\n", pMesh->mNormals ? "Yes" : "No");
-	dLog("            IndicesNum  : %zd\n", indices.size());
-	dLog("            VerticesNum : %zd\n", vertices.size());
-	dLog("            TexturesNum : %zd\n", textures.size());
+	dLog("        |-- Process mesh with:");
+	dLog("            HasNormal   : %s.", pMesh->mNormals ? "Yes" : "No");
+	dLog("            IndicesNum  : %zd", indices.size());
+	dLog("            VerticesNum : %zd", vertices.size());
+	dLog("            TexturesNum : %zd", textures.size());
 	// 把生成的网格对象压入成员变量
 	m_meshes.push_back(Mesh::Create(move(vertices), move(indices), move(textures)));
 }
@@ -158,13 +158,13 @@ void StaticMesh::ProcessTexture(aiMaterial* pMaterial, aiTextureType aiType, NNT
 			shared_ptr<Texture2D> new_texture = Texture2D::Create(texFilePath.c_str());
 			m_textures.insert(make_pair(texFilePath, new_texture));
 			textures.push_back(tuple<shared_ptr<Texture2D>, NNTextureType>(new_texture, nnType));
-			dLog("            loaded new texture file (type: %d): %s\n", nnType, texFilePath.c_str());
-		} 
-		else 
+			dLog("            loaded new texture file (type: %d): %s", nnType, texFilePath.c_str());
+		}
+		else
 		{
 			// 之前已经读取过，避免重复读取
 			textures.push_back(tuple<shared_ptr<Texture2D>, NNTextureType>(it->second, nnType));
-			dLog("            loaded cached texture file (type: %d): %s\n", nnType, texFilePath.c_str());
+			dLog("            loaded cached texture file (type: %d): %s", nnType, texFilePath.c_str());
 		}
 	}
 }

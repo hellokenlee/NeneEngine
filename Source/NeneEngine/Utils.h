@@ -21,6 +21,7 @@ public:
 	static void SetWindowShouldClose(bool flag);
 	// 刷新缓冲
 	static void Clear();
+	static void Clear(const NNFloat& r, const NNFloat& g, const  NNFloat& b, const NNFloat& a);
 	// 
 	static void Update();
 	// 颜色缓冲颜色指定

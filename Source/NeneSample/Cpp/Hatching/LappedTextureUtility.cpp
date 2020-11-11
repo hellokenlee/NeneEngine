@@ -136,7 +136,7 @@ NNVec2 SimilarTriangle3DTo2D(NNVec3 a_3d, NNVec3 b_3d, NNVec3 c_3d, NNVec3 n_3d,
 	NNVec2 c_2d = a_2d + (dir_ac_2d * len_ac_3d * len_ab_2d / len_ab_3d);
 	c_2d *= 0.001f;
 	//
-	c_2d = glm::clamp(c_2d, 0.0f, 1.0f);
+	// c_2d = glm::clamp(c_2d, 0.0f, 1.0f);
 	//
 	return c_2d;
 }

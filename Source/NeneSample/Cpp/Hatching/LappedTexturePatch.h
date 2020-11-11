@@ -7,6 +7,7 @@
 #include <deque>
 #include <vector>
 #include <optional>
+#include <unordered_set>
 #include "NeneEngine/Nene.h"
 #include "LappedTextureUtility.h"
 
@@ -16,7 +17,7 @@ class LappedTexturePatch
 public:
 	//
 	~LappedTexturePatch();
-	LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, const std::vector<std::unordered_map<NNUInt, FaceAdjacency>>& face_adjs, std::set<NNUInt>& faces);
+	LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, const std::vector<std::unordered_map<NNUInt, FaceAdjacency>>& face_adjs, std::unordered_set<NNUInt>& faces);
 	//
 	void Grow();
 	bool IsGrown() { return m_is_grown; }
@@ -26,6 +27,9 @@ public:
 	void DrawCoverage() const;
 	//
 	void GenerateCoverageMesh();
+	//
+	void UpdateMeshAfterGrowth(bool should) { m_update_mesh_after_growth = should; };
+
 private:
 	//
 	bool IsValidAdjacency(const FaceAdjacency& adj);
@@ -35,10 +39,12 @@ private:
 	NNUInt AddSourceFaceToPatch(const NNUInt& sface);
 	//
 	std::optional<NNUInt> AddNearestAdjacentFaceToPatch();
+	//
+	void CopyPatchAdjacencyVertexTexcoord(const FaceAdjacency& adj, const bool& dst_to_src);
 		
 private:
 	//
-	std::set<NNUInt>& m_candidate_faces;
+	std::unordered_set<NNUInt>& m_candidate_faces;
 	//
 	const std::vector<NNUInt>& m_source_indices;
 	const std::vector<Vertex>& m_source_vertices;
@@ -47,14 +53,14 @@ private:
 private:
 	//
 	bool m_is_grown;
-	bool m_is_optimazed;
+	bool m_update_mesh_after_growth;
 	//
 	NNVec3 m_center_position;
 	std::vector<NNUInt> m_patch_indices;
 	std::vector<Vertex> m_patch_vertices;
 	//
 	std::set<NNUInt> m_source_coverage_faces;
-	std::map<NNUInt, NNUInt> m_source_to_patch_index;
+	std::unordered_map<NNUInt, NNUInt> m_source_to_patch_index;
 	//
 	std::shared_ptr<Mesh> m_patch_rendering_mesh;
 	std::shared_ptr<Shape> m_patch_coverage_mesh;

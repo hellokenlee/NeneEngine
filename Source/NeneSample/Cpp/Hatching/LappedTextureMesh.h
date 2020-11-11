@@ -3,6 +3,7 @@
 #define LAPPED_TEXTURE_MESH
 
 #include <vector>
+#include <unordered_set>
 #include "LappedTexturePatch.h"
 
 class LappedTextureMesh
@@ -13,6 +14,7 @@ public:
 	LappedTextureMesh(const char* filepath);
 	LappedTextureMesh(std::shared_ptr<Mesh> static_mesh);
 	//
+	bool IsFilled();
 	NNUInt AddPatch();
 	NNUInt PatchCount() { return NNUInt(m_patches.size()); }
 	LappedTexturePatch& GetPatch(const NNUInt& i) { return m_patches[i]; }
@@ -21,9 +23,12 @@ public:
 	//
 	void Draw();
 	void DrawDebug(const NNUInt& i);
+	void DrawAndSaveLappedCoord();
 	void DrawAndCalcFaceCoverage();
 
 private:
+	void CreateShaderAndTextures();
+
 	bool ReadSourceFaceAdjacencies();
 	void WriteSourceFaceAdjacencies();
 	void BuildSourceFaceAdjacencies();
@@ -32,9 +37,10 @@ private:
 	
 private:
 	//
+	NNUInt m_source_face_count;
 	std::shared_ptr<Mesh> m_source_mesh;
 	//
-	std::set<NNUInt> m_candidate_faces;
+	std::unordered_set<NNUInt> m_candidate_faces;
 	std::vector<LappedTexturePatch> m_patches;
 	//
 	std::shared_ptr<Shape> m_debug_quad;
@@ -46,7 +52,9 @@ private:
 	bool m_need_to_update_coverage;
 	std::shared_ptr<Mesh> m_coverage_mesh;
 	std::shared_ptr<Shader> m_coverage_shader;
+	std::shared_ptr<Shader> m_lapped_coord_shader;
 	std::shared_ptr<RenderTarget> m_coverage_rtt;
+	std::shared_ptr<RenderTarget> m_lapped_coord_rtt;
 	//
 	std::string m_source_face_adjacencies_cachepath;
 	std::vector<std::unordered_map<NNUInt, FaceAdjacency>> m_source_face_adjacencies;
