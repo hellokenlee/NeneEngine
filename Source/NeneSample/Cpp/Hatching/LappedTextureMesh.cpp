@@ -34,14 +34,15 @@ LappedTextureMesh::LappedTextureMesh(std::shared_ptr<StaticMesh> static_mesh):
 		m_candidate_faces.insert(f);
 	}
 	//
-	BuildAdjacentFaceRelation();
+	BuildSourceFaceAdjacencies();
 }
 
 NNUInt LappedTextureMesh::AddPatch()
 {
 	//
 	const std::shared_ptr<Mesh> mesh = m_source_mesh.GetMeshes()[0];
-	LappedTexturePatch patch(mesh->GetIndexData(), mesh->GetVertexData(), m_source_adjacent_faces, m_candidate_faces);
+	//
+	LappedTexturePatch patch(mesh->GetIndexData(), mesh->GetVertexData(), m_source_face_adjacencies, m_candidate_faces);
 	//
 	m_patches.emplace_back(patch);
 	//
@@ -131,9 +132,26 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 	m_coverage_rtt->GetColorTex(0)->SavePixelData("coverage.png");
 }
 
-void LappedTextureMesh::BuildAdjacentFaceRelation()
+void LappedTextureMesh::BuildSourceFaceAdjacencies()
 {
-	dLog("[Coverage] Building equivalent indices...");
 	//
-	dLog("[Coverage] Equivalent indices generated.");
+	m_source_face_adjacencies.clear();
+	const std::shared_ptr<Mesh> mesh = m_source_mesh.GetMeshes()[0];
+	const std::vector<NNUInt> indices = mesh->GetIndexData();
+	const std::vector<Vertex> vertices = mesh->GetVertexData();
+	m_source_face_adjacencies.resize(indices.size() / 3);
+	//
+	for (NNUInt f0 = 0; f0 < m_source_face_adjacencies.size(); ++f0)
+	{
+		dLog("[Coverage] Building adjacent face relation...");
+		for (NNUInt f1 = f0 + 1; f1 < m_source_face_adjacencies.size(); ++f1)
+		{
+			optional<FaceAdjacency> adj = CalcAdjacency(indices, vertices, f0, f1);
+			if (adj.has_value())
+			{
+				m_source_face_adjacencies[f0].insert(make_pair(f1, FaceAdjacency{ adj->src_edge, adj->dst_edge, adj->center_distance }));
+				m_source_face_adjacencies[f1].insert(make_pair(f0, FaceAdjacency{ adj->dst_edge, adj->src_edge, adj->center_distance }));
+			}
+		}
+	}
 }

@@ -23,7 +23,7 @@ public:
 	void DrawAndCalcFaceCoverage();
 
 private:
-	void BuildAdjacentFaceRelation();
+	void BuildSourceFaceAdjacencies();
 
 private:
 	//
@@ -43,7 +43,7 @@ private:
 	std::shared_ptr<Shader> m_coverage_shader;
 	std::shared_ptr<RenderTarget> m_coverage_rtt;
 	//
-	std::vector<std::set<NNUInt>> m_source_adjacent_faces;
+	std::vector<std::map<NNUInt, FaceAdjacency>> m_source_face_adjacencies;
 };
 
 

@@ -140,3 +140,29 @@ NNVec2 SimilarTriangle3DTo2D(NNVec3 a_3d, NNVec3 b_3d, NNVec3 c_3d, NNVec3 n_3d,
 	//
 	return c_2d;
 }
+
+optional<FaceAdjacency> CalcAdjacency(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, const NNUInt& src_face, const NNUInt& dst_face)
+{
+	for (NNUInt se = AdjacencyEdge::AB; se <= AdjacencyEdge::CA; ++se)
+	{
+		const NNUInt sia = indices[src_face * 3 + ((0 + se) % 3)];
+		const NNUInt sib = indices[src_face * 3 + ((1 + se) % 3)];
+		const NNUInt sic = indices[src_face * 3 + ((2 + se) % 3)];
+		for (NNUInt de = AdjacencyEdge::AB; de <= AdjacencyEdge::CA; ++de)
+		{
+			const NNUInt dia = indices[dst_face * 3 + ((0 + de) % 3)];
+			const NNUInt dib = indices[dst_face * 3 + ((1 + de) % 3)];
+			const NNUInt dic = indices[dst_face * 3 + ((2 + de) % 3)];
+			if (IsNearlySame(vertices[sia].m_position, vertices[dia].m_position) and
+				IsNearlySame(vertices[sib].m_position, vertices[dib].m_position) and
+				(not IsNearlySame(vertices[sic].m_position, vertices[dic].m_position))
+				)
+			{
+				NNVec3 s_center = (vertices[sia].m_position + vertices[sib].m_position + vertices[sic].m_position) / 3.0f;
+				NNVec3 d_center = (vertices[dia].m_position + vertices[dib].m_position + vertices[dic].m_position) / 3.0f;
+				return FaceAdjacency{ AdjacencyEdge(se), AdjacencyEdge(de), glm::distance(s_center, d_center) };
+			}
+		}
+	}
+	return nullopt;
+}
