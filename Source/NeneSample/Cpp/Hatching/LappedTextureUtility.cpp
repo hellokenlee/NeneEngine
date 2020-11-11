@@ -141,26 +141,25 @@ NNVec2 SimilarTriangle3DTo2D(NNVec3 a_3d, NNVec3 b_3d, NNVec3 c_3d, NNVec3 n_3d,
 	return c_2d;
 }
 
-optional<FaceAdjacency> CalcAdjacency(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, const NNUInt& src_face, const NNUInt& dst_face)
+optional<FaceAdjacency> CalcAdjacentEdge(const std::vector<NNUInt> indices, const std::vector<Vertex> vertices, const NNUInt src_face, const NNUInt dst_face)
 {
-	for (NNUInt se = AdjacencyEdge::AB; se <= AdjacencyEdge::CA; ++se)
+	for (NNUInt src_edge = AdjacentEdge::AB; src_edge <= AdjacentEdge::CA; ++src_edge)
 	{
-		const NNUInt sia = indices[src_face * 3 + ((0 + se) % 3)];
-		const NNUInt sib = indices[src_face * 3 + ((1 + se) % 3)];
-		const NNUInt sic = indices[src_face * 3 + ((2 + se) % 3)];
-		for (NNUInt de = AdjacencyEdge::AB; de <= AdjacencyEdge::CA; ++de)
+		//
+		const NNVec3 src_p0 = vertices[indices[SRC_ADJ_SHARE_I0(src_face, src_edge)]].m_position;
+		const NNVec3 src_p1 = vertices[indices[SRC_ADJ_SHARE_I1(src_face, src_edge)]].m_position;
+		const NNVec3 src_p2 = vertices[indices[SRC_ADJ_DIAGO_I2(src_face, src_edge)]].m_position;
+		// 
+		for (NNUInt dst_edge = AdjacentEdge::AB; dst_edge <= AdjacentEdge::CA; ++dst_edge)
 		{
-			const NNUInt dia = indices[dst_face * 3 + ((0 + de) % 3)];
-			const NNUInt dib = indices[dst_face * 3 + ((1 + de) % 3)];
-			const NNUInt dic = indices[dst_face * 3 + ((2 + de) % 3)];
-			if (IsNearlySame(vertices[sia].m_position, vertices[dia].m_position) and
-				IsNearlySame(vertices[sib].m_position, vertices[dib].m_position) and
-				(not IsNearlySame(vertices[sic].m_position, vertices[dic].m_position))
-				)
+			// 相邻的三角形邻接边的顶点顺序相反
+			const NNVec3 dst_p0 = vertices[indices[DST_ADJ_SHARE_I0(dst_face, dst_edge)]].m_position;
+			const NNVec3 dst_p1 = vertices[indices[DST_ADJ_SHARE_I1(dst_face, dst_edge)]].m_position;
+			const NNVec3 dst_p2 = vertices[indices[DST_ADJ_DIAGO_I2(dst_face, dst_edge)]].m_position;
+			//
+			if (IsNearlySame(src_p0, dst_p0) and IsNearlySame(src_p1, dst_p1) and not IsNearlySame(src_p2, dst_p2))
 			{
-				NNVec3 s_center = (vertices[sia].m_position + vertices[sib].m_position + vertices[sic].m_position) / 3.0f;
-				NNVec3 d_center = (vertices[dia].m_position + vertices[dib].m_position + vertices[dic].m_position) / 3.0f;
-				return FaceAdjacency{ AdjacencyEdge(se), AdjacencyEdge(de), glm::distance(s_center, d_center) };
+				return FaceAdjacency{ src_face, dst_face, AdjacentEdge(src_edge), AdjacentEdge(dst_edge) };
 			}
 		}
 	}

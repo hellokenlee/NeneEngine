@@ -26,17 +26,15 @@ public:
 	void DrawCoverage() const;
 	//
 	void GenerateCoverageMesh();
-
 private:
-	
+	//
+	bool IsValidAdjacency(const FaceAdjacency& adj);
+	//
+	bool IsInPatchHull(const NNVec2& ta, const NNVec2& tb);
 	//
 	NNUInt AddSourceFaceToPatch(const NNUInt& sface);
 	//
-	NNUInt AddNearestSourceAdjacentFaceToPatch();
-	//
-	bool IsInsidePatchHull(const NNVec2& ta, const NNVec2& tb);
-	//
-	bool IsValidFaceAdjacency(const FaceAdjacency& adj);
+	std::optional<NNUInt> AddNearestAdjacentFaceToPatch();
 		
 private:
 	//

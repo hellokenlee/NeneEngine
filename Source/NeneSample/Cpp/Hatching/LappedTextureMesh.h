@@ -23,7 +23,7 @@ public:
 	void DrawAndCalcFaceCoverage();
 
 private:
-	void BuildSourceFaceAdjacencies();
+	void BuildFaceAdjacency();
 
 private:
 	//

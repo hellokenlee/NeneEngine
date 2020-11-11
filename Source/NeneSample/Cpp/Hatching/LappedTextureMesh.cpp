@@ -34,7 +34,7 @@ LappedTextureMesh::LappedTextureMesh(std::shared_ptr<StaticMesh> static_mesh):
 		m_candidate_faces.insert(f);
 	}
 	//
-	BuildSourceFaceAdjacencies();
+	BuildFaceAdjacency();
 }
 
 NNUInt LappedTextureMesh::AddPatch()
@@ -132,26 +132,29 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 	m_coverage_rtt->GetColorTex(0)->SavePixelData("coverage.png");
 }
 
-void LappedTextureMesh::BuildSourceFaceAdjacencies()
+void LappedTextureMesh::BuildFaceAdjacency()
 {
 	//
-	m_source_face_adjacencies.clear();
 	const std::shared_ptr<Mesh> mesh = m_source_mesh.GetMeshes()[0];
-	const std::vector<NNUInt> indices = mesh->GetIndexData();
-	const std::vector<Vertex> vertices = mesh->GetVertexData();
-	m_source_face_adjacencies.resize(indices.size() / 3);
+	const auto& indices = mesh->GetIndexData();
+	const auto& vertices = mesh->GetVertexData();
 	//
-	for (NNUInt f0 = 0; f0 < m_source_face_adjacencies.size(); ++f0)
+	NNUInt face_num = NNUInt(indices.size() / 3);
+	//
+	m_source_face_adjacencies.clear();
+	m_source_face_adjacencies.resize(face_num);
+	//
+	for (NNUInt src_face = 0; src_face < face_num; ++src_face)
 	{
-		dLog("[Coverage] Building adjacent face relation...");
-		for (NNUInt f1 = f0 + 1; f1 < m_source_face_adjacencies.size(); ++f1)
+		for (NNUInt dst_face = src_face + 1; dst_face < face_num; ++dst_face)
 		{
-			optional<FaceAdjacency> adj = CalcAdjacency(indices, vertices, f0, f1);
+			optional<FaceAdjacency> adj = CalcAdjacentEdge(indices, vertices, src_face, dst_face);
 			if (adj.has_value())
 			{
-				m_source_face_adjacencies[f0].insert(make_pair(f1, FaceAdjacency{ adj->src_edge, adj->dst_edge, adj->center_distance }));
-				m_source_face_adjacencies[f1].insert(make_pair(f0, FaceAdjacency{ adj->dst_edge, adj->src_edge, adj->center_distance }));
+				m_source_face_adjacencies[src_face][dst_face] = FaceAdjacency{ src_face, dst_face, adj->src_edge, adj->dst_edge };
+				m_source_face_adjacencies[dst_face][src_face] = FaceAdjacency{ dst_face, src_face, adj->dst_edge, adj->src_edge };
 			}
 		}
 	}
+	//
 }
