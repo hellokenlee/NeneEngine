@@ -60,6 +60,6 @@ IntersectStatus Intersect(NNVec2 p0, NNVec2 p1, NNVec2 t0, NNVec2 t1, NNVec2 t2)
 
 Eigen::Matrix2x3f CalcLinearTransformWithEigen(const Eigen::Vector3f& a, const Eigen::Vector3f& b, const Eigen::Vector3f& c, const Eigen::Vector2f& ta, const Eigen::Vector2f& tb, const Eigen::Vector2f& tc);
 
-optional<FaceAdjacency> CalcAdjacentEdge(const std::vector<NNUInt> indices, const std::vector<Vertex> vertices, const NNUInt src_face, const NNUInt dst_face);
+std::optional<FaceAdjacency> CalcAdjacentEdge(const std::vector<NNUInt> indices, const std::vector<Vertex> vertices, const NNUInt src_face, const NNUInt dst_face);
 
 #endif // LAPPED_TEXTURE_UTILITY

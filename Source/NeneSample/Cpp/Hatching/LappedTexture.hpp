@@ -144,7 +144,8 @@ namespace lappedtexture
 		//
 		ConstantBuffer<CustomCBDS> CustomConstantBuffer;
 		//
-		g_lapped_mesh = std::make_shared<LappedTextureMesh>(bunny);
+		// g_lapped_mesh = std::make_shared<LappedTextureMesh>(bunny->GetMeshes()[0]);
+		g_lapped_mesh = std::make_shared<LappedTextureMesh>("Resource/Mesh/bunny/bunny_with_uv.obj");
 		//
 		while (!Utils::WindowShouldClose()) 
 		{
@@ -174,6 +175,7 @@ namespace lappedtexture
 					bunny->Draw(shader_3d_color);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				}
+				//
 				
 				// Draw the patches
 				{

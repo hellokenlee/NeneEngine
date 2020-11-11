@@ -28,6 +28,7 @@ shared_ptr<StaticMesh> StaticMesh::Create(const NNChar* filepath, const NNFloat 
 	}
 	// 文件目录
 	StaticMesh* result = new StaticMesh();
+	result->m_filepath = filepath;
 	result->m_dirpath = GetDirectoryPath(filepath);
 	// 
 	dLog("[Info] ===== Loading model begined:  ===== \n");

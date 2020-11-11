@@ -7,7 +7,8 @@
 //
 //    Geometry: 
 //
-class Geometry {
+class Geometry 
+{
 public:
 	// 创建一个UV球体
 	static std::shared_ptr<Shape> CreateSphereUV(const NNUInt& latLines = 3, const NNUInt& longLines = 3, NNVertexOrder vo = COUNTER_CLOCK_WISE);
@@ -23,6 +24,8 @@ public:
 	static std::shared_ptr<Shape> CreateTorus(NNVertexOrder vo = COUNTER_CLOCK_WISE);
 	// 生成法向量
 	static void CalcNormals(std::vector<NNFloat> &vertices, std::vector<NNUInt> &indices);
+	//
+	static void InvertIndexOrder(NNUInt *indices, NNUInt iNum);
 };
 
 #endif // GEOMETRY_H

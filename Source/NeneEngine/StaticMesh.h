@@ -35,6 +35,7 @@ protected:
 
 protected:
 	std::string m_dirpath;
+	std::string m_filepath;
 	std::vector<std::shared_ptr<Mesh>> m_meshes;
 	std::unordered_map<std::string, std::shared_ptr<Texture2D>> m_textures;
 

@@ -11,9 +11,11 @@ struct NNUVec3 {
 	NNUInt x, y, z;
 };
 
-void InvertIndexOrder(NNUInt *indices, NNUInt iNum) {
+void Geometry::InvertIndexOrder(NNUInt *indices, NNUInt iNum)
+{
 	dLogIf(iNum % 3 != 0, "[Error] Inverting vertex order of a non-trianglized mesh may cause undefine behavior.\n");
-	for (NNUInt v = 0; v < iNum / 3; ++v) {
+	for (NNUInt v = 0; v < iNum / 3; ++v) 
+	{
 		swap(indices[3 * v + 1], indices[3 * v + 2]);
 	}
 }

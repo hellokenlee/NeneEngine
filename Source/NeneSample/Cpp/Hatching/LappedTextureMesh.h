@@ -10,7 +10,8 @@ class LappedTextureMesh
 public:
 	//
 	~LappedTextureMesh();
-	LappedTextureMesh(std::shared_ptr<StaticMesh> static_mesh);
+	LappedTextureMesh(const char* filepath);
+	LappedTextureMesh(std::shared_ptr<Mesh> static_mesh);
 	//
 	NNUInt AddPatch();
 	NNUInt PatchCount() { return NNUInt(m_patches.size()); }
@@ -23,11 +24,15 @@ public:
 	void DrawAndCalcFaceCoverage();
 
 private:
-	void BuildFaceAdjacency();
+	bool ReadSourceFaceAdjacencies();
+	void WriteSourceFaceAdjacencies();
+	void BuildSourceFaceAdjacencies();
 
+	void ReadOBJFileAndBuildSourceFaceAdjacencies(const char* filepath);
+	
 private:
 	//
-	const StaticMesh& m_source_mesh;
+	std::shared_ptr<Mesh> m_source_mesh;
 	//
 	std::set<NNUInt> m_candidate_faces;
 	std::vector<LappedTexturePatch> m_patches;
@@ -43,7 +48,8 @@ private:
 	std::shared_ptr<Shader> m_coverage_shader;
 	std::shared_ptr<RenderTarget> m_coverage_rtt;
 	//
-	std::vector<std::map<NNUInt, FaceAdjacency>> m_source_face_adjacencies;
+	std::string m_source_face_adjacencies_cachepath;
+	std::vector<std::unordered_map<NNUInt, FaceAdjacency>> m_source_face_adjacencies;
 };
 
 
