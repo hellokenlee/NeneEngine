@@ -49,12 +49,13 @@ LappedTextureMesh::LappedTextureMesh(std::shared_ptr<Mesh> static_mesh):
 	//
 	const std::vector<NNUInt>& indices = m_source_mesh->GetIndexData();
 	//
-	for (NNUInt f = 0; f < NNUInt(indices.size()) / 3; ++f)
+	m_source_face_count = NNUInt(indices.size()) / 3;
+	assert(m_source_face_count < MAX_SOURCE_FACE_COUNT);
+	//
+	for (NNUInt f = 0; f < m_source_face_count; ++f)
 	{
 		m_candidate_faces.insert(f);
 	}
-	//
-	m_source_face_adjacencies_cachepath = "FaceAdjacencies.cache";
 	//
 	if (not ReadSourceFaceAdjacencies())
 	{
@@ -78,6 +79,8 @@ void LappedTextureMesh::CreateShaderAndTextures()
 	m_coverage_shader = Shader::Create("Resource/Shader/GLSL/Coverage.vert", "Resource/Shader/GLSL/Coverage.frag", NNVertexFormat::POSITION_TEXTURE);
 	m_lapped_coord_rtt = RenderTarget::Create(4096, 4096, 1);
 	m_lapped_coord_shader = Shader::Create("Resource/Shader/GLSL/LappedCoord.vert", "Resource/Shader/GLSL/LappedCoord.frag", NNVertexFormat::POSITION_TEXTURE);
+	//
+	m_source_face_adjacencies_cachepath = "FaceAdjacencies.cache";
 }
 
 void LappedTextureMesh::ReadOBJFileAndBuildSourceFaceAdjacencies(const char* filepath)
@@ -141,6 +144,7 @@ void LappedTextureMesh::ReadOBJFileAndBuildSourceFaceAdjacencies(const char* fil
 	//
 	unordered_map<NNUInt, FaceEdge> edge_map;
 	m_source_face_count = NNUInt(positions_indices.size() / 3);
+	assert(m_source_face_count < MAX_SOURCE_FACE_COUNT);
 	//
 	for (NNUInt f = 0; f < m_source_face_count; ++f)
 	{
@@ -240,9 +244,9 @@ void LappedTextureMesh::DrawAndSaveLappedCoord()
 	{
 		Utils::Clear();
 		m_lapped_coord_shader->Use();
-		for (const auto& patch : m_patches)
+		for (auto it = m_patches.rbegin(); it != m_patches.rend(); ++it)
 		{
-			patch.DrawCoverage();
+			it->DrawCoverage();
 		}
 	}
 	m_lapped_coord_rtt->End();
@@ -275,10 +279,10 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 	shared_ptr<NNByte[]> bits = m_coverage_rtt->GetColorTex(0)->GetPixelData();
 	assert(bits != nullptr);
 	//
-	bitset<MAX_SOURCE_FACE_COUNT> uncovered_faces;
+	bitset<MAX_SOURCE_FACE_COUNT> candidate_faces;
 	for (const auto& face : m_candidate_faces)
 	{
-		uncovered_faces.set(face);
+		candidate_faces.set(face);
 	}
 	//
 	array<NNUInt, MAX_SOURCE_FACE_COUNT> faces_total_pixel {};
@@ -298,16 +302,17 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 			NNByte b = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 0];
 			NNByte g = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 1];
 			NNByte r = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 2];
-			
 			//
 			NNUInt face = (NNUInt(r) << 8) + NNUInt(g);
 			//
-			bool covered = b < COVERAGE_ALPHA_THRESHOLD;
-			//
-			if (not uncovered_faces.test(face))
+			
+			// 只统计不在候选当中的面
+			if (not candidate_faces.test(face))
 			{
+				// 该面总像素数目
 				++(faces_total_pixel[face]);
-				if (covered)
+				// 该面覆盖像素数目
+				if (b > COVERAGE_ALPHA_THRESHOLD)
 				{
 					++faces_covered_pixel[face];
 				}
@@ -316,6 +321,7 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 	}
 	//
 	std::unordered_set<NNUInt> faces_to_readd;
+	std::unordered_set<NNUInt> faces_fully_covered;
 	for (NNUInt face = 0; face < m_source_face_count; ++face)
 	{
 		if (faces_total_pixel[face] > 0)
@@ -325,6 +331,9 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 			{
 				faces_to_readd.insert(face);
 			}
+			else {
+				faces_fully_covered.insert(face);
+			}
 		}
 	}
 	//
@@ -333,7 +342,7 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 		m_candidate_faces.insert(face);
 	}
 	//
-	m_coverage_rtt->GetColorTex(0)->SavePixelData("coverage.png");
+	// m_coverage_rtt->GetColorTex(0)->SavePixelData("coverage.png");
 	//
 	dLog("[Coverage] Re-add candidate %zd faces; Remain uncovered face num: %zd", faces_to_readd.size(), m_candidate_faces.size());
 }

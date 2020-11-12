@@ -16,6 +16,7 @@ using namespace std;
 
 NNUInt LappedTexturePatch::AddSourceFaceToPatch(const NNUInt& sface)
 {
+	assert(m_candidate_faces.find(sface) != m_candidate_faces.end());
 	//
 	m_candidate_faces.erase(sface);
 	//
@@ -53,8 +54,10 @@ LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const
 	m_source_indices(indices), m_source_vertices(vertices), m_candidate_faces(faces), m_source_face_adjacencies(face_adjs), m_is_grown(false), m_update_mesh_after_growth(true)
 {
 	// ≥ı º√Ê
-	// NNUInt sface = rand() % NNUInt(m_candidate_faces.size());
-	NNUInt sface = *(m_candidate_faces.begin());
+	int random_pos = rand() % int(m_candidate_faces.size());
+	auto random_it = std::next(std::begin(m_candidate_faces), random_pos);
+	NNUInt sface = *random_it;
+	// NNUInt sface = *(m_candidate_faces.begin());
 	//
 	NNUInt pface = AddSourceFaceToPatch(sface);
 	//
