@@ -45,9 +45,6 @@
     <ClInclude Include="..\..\Source\NeneSample\Cpp\AntiAliasing\Main.hpp">
       <Filter>头文件\AntiAliasing</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\Main.hpp">
-      <Filter>头文件\Hatching</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\NeneSample\Cpp\Simple\Main.hpp">
       <Filter>头文件\Simple</Filter>
     </ClInclude>
@@ -61,6 +58,9 @@
       <Filter>头文件\Hatching</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\LappedTexture.hpp">
+      <Filter>头文件\Hatching</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NeneSample\Cpp\Hatching\Hatching.hpp">
       <Filter>头文件\Hatching</Filter>
     </ClInclude>
   </ItemGroup>

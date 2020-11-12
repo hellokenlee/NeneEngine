@@ -68,6 +68,11 @@ namespace hatching
 		auto quad = Geometry::CreateQuad();
 		auto cube = Geometry::CreateCube();
 		auto ball = Geometry::CreateSphereUV(30, 30);
+		//
+		auto bunny = StaticMesh::Create("Resource/Mesh/bunny/bunny_with_uv.obj", 30.0f);
+		auto tex_bunny_lapped_coord = Texture2D::Create("LappedCoord.png");
+		auto tex_lapped_patch = Texture2D::Create("Resource/Texture/splotch_checkboard.png");
+		auto shader_lapped = Shader::Create("Resource/Shader/GLSL/LappedTexture.vert", "Resource/Shader/GLSL/LappedTexture.frag");
 		// <Real-Time Hatching> Praun et al.
 		auto shader_praun = Shader::Create("Resource/Shader/GLSL/PraunHatchOrigin.vert", "Resource/Shader/GLSL/PraunHatchOrigin.frag");
 		// <Real-Time Stroke Textures> Freud. et al. 
@@ -136,10 +141,13 @@ namespace hatching
 			LightConstantBuffer.Data().position.z = g_light_position[2];
 			LightConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_LIGHT_SLOT);
 			//
-			/* <Real-Time Hatching> Praun et al.
 			{
 				Utils::Clear();
 				ca->Draw();
+			}
+			//
+			/* <Real-Time Hatching> Praun et al.
+			{
 				tex_hatch_tone012->Use(0);
 				tex_hatch_tone345->Use(1);
 				ball->Draw(shader_praun);
@@ -147,20 +155,22 @@ namespace hatching
 			//*/
 			/* <Real-Time Stroke Textures> Freud. et al.
 			{
-				Utils::Clear();
-				ca->Draw();
 				tex_hatch->Use(0);
 				ball->Draw(shader_fraud);
 			}
 			//*/
-			//* <Fine Tone Control in Harward Hatching> Praun et al. Scheme1
+			/* <Fine Tone Control in Harward Hatching> Praun et al. Scheme1
 			{
-				Utils::Clear();
-				ca->Draw();
 				tex_vol->Use(0);
 				ball->Draw(shader_praun_scheme1);
 			}
 			//*/
+
+			{
+				tex_vol->Use(0);
+				tex_bunny_lapped_coord->Use(1);
+				bunny->Draw(shader_lapped);
+			}
 
 			//
 			{
