@@ -335,6 +335,11 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 		m_candidate_faces.insert(face);
 	}
 	//
+	if (m_candidate_faces.size() < 2)
+	{
+		m_candidate_faces.clear();
+	}
+	//
 	// m_coverage_rtt->GetColorTex(0)->SavePixelData("coverage.png");
 	//
 	dLog("[Coverage] Re-add candidate %zd faces; Remain uncovered face num: %zd", faces_to_readd.size(), m_candidate_faces.size());
