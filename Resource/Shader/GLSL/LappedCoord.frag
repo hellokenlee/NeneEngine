@@ -11,9 +11,9 @@ void main()
 	//
 	vec4 patch_color = texture(tex_patch, uv_VS_out);
 	//
-	if(patch_color.a < 0.2)
+	if(patch_color.a < 0.01)
 	{
 		discard;
 	}
-	color_FS_out = vec4(uv_VS_out.xy, 0.0, 1.0);
+	color_FS_out = vec4(uv_VS_out.xy, patch_color.a, 1.0);
 }

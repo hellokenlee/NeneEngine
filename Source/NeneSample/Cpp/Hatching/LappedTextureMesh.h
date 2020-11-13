@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include "LappedTexturePatch.h"
 
+
 class LappedTextureMesh
 {
 public:
@@ -23,6 +24,7 @@ public:
 	//
 	void Draw();
 	void DrawDebug(const NNUInt& i);
+	void DrawDebugReaddFaces(const NNUInt& i);
 	void DrawAndSaveLappedCoord();
 	void DrawAndCalcFaceCoverage();
 
@@ -58,6 +60,8 @@ private:
 	//
 	std::string m_source_face_adjacencies_cachepath;
 	std::vector<std::unordered_map<NNUInt, FaceAdjacency>> m_source_face_adjacencies;
+	//
+	std::vector<std::shared_ptr<Mesh>> m_debug_readd_faces_meshes;
 };
 
 

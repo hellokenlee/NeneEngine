@@ -26,7 +26,6 @@ namespace lappedtexture
 	bool g_consecutive_grow = false;
 	bool g_need_add_patch = false;
 	bool g_need_grow_patch = false;
-	bool g_need_update_coverage = false;
 	bool g_need_snap_texcoord = false;
 
 	NNVec3 g_camera_pos;
@@ -145,7 +144,6 @@ namespace lappedtexture
 		//
 		ConstantBuffer<CustomCBDS> CustomConstantBuffer;
 		//
-		// g_lapped_mesh = std::make_shared<LappedTextureMesh>(bunny->GetMeshes()[0]);
 		g_lapped_mesh = std::make_shared<LappedTextureMesh>("Resource/Mesh/bunny/bunny_with_uv.obj");
 		//
 		while (!Utils::WindowShouldClose()) 
@@ -186,20 +184,12 @@ namespace lappedtexture
 					g_lapped_mesh->DrawDebug(g_viewing_patch_index);
 				}
 				
-				// 
-				/*
-				if (g_need_update_coverage)
-				{
-					g_need_update_coverage = false;
-					g_lapped_mesh->DrawAndCalcFaceCoverage();
-				}
-				*/
 				//
 				{
 					g_lapped_mesh->DrawAndCalcFaceCoverage();
 				}
 
-				// Highline Selected Patch
+				// Highlight Selected Patch
 				if (NNUInt(g_viewing_patch_index) < g_lapped_mesh->PatchCount())
 				{
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -207,6 +197,17 @@ namespace lappedtexture
 					CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
 					shader_3d_color->Use();
 					g_lapped_mesh->GetPatch(g_viewing_patch_index).Draw();
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				}
+
+				// Highlight Re-add Faces
+				if (NNUInt(g_viewing_patch_index) < g_lapped_mesh->PatchCount())
+				{
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					CustomConstantBuffer.Data().color = NNVec4(1.0, 1.0, 0.0, 1.0);
+					CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
+					shader_3d_color->Use();
+					g_lapped_mesh->DrawDebugReaddFaces(g_viewing_patch_index);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				}
 			}

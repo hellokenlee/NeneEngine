@@ -28,7 +28,7 @@ public:
 	~Mesh();
 	//
 	static std::shared_ptr<Mesh> Create(const std::vector<Vertex>& vertices);
-	static std::shared_ptr<Mesh> Create(const std::vector<Vertex>& vertices,const std::vector<NNUInt>& indices,
+	static std::shared_ptr<Mesh> Create(const std::vector<Vertex>& vertices, const std::vector<NNUInt>& indices,
 		const std::vector<std::tuple<std::shared_ptr<Texture2D>, NNTextureType>>& textures);
 	//
 	void Draw();
