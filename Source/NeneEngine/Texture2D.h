@@ -3,6 +3,7 @@
 #define TEXTURE2D_H
 
 #include <vector>
+#include "Pixel.h"
 #include "Texture.h"
 
 //
@@ -20,8 +21,7 @@ public:
 	// Create texture with multi image paths as mipmaps
 	static std::shared_ptr<Texture2D> Create(std::vector<const NNChar*> filepaths);
 	// 
-	static std::shared_ptr<Texture2D> CreateFromMemory(const NNUInt& width, const NNUInt& height,
-		const NNUInt& iformat, const NNUInt& format, const NNUInt& type, const void *pInitData = nullptr);
+	static std::shared_ptr<Texture2D> CreateFromMemory(const NNUInt& width, const NNUInt& height, const NNPixelFormat& format, const void *pInitData = nullptr);
 	//
 	static std::shared_ptr<Texture2D> CreateMultisample(const NNUInt& width, const NNUInt& height, const NNUInt& samples, const NNUInt& iformat);
 	
@@ -34,6 +34,7 @@ public:
 	virtual void SavePixelData(const NNChar* filepath);
 
 protected:
+	NNPixelFormat m_format;
 	NNTextureMode mMode;
 	NNUInt m_width, m_height;
 

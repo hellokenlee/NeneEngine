@@ -4,6 +4,7 @@
 
 #include "Texture2D.h"
 #include "Types.h"
+#include "Pixel.h"
 #include <vector>
 #include <memory>
 
@@ -16,6 +17,7 @@ class RenderTarget
 public:
 	//
 	static std::shared_ptr<RenderTarget> Create(const NNUInt& width, const NNUInt& height, const NNUInt& count);
+	static std::shared_ptr<RenderTarget> Create(const NNUInt& width, const NNUInt& height, const NNUInt& count, const NNPixelFormat& format);
 	static std::shared_ptr<RenderTarget> CreateMultisample(const NNUInt& width, const NNUInt& height, const NNUInt& samples, const NNUInt& count);
 	//
 	static void Blit(const RenderTarget& src, const RenderTarget& dest, NNUInt field, NNUInt filter);
@@ -30,6 +32,8 @@ public:
 	virtual void Begin();
 	virtual void End();
 protected:
+	//
+	NNPixelFormat format;
 	//
 	NNUInt mCount;
 	NNUInt mWidth, mHeight;

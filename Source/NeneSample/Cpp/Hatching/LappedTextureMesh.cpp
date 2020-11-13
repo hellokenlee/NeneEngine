@@ -8,7 +8,7 @@
 using namespace std;
 
 #define COVERAGE_TEXTURE_SIZE 4096
-#define COVERAGE_ALPHA_THRESHOLD 10
+#define COVERAGE_ALPHA_THRESHOLD 1
 #define MAX_SOURCE_FACE_COUNT 16348
 
 
@@ -77,7 +77,7 @@ void LappedTextureMesh::CreateShaderAndTextures()
 	//
 	m_coverage_rtt = RenderTarget::Create(4096, 4096, 1);
 	m_coverage_shader = Shader::Create("Resource/Shader/GLSL/Coverage.vert", "Resource/Shader/GLSL/Coverage.frag", NNVertexFormat::POSITION_TEXTURE);
-	m_lapped_coord_rtt = RenderTarget::Create(4096, 4096, 1);
+	m_lapped_coord_rtt = RenderTarget::Create(4096, 4096, 1, NNPixelFormat::R32G32B32_FLOAT);
 	m_lapped_coord_shader = Shader::Create("Resource/Shader/GLSL/LappedCoord.vert", "Resource/Shader/GLSL/LappedCoord.frag", NNVertexFormat::POSITION_TEXTURE);
 	//
 	m_source_face_adjacencies_cachepath = "FaceAdjacencies.cache";
@@ -99,7 +99,11 @@ void LappedTextureMesh::ReadOBJFileAndBuildSourceFaceAdjacencies(const char* fil
 	vector<NNUInt> texcoords_indices;
 	while (fscanf(file, "%s", linebuff) != EOF)
 	{
-		if (linebuff[0] == 'v' and linebuff[1] == 'n')
+		if (linebuff[0] == 'm' and linebuff[0] == 't')
+		{
+			fgets(linebuff, 512, file);
+		}
+		else if (linebuff[0] == 'v' and linebuff[1] == 'n')
 		{
 			NNVec3 temp;
 			fscanf(file, "%f %f %f", &temp.x, &temp.y, &temp.z);
@@ -132,6 +136,10 @@ void LappedTextureMesh::ReadOBJFileAndBuildSourceFaceAdjacencies(const char* fil
 		{
 			fgets(linebuff, 512, file);
 		}
+		else if (linebuff[0] == 'o')
+		{
+			fgets(linebuff, 512, file);
+		}
 		else
 		{
 			fgets(linebuff, 512, file);
@@ -160,7 +168,7 @@ void LappedTextureMesh::ReadOBJFileAndBuildSourceFaceAdjacencies(const char* fil
 			if (vertex_map.find(vmkey) == vertex_map.end())
 			{
 				NNUInt idx = NNUInt(vertices.size());
-				vertices.push_back(Vertex{ positions[ip] * 30.0f, normal, texcoords[it] });
+				vertices.push_back(Vertex{ positions[ip], normal, texcoords[it] });
 				vertex_map[vmkey] = idx;
 			}
 			indices.push_back(vertex_map[vmkey]);
@@ -243,6 +251,7 @@ void LappedTextureMesh::DrawAndSaveLappedCoord()
 	m_lapped_coord_rtt->Begin();
 	{
 		Utils::Clear();
+		m_patch_texture->Use(0);
 		m_lapped_coord_shader->Use();
 		for (auto it = m_patches.rbegin(); it != m_patches.rend(); ++it)
 		{
@@ -251,7 +260,7 @@ void LappedTextureMesh::DrawAndSaveLappedCoord()
 	}
 	m_lapped_coord_rtt->End();
 
-	m_lapped_coord_rtt->GetColorTex(0)->SavePixelData("LappedCoord.png");
+	m_lapped_coord_rtt->GetColorTex(0)->SavePixelData("LappedCoord.exr");
 }
 
 void LappedTextureMesh::DrawAndCalcFaceCoverage()
@@ -299,9 +308,9 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 				continue;
 			}
 			//
-			NNByte b = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 0];
+			NNByte r = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 0];
 			NNByte g = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 1];
-			NNByte r = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 2];
+			NNByte b = bits[(y * COVERAGE_TEXTURE_SIZE * 4) + (x * 4) + 2];
 			//
 			NNUInt face = (NNUInt(r) << 8) + NNUInt(g);
 			//
@@ -327,7 +336,7 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 		if (faces_total_pixel[face] > 0)
 		{
 			float coverage = float(faces_covered_pixel[face]) / float(faces_total_pixel[face]);
-			if (coverage < 0.95f)
+			if (coverage < 0.99f)
 			{
 				faces_to_readd.insert(face);
 			}

@@ -3,6 +3,7 @@
 #define TEXTURE_H
 
 #include "Utils.h"
+#include "Pixel.h"
 #include <memory>
 
 //
@@ -17,7 +18,7 @@ public:
 	//
 	static std::shared_ptr<NNByte[]> LoadImage(const NNChar* filepath, NNUInt& width, NNUInt& height, NNColorFormat &format);
 	//
-	static void SaveImage(std::shared_ptr<NNByte[]> data, const NNUInt& width, const NNUInt& height, const NNColorFormat &format, const NNChar* filepath);
+	static void SaveImage(std::shared_ptr<NNByte[]> data, const NNUInt& width, const NNUInt& height, const NNPixelFormat &format, const NNChar* filepath);
 };
 
 #endif // TEXTURE_H

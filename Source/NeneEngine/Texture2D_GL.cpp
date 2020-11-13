@@ -26,13 +26,13 @@ Texture2D::~Texture2D()
 	}
 }
 
-shared_ptr<Texture2D> Texture2D::CreateFromMemory(const NNUInt& width, const NNUInt& height, const NNUInt& iformat, const NNUInt& format, const NNUInt& type, const void *pInitData)
+shared_ptr<Texture2D> Texture2D::CreateFromMemory(const NNUInt& width, const NNUInt& height, const NNPixelFormat& format, const void *init_data)
 {
 	//
 	GLuint texID = 0;
 	glGenTextures(1, &texID);
 	glBindTexture(GL_TEXTURE_2D, texID);
-		glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)iformat, width, height, 0, (GLenum)format, (GLenum)type, pInitData);
+		glTexImage2D(GL_TEXTURE_2D, 0, GetGLInternalFormat(format), width, height, 0, GetGLFormat(format), GetGLType(format), init_data);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -45,6 +45,7 @@ shared_ptr<Texture2D> Texture2D::CreateFromMemory(const NNUInt& width, const NNU
 	ret->mTextureID = texID;
 	ret->m_width = width;
 	ret->m_height = height;
+	ret->m_format = format;
 	return shared_ptr<Texture2D>(ret);
 }
 
@@ -123,6 +124,7 @@ shared_ptr<Texture2D> Texture2D::Create(vector<const NNChar*> filepaths)
 	ret->mTextureID = texID;
 	ret->m_width = width;
 	ret->m_height = height;
+	ret->m_format = NNPixelFormat::R8G8B8A8_UNORM;
 	return shared_ptr<Texture2D>(ret);
 }
 
@@ -170,11 +172,16 @@ shared_ptr<NNByte[]> Texture2D::GetPixelData()
 		return nullptr;
 	}
 	//
-	NNByte* buffer = new NNByte[m_width * m_height * 4 * sizeof(NNByte)];
+	NNUInt pixel_width = 4;
+	if (m_format == NNPixelFormat::R32G32B32_FLOAT)
+	{
+		pixel_width = 96;
+	}
+	NNByte* buffer = new NNByte[m_width * m_height * pixel_width * sizeof(NNByte)];
 	//
 	glBindTexture(GL_TEXTURE_2D, mTextureID);
 	{
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, buffer);
+		glGetTexImage(GL_TEXTURE_2D, 0, GetGLFormat(m_format), GetGLType(m_format), buffer);
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//
@@ -186,7 +193,7 @@ void Texture2D::SavePixelData(const NNChar* filepath)
 	shared_ptr<NNByte[]> bits = GetPixelData();
 	if (bits != nullptr)
 	{
-		SaveImage(bits, m_width, m_height, NNColorFormat::RGBA, filepath);
+		SaveImage(bits, m_width, m_height, m_format, filepath);
 	}
 }
 

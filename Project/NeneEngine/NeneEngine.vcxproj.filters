@@ -144,6 +144,12 @@
     <ClInclude Include="..\..\Source\NeneEngine\StaticMesh.h">
       <Filter>头文件\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\NeneEngine\Pixel.h">
+      <Filter>头文件\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NeneEngine\Pixel_GL_S.inl">
+      <Filter>头文件\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\NeneEngine\ConstantBuffer_DX.inl">
@@ -162,6 +168,9 @@
       <Filter>头文件\Engine</Filter>
     </None>
     <None Include="..\..\Source\NeneEngine\ParticleSystem_GL.inl">
+      <Filter>头文件\Engine</Filter>
+    </None>
+    <None Include="..\..\Source\NeneEngine\Pixel_GL_P.inl">
       <Filter>头文件\Engine</Filter>
     </None>
   </ItemGroup>

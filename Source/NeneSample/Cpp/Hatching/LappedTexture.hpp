@@ -123,11 +123,11 @@ namespace lappedtexture
 		auto controls = UserInterface::Create(DrawGraphicUserInterfaces);
 		//
 		cc->m_speed = 3.0f;
-		cc->SetYaw(0.3f);
-		cc->SetPitch(-0.3f);
-		cc->SetPosition(NNVec3(-4.7f, 4.7f, -0.2f));
+		cc->SetYaw(4.1f);
+		cc->SetPitch(-0.4f);
+		cc->SetPosition(NNVec3(3.1f, 6.0f, 5.6f));
 		//
-		auto bunny = StaticMesh::Create("Resource/Mesh/bunny/bunny_with_uv.obj", 30.0f);
+		auto bunny = StaticMesh::Create("Resource/Mesh/bunny/bunny_with_uv.obj");
 		//
 		auto shader_debug = Shader::Create("Resource/Shader/GLSL/Debug.vert", "Resource/Shader/GLSL/Debug.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE, true);
 		shader_debug->AddOptionalShader("Resource/Shader/GLSL/Debug.geom", NNShaderType::GEOMETRY_SHADER, true);

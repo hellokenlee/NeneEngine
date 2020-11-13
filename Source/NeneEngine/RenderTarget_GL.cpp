@@ -15,8 +15,14 @@ RenderTarget::~RenderTarget() {
 
 shared_ptr<RenderTarget> RenderTarget::Create(const NNUInt& width, const NNUInt& height, const NNUInt& count)
 {
+	return Create(width, height, count, NNPixelFormat::R8G8B8A8_UNORM);
+}
+
+shared_ptr<RenderTarget> RenderTarget::Create(const NNUInt& width, const NNUInt& height, const NNUInt& count, const NNPixelFormat& format)
+{
 	// 
 	RenderTarget *ret = new RenderTarget();
+	ret->format = format;
 	ret->mWidth = width;
 	ret->mHeight = height;
 	// Framebuffer
@@ -26,32 +32,34 @@ shared_ptr<RenderTarget> RenderTarget::Create(const NNUInt& width, const NNUInt&
 	// Color textures
 	for (unsigned int i = 0; i < count; ++i)
 	{
-		ret->mColorTexes.push_back(Texture2D::CreateFromMemory(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE));
+		ret->mColorTexes.push_back(Texture2D::CreateFromMemory(width, height, format));
 	}
 	// DepthStencil textures
-	ret->mDepthStencilTex = Texture2D::CreateFromMemory(width, height, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
+	ret->mDepthStencilTex = Texture2D::CreateFromMemory(width, height, NNPixelFormat::D24S8_UNORM);
 	// 
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-		// Bind as color attacments
-		vector<unsigned int> attachments;
-		for (unsigned int i = 0; i < count; ++i) {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, ret->mColorTexes[i]->mTextureID, 0);
-			attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
-		}
-		// Bind as depthstencil attacments
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, ret->mDepthStencilTex->mTextureID, 0);
-		// 
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-			dLog("[Error] Framebuffer init faild!");
-			delete ret;
-			return nullptr;
-		}
-		// Check if multi render targets is used
-		glDrawBuffers((NNUInt)attachments.size(), attachments.data());
+	// Bind as color attacments
+	vector<unsigned int> attachments;
+	for (unsigned int i = 0; i < count; ++i) {
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, ret->mColorTexes[i]->mTextureID, 0);
+		attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
+	}
+	// Bind as depthstencil attacments
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, ret->mDepthStencilTex->mTextureID, 0);
+	// 
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		dLog("[Error] Framebuffer init faild!");
+		delete ret;
+		return nullptr;
+	}
+	// Check if multi render targets is used
+	glDrawBuffers((NNUInt)attachments.size(), attachments.data());
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// 
 	return shared_ptr<RenderTarget>(ret);
 }
+
+
 
 void RenderTarget::Blit(const RenderTarget& src, const RenderTarget& dest, NNUInt field, NNUInt filter) {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest.mFBO);
@@ -133,7 +141,7 @@ void RenderTarget::SavePixelData(const NNChar* filepath)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//
 	shared_ptr<NNByte[]> bits = shared_ptr<NNByte[]>(buffer);
-	Texture::SaveImage(bits, mWidth, mHeight, NNColorFormat::RGBA, filepath);
+	Texture::SaveImage(bits, mWidth, mHeight, format, filepath);
 }
 
 

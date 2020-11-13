@@ -6,11 +6,21 @@
 using namespace std;
 
 
-void Texture::SaveImage(std::shared_ptr<NNByte[]> bits, const NNUInt& width, const NNUInt& height, const NNColorFormat &format, const NNChar* filepath)
+void Texture::SaveImage(std::shared_ptr<NNByte[]> bits, const NNUInt& width, const NNUInt& height, const NNPixelFormat &format, const NNChar* filepath)
 {
-	int bpp = 32;
-	int pitch = ((((bpp * width) + 31) / 32) * 4);
-	FIBITMAP *p_image = FreeImage_ConvertFromRawBits(bits.get(), width, height, pitch, bpp, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK);
+	FIBITMAP *p_image = nullptr;
+	if (format == NNPixelFormat::R32G32B32_FLOAT)
+	{
+		int bpp = 8 * sizeof(FIRGBF);
+		int pitch = ((((bpp * width) + 31) / 32) * 4);
+		p_image = FreeImage_ConvertFromRawBitsEx(true, bits.get(), FIT_RGBF, width, height, pitch, bpp, 0, 0, 0);
+	}
+	else if (format == NNPixelFormat::R8G8B8A8_UNORM)
+	{
+		int bpp = 32;
+		int pitch = ((((bpp * width) + 31) / 32) * 4);
+		p_image = FreeImage_ConvertFromRawBits(bits.get(), width, height, pitch, bpp, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK);
+	}
 	if (p_image != nullptr)
 	{
 		FREE_IMAGE_FORMAT format = FreeImage_GetFIFFromFilename(filepath);

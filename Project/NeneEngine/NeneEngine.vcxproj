@@ -248,6 +248,8 @@
     <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_rect_pack.h" />
     <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_textedit.h" />
     <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_truetype.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\Pixel.h" />
+    <ClInclude Include="..\..\Source\NeneEngine\Pixel_GL_S.inl" />
     <ClInclude Include="..\..\Source\NeneEngine\UserInterface.h" />
     <ClInclude Include="..\..\Source\NeneEngine\IO.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Keyboard.h" />
@@ -280,6 +282,7 @@
     <None Include="..\..\Source\NeneEngine\CoordinateAxesShader_GL.inl" />
     <None Include="..\..\Source\NeneEngine\ParticleSystem_DX.inl" />
     <None Include="..\..\Source\NeneEngine\ParticleSystem_GL.inl" />
+    <None Include="..\..\Source\NeneEngine\Pixel_GL_P.inl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\NeneEngine\Camera.cpp" />
