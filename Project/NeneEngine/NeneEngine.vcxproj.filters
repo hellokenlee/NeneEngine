@@ -307,6 +307,12 @@
     <ClCompile Include="..\..\Source\NeneEngine\StaticMesh.cpp">
       <Filter>源文件\Engine</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\NeneEngine\Event.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NeneEngine\Light.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\NeneEngine\Sampler_GL.cpp">
       <Filter>源文件\Engine</Filter>
     </ClCompile>

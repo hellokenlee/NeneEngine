@@ -250,6 +250,7 @@
     <ClInclude Include="..\..\Source\NeneEngine\ImGui\stb_truetype.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Pixel.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Pixel_GL_S.inl" />
+    <ClInclude Include="..\..\Source\NeneEngine\Sampler.h" />
     <ClInclude Include="..\..\Source\NeneEngine\UserInterface.h" />
     <ClInclude Include="..\..\Source\NeneEngine\IO.h" />
     <ClInclude Include="..\..\Source\NeneEngine\Keyboard.h" />
@@ -297,6 +298,7 @@
     <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_draw.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\ImGui\imgui_impl_glfw_gl3.cpp" />
+    <ClCompile Include="..\..\Source\NeneEngine\Sampler_GL.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\Texture3D_GL.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\UserInterface_DX.cpp" />
     <ClCompile Include="..\..\Source\NeneEngine\UserInterface_GL.cpp" />
