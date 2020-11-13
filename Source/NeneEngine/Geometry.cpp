@@ -13,8 +13,8 @@ struct NNUVec3 {
 
 void Geometry::InvertIndexOrder(NNUInt *indices, NNUInt iNum)
 {
-	dLogIf(iNum % 3 != 0, "[Error] Inverting vertex order of a non-trianglized mesh may cause undefine behavior.\n");
-	for (NNUInt v = 0; v < iNum / 3; ++v) 
+	dLogIf(iNum % 3 != 0, "[Error] Inverting vertex order of a non-trianglized mesh may cause undefine behavior.");
+	for (NNUInt v = 0; v < iNum / 3; ++v)
 	{
 		swap(indices[3 * v + 1], indices[3 * v + 2]);
 	}
@@ -61,20 +61,20 @@ shared_ptr<Shape> Geometry::CreateSphereIco(const NNUInt& level, NNVertexOrder v
 	NNFloat s = 1.0f / len;
 	// 3个互相垂直的长方形
 	// XoY平面上
-	vertices.push_back(NNVec3(-s,  t, 0.0f));
-	vertices.push_back(NNVec3( s,  t, 0.0f));
+	vertices.push_back(NNVec3(-s, t, 0.0f));
+	vertices.push_back(NNVec3(s, t, 0.0f));
 	vertices.push_back(NNVec3(-s, -t, 0.0f));
-	vertices.push_back(NNVec3( s, -t, 0.0f));
+	vertices.push_back(NNVec3(s, -t, 0.0f));
 	// YoZ平面上
-	vertices.push_back(NNVec3(0.0f, -s,  t));
-	vertices.push_back(NNVec3(0.0f,  s,  t));
+	vertices.push_back(NNVec3(0.0f, -s, t));
+	vertices.push_back(NNVec3(0.0f, s, t));
 	vertices.push_back(NNVec3(0.0f, -s, -t));
-	vertices.push_back(NNVec3(0.0f,  s, -t));
+	vertices.push_back(NNVec3(0.0f, s, -t));
 	// XoZ平面上
-	vertices.push_back(NNVec3( t, 0.0f, -s));
-	vertices.push_back(NNVec3( t, 0.0f,  s));
+	vertices.push_back(NNVec3(t, 0.0f, -s));
+	vertices.push_back(NNVec3(t, 0.0f, s));
 	vertices.push_back(NNVec3(-t, 0.0f, -s));
-	vertices.push_back(NNVec3(-t, 0.0f,  s));
+	vertices.push_back(NNVec3(-t, 0.0f, s));
 
 	// 索引数组
 	vector<NNUVec3> faces;
@@ -120,16 +120,16 @@ shared_ptr<Shape> Geometry::CreateSphereIco(const NNUInt& level, NNVertexOrder v
 			faces2.push_back(NNUVec3(p1, a, c));
 			faces2.push_back(NNUVec3(p2, b, a));
 			faces2.push_back(NNUVec3(p3, c, b));
-			faces2.push_back(NNUVec3(a,  b, c));
+			faces2.push_back(NNUVec3(a, b, c));
 		}
 		faces = faces2;// 细分后的面取代原来的面
 	}
 	if (vo == CLOCK_WISE) {
 		InvertIndexOrder(&faces[0].x, (NNUInt)faces.size() * 3);
 	}
-	dLog("[Info] Create icosphere with level %d :\n", level);
-	dLog("    Vertices Num: %zd \n", vertices.size());
-	dLog("    Faces Num: %zd \n", faces.size());
+	dLog("[Info] Create icosphere with level %d :", level);
+	dLog("    Vertices Num: %zd ", vertices.size());
+	dLog("    Faces Num: %zd ", faces.size());
 	// 计算纹理坐标
 	vector<NNFloat> verticesPNT;
 	for (NNUInt f = 0; f < faces.size(); ++f) {
@@ -155,15 +155,15 @@ shared_ptr<Shape> Geometry::CreateSphereIco(const NNUInt& level, NNVertexOrder v
 		NNVec3 tmp = NNVec3(u[2], v[2], 0.0f) - NNVec3(u[0], v[0], 0.0f);
 
 		NNVec3 texNormal = NNCross(-tmp, NNVec3(u[1], v[1], 0.0f) - NNVec3(u[0], v[0], 0.0f));
-		
+
 		if (texNormal.z < 0) {
 			ddLog("    Triangle (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f):\n ", x[0], y[0], z[0], x[1], y[1], z[1], x[2], y[2], z[2]);
-			ddLog("    Have UV:(%.2f, %.2f) , (%.2f, %.2f) , (%.2f, %.2f): \n", u[0], v[0], u[1], v[1], u[2], v[2]);
+			ddLog("    Have UV:(%.2f, %.2f) , (%.2f, %.2f) , (%.2f, %.2f): ", u[0], v[0], u[1], v[1], u[2], v[2]);
 			for (int i = 0; i < 3; ++i) {
 				if (u[i] < 0.5)
 					u[i] += 1.0;
 			}
-			ddLog("    Fixed UV:(%.2f, %.2f) , (%.2f, %.2f) , (%.2f, %.2f): \n\n", u[0], v[0], u[1], v[1], u[2], v[2]);
+			ddLog("    Fixed UV:(%.2f, %.2f) , (%.2f, %.2f) , (%.2f, %.2f): \n", u[0], v[0], u[1], v[1], u[2], v[2]);
 		}
 		if (isPole) {
 			u[poleVertex] = (u[(poleVertex + 1) % 3] + u[(poleVertex + 2) % 3]) / 2;
@@ -183,7 +183,7 @@ shared_ptr<Shape> Geometry::CreateSphereIco(const NNUInt& level, NNVertexOrder v
 			verticesPNT.push_back(v[i]);
 		}
 	}
-	dLog("    Total Render vertices number(without indexing): %zd \n\n", verticesPNT.size() / 8);
+	dLog("    Total Render vertices number(without indexing): %zd \n", verticesPNT.size() / 8);
 	return Shape::Create(verticesPNT, POSITION_NORMAL_TEXTURE);
 }
 
@@ -209,12 +209,12 @@ shared_ptr<Shape> Geometry::CreateSphereUV(const NNUInt& latLines, const NNUInt&
 		for (NNUInt j = 0; j < longLines; ++j) {
 			// 通过单位Z+向量绕X轴旋转然后绕Z轴旋转得到
 			sphereYaw = j * (M_PI_TIMES_2 / (NNFloat)longLines);
-			NNMat4 rotZ = NNMat4Identity; 
+			NNMat4 rotZ = NNMat4Identity;
 			rotZ = NNCreateRotationZ(rotZ, sphereYaw);
 			currVertPos = NNMat4MulVec4(rotZ, NNMat4MulVec4(rotX, NNVec4(0.0f, 0.0f, 1.0f, 1.0f)));
 			vertices[i * longLines + j + 1] = NNNormalize(NNVec3(currVertPos));
 		}
-	} 
+	}
 	// 收尾
 	vertices[vNum - 1] = NNVec3(0.0f, 0.0f, -1.0f);
 	// 把四边形拆分成两个三角形
@@ -280,10 +280,10 @@ shared_ptr<Shape> Geometry::CreateSphereUV(const NNUInt& latLines, const NNUInt&
 		verticesPNT.push_back(0.5f - asinf(vertices[i].y) / M_PI);
 	}
 	//
-	dLog("[Info] Create uv-sphere with %d latlines, %d longlines:\n", latLines, longLines);
-	dLog("    Vertices Num: %zd \n", vertices.size());
-	dLog("    Faces Num: %zd \n", indices.size() / 3);
-	dLog("    Total Render vertices number: %zd \n\n", indices.size());
+	dLog("[Info] Create uv-sphere with %d latlines, %d longlines:", latLines, longLines);
+	dLog("    Vertices Num: %zd ", vertices.size());
+	dLog("    Faces Num: %zd ", indices.size() / 3);
+	dLog("    Total Render vertices number: %zd \n", indices.size());
 	//
 	if (vo == CLOCK_WISE) {
 		InvertIndexOrder(indices.data(), (NNUInt)indices.size());
@@ -298,35 +298,35 @@ shared_ptr<Shape> Geometry::CreateCube(NNVertexOrder vo) {
 	static vector<NNFloat> vertices = {
 		// POSITION_XYZ         NORMAL_XYZ          TEXTURE_UV
 		//前面
-		-1.0f, -1.0f,  1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f, 
+		-1.0f, -1.0f,  1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f,
 		-1.0f,  1.0f,  1.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
 		 1.0f,  1.0f,  1.0f,   0.0f, 0.0f, 1.0f,   1.0f, 0.0f,
 		 1.0f, -1.0f,  1.0f,   0.0f, 0.0f, 1.0f,   1.0f, 1.0f,
-		// 后面
-		-1.0f, -1.0f, -1.0f,   0.0f, 0.0f,-1.0f,   1.0f, 1.0f,
-		 1.0f, -1.0f, -1.0f,   0.0f, 0.0f,-1.0f,   0.0f, 1.0f,
-		 1.0f,  1.0f, -1.0f,   0.0f, 0.0f,-1.0f,   0.0f, 0.0f,
-		-1.0f,  1.0f, -1.0f,   0.0f, 0.0f,-1.0f,   1.0f, 0.0f,
-		// 上面
-		-1.0f,  1.0f, -1.0f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
-		-1.0f,  1.0f,  1.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
-		 1.0f,  1.0f,  1.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-		 1.0f,  1.0f, -1.0f,   0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
-		// 下面
-		-1.0f, -1.0f, -1.0f,   0.0f,-1.0f, 0.0f,   0.0f, 1.0f,
-		-1.0f, -1.0f,  1.0f,   0.0f,-1.0f, 0.0f,   0.0f, 0.0f,
-		 1.0f, -1.0f,  1.0f,   0.0f,-1.0f, 0.0f,   1.0f, 0.0f,
-		 1.0f, -1.0f, -1.0f,   0.0f,-1.0f, 0.0f,   1.0f, 1.0f,
-		// 左边
-		-1.0f, -1.0f, -1.0f,  -1.0f, 0.0f, 0.0f,   0.0f, -1.0f,
-		-1.0f, -1.0f,  1.0f,  -1.0f, 0.0f, 0.0f,   0.0f,  0.0f,
-		-1.0f,  1.0f,  1.0f,  -1.0f, 0.0f, 0.0f,   1.0f,  0.0f,
-		-1.0f,  1.0f, -1.0f,  -1.0f, 0.0f, 0.0f,   1.0f, -1.0f,
-		// 右边
-		 1.0f, -1.0f, -1.0f,   1.0f, 0.0f, 0.0f,   0.0f, 1.0f,
-		 1.0f, -1.0f,  1.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
-		 1.0f,  1.0f,  1.0f,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f,
-		 1.0f,  1.0f, -1.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f
+		 // 后面
+		 -1.0f, -1.0f, -1.0f,   0.0f, 0.0f,-1.0f,   1.0f, 1.0f,
+		  1.0f, -1.0f, -1.0f,   0.0f, 0.0f,-1.0f,   0.0f, 1.0f,
+		  1.0f,  1.0f, -1.0f,   0.0f, 0.0f,-1.0f,   0.0f, 0.0f,
+		 -1.0f,  1.0f, -1.0f,   0.0f, 0.0f,-1.0f,   1.0f, 0.0f,
+		 // 上面
+		 -1.0f,  1.0f, -1.0f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+		 -1.0f,  1.0f,  1.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
+		  1.0f,  1.0f,  1.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+		  1.0f,  1.0f, -1.0f,   0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+		  // 下面
+		  -1.0f, -1.0f, -1.0f,   0.0f,-1.0f, 0.0f,   0.0f, 1.0f,
+		  -1.0f, -1.0f,  1.0f,   0.0f,-1.0f, 0.0f,   0.0f, 0.0f,
+		   1.0f, -1.0f,  1.0f,   0.0f,-1.0f, 0.0f,   1.0f, 0.0f,
+		   1.0f, -1.0f, -1.0f,   0.0f,-1.0f, 0.0f,   1.0f, 1.0f,
+		   // 左边
+		   -1.0f, -1.0f, -1.0f,  -1.0f, 0.0f, 0.0f,   0.0f, -1.0f,
+		   -1.0f, -1.0f,  1.0f,  -1.0f, 0.0f, 0.0f,   0.0f,  0.0f,
+		   -1.0f,  1.0f,  1.0f,  -1.0f, 0.0f, 0.0f,   1.0f,  0.0f,
+		   -1.0f,  1.0f, -1.0f,  -1.0f, 0.0f, 0.0f,   1.0f, -1.0f,
+		   // 右边
+			1.0f, -1.0f, -1.0f,   1.0f, 0.0f, 0.0f,   0.0f, 1.0f,
+			1.0f, -1.0f,  1.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
+			1.0f,  1.0f,  1.0f,   1.0f, 0.0f, 0.0f,   1.0f, 0.0f,
+			1.0f,  1.0f, -1.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f
 	};
 	// 立方体索引
 	static vector<NNUInt> indices = {
@@ -374,7 +374,7 @@ shared_ptr<Shape> Geometry::CreateQuad(NNVertexOrder vo) {
 }
 
 void Geometry::CalcNormals(vector<NNFloat> &vertices, vector<NNUInt> &indices) {
-	dLog("[Info] Generating Normals...\n");
+	dLog("[Info] Generating Normals...");
 	// 初始化
 	vector<NNVec3> faceNormals;
 	NNUInt facesNum = (NNUInt)indices.size() / 3;
@@ -423,5 +423,5 @@ void Geometry::CalcNormals(vector<NNFloat> &vertices, vector<NNUInt> &indices) {
 		vertices[i * POSITION_NORMAL_TEXTURE + 4] = normalSum.y;
 		vertices[i * POSITION_NORMAL_TEXTURE + 5] = normalSum.z;
 	}
-	dLog("Done!\n");
+	dLog("Done!");
 }

@@ -134,6 +134,9 @@ namespace lappedtexture
 		auto shader_flat = Shader::Create("Resource/Shader/GLSL/Flat.vert", "Resource/Shader/GLSL/Flat.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
 		//
 		auto shader_3d_color = Shader::Create("Resource/Shader/GLSL/3DColor.vert", "Resource/Shader/GLSL/3DColor.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
+		auto shader_flatten_uv = Shader::Create("Resource/Shader/GLSL/FlattenUV.vert", "Resource/Shader/GLSL/FlattenUV.frag", NNVertexFormat::POSITION_NORMAL_TEXTURE);
+		//
+		auto rtt_flatten_uv = RenderTarget::Create(4096, 4096, 1, NNPixelFormat::B8G8R8A8_UNORM);
 		//
 		ConstantBuffer<LightCBDS> LightConstantBuffer;
 		LightConstantBuffer.Data().ltype = 123.456f;
@@ -184,7 +187,7 @@ namespace lappedtexture
 					g_lapped_mesh->DrawDebug(g_viewing_patch_index);
 				}
 				
-				//
+				// Draw face coverage
 				{
 					g_lapped_mesh->DrawAndCalcFaceCoverage();
 				}
@@ -200,18 +203,27 @@ namespace lappedtexture
 					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				}
 
-				// Highlight Re-add Faces
-				if (NNUInt(g_viewing_patch_index) < g_lapped_mesh->PatchCount())
+				if (g_need_snap_texcoord)
 				{
-					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-					CustomConstantBuffer.Data().color = NNVec4(1.0, 1.0, 0.0, 1.0);
-					CustomConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_DATA_SLOT);
-					shader_3d_color->Use();
-					g_lapped_mesh->DrawDebugReaddFaces(g_viewing_patch_index);
-					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+					if (NNUInt(g_viewing_patch_index) < g_lapped_mesh->PatchCount())
+					{
+						g_lapped_mesh->DrawAndSaveLappedCoord();
+					}
+
+					rtt_flatten_uv->Begin();
+					{
+						Utils::Clear(0.0f, 0.0f, 0.0f, 0.0f);
+						bunny->Draw(shader_flatten_uv);
+					}
+					rtt_flatten_uv->End();
+					rtt_flatten_uv->GetColorTex(0)->SavePixelData("FlattenCoord.png");
+	
+					g_need_snap_texcoord = false;
 				}
 			}
 			
+
+
 			// Interface Pass
 			{
 				g_camera_pos = cc->GetCamera()->GetPosition();
@@ -258,14 +270,6 @@ namespace lappedtexture
 						}
 					}
 				}
-			}
-			if (g_need_snap_texcoord)
-			{
-				if (NNUInt(g_viewing_patch_index) < g_lapped_mesh->PatchCount())
-				{
-					g_lapped_mesh->DrawAndSaveLappedCoord();
-				}
-				g_need_snap_texcoord = false;
 			}
 		}
 		

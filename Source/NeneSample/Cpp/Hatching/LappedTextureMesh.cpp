@@ -77,7 +77,8 @@ void LappedTextureMesh::CreateShaderAndTextures()
 	//
 	m_coverage_rtt = RenderTarget::Create(4096, 4096, 1);
 	m_coverage_shader = Shader::Create("Resource/Shader/GLSL/Coverage.vert", "Resource/Shader/GLSL/Coverage.frag", NNVertexFormat::POSITION_TEXTURE);
-	m_lapped_coord_rtt = RenderTarget::Create(4096, 4096, 1, NNPixelFormat::R32G32B32_FLOAT);
+	//
+	m_lapped_coord_rtt = RenderTarget::Create(4096, 4096, 1, NNPixelFormat::B8G8R8A8_UNORM);
 	m_lapped_coord_shader = Shader::Create("Resource/Shader/GLSL/LappedCoord.vert", "Resource/Shader/GLSL/LappedCoord.frag", NNVertexFormat::POSITION_TEXTURE);
 	//
 	m_source_face_adjacencies_cachepath = "FaceAdjacencies.cache";
@@ -233,12 +234,14 @@ void LappedTextureMesh::Draw()
 
 void LappedTextureMesh::DrawDebug(const NNUInt& i)
 {
+	// Texture Preview TopLeft Conner
 	{
 		m_patch_texture->Use(0);
 		m_texture_debug_shader->Use();
 		m_debug_quad->Draw();
 	}
 	
+	// Patch Line Preview TopLeft Conner
 	m_patch_debug_shader->Use();
 	if(i < m_patches.size())
 	{
@@ -248,19 +251,11 @@ void LappedTextureMesh::DrawDebug(const NNUInt& i)
 	}
 }
 
-void LappedTextureMesh::DrawDebugReaddFaces(const NNUInt& i)
-{
-	if (i < m_debug_readd_faces_meshes.size())
-	{
-		m_debug_readd_faces_meshes[i]->Draw();
-	}
-}
-
 void LappedTextureMesh::DrawAndSaveLappedCoord()
 {
 	m_lapped_coord_rtt->Begin();
 	{
-		Utils::Clear();
+		Utils::Clear(0.0f, 0.0f, 0.0f, 0.0f);
 		m_patch_texture->Use(0);
 		m_lapped_coord_shader->Use();
 		for (auto it = m_patches.rbegin(); it != m_patches.rend(); ++it)
@@ -270,7 +265,7 @@ void LappedTextureMesh::DrawAndSaveLappedCoord()
 	}
 	m_lapped_coord_rtt->End();
 
-	m_lapped_coord_rtt->GetColorTex(0)->SavePixelData("LappedCoord.exr");
+	m_lapped_coord_rtt->GetColorTex(0)->SavePixelData("LappedCoord.png");
 }
 
 void LappedTextureMesh::DrawAndCalcFaceCoverage()
@@ -284,7 +279,7 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 	//
 	m_coverage_rtt->Begin();
 	{
-		Utils::Clear(0.0, 0.0, 0.0, 0.0);
+		Utils::Clear(0.0f, 0.0f, 0.0f, 0.0f);
 		m_coverage_shader->Use();
 		m_patch_texture->Use(0);
 		for (const auto& patch : m_patches)
@@ -304,11 +299,7 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 		candidate_faces.set(face);
 	}
 	//
-	array<NNUInt, MAX_SOURCE_FACE_COUNT> faces_total_pixel {};
-	array<NNUInt, MAX_SOURCE_FACE_COUNT> faces_covered_pixel {};
-	//
 	std::unordered_set<NNUInt> faces_to_readd;
-	std::unordered_set<NNUInt> faces_fully_covered;
 	//
 	for (NNUInt y = 0; y < COVERAGE_TEXTURE_SIZE; ++y)
 	{

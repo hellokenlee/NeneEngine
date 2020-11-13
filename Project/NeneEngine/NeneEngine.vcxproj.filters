@@ -150,6 +150,9 @@
     <ClInclude Include="..\..\Source\NeneEngine\Pixel_GL_S.inl">
       <Filter>头文件\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\NeneEngine\Sampler.h">
+      <Filter>头文件\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\NeneEngine\ConstantBuffer_DX.inl">
@@ -188,9 +191,6 @@
       <Filter>源文件\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\NeneEngine\Drawable.cpp">
-      <Filter>源文件\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\NeneEngine\Event.cpp">
       <Filter>源文件\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\NeneEngine\Geometry.cpp">
@@ -280,9 +280,6 @@
     <ClCompile Include="..\..\Source\NeneEngine\ConstantBufferPool_GL.cpp">
       <Filter>源文件\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\NeneEngine\Light.cpp">
-      <Filter>源文件\Engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\NeneEngine\ShadowMap.cpp">
       <Filter>源文件\Engine</Filter>
     </ClCompile>
@@ -308,6 +305,9 @@
       <Filter>源文件\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\NeneEngine\StaticMesh.cpp">
+      <Filter>源文件\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NeneEngine\Sampler_GL.cpp">
       <Filter>源文件\Engine</Filter>
     </ClCompile>
   </ItemGroup>

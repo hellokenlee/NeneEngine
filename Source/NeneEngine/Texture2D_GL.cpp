@@ -98,16 +98,17 @@ shared_ptr<Texture2D> Texture2D::Create(vector<const NNChar*> filepaths)
 			const char* filepath = filepaths[idx];
 			shared_ptr<NNByte[]> image_data = nullptr;
 			//
-			NNColorFormat format;
+			NNUInt bpp;
+			NNPixelFormat format;
 			//
-			image_data = LoadImage(filepath, width, height, format);
+			image_data = LoadImage(filepath, width, height, bpp, format);
 			if (image_data == nullptr || width == 0 || height == 0)
 			{
 				dLog("[Error] Broken image data! Could not load texture(%s)\n", filepath);
 				continue;
 			}
 			//
-			glTexImage2D(GL_TEXTURE_2D, idx, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, image_data.get());
+			glTexImage2D(GL_TEXTURE_2D, idx, GetGLInternalFormat(format), width, height, 0, GetGLFormat(format), GetGLType(format), image_data.get());
 		}
 		//
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -134,32 +135,14 @@ void Texture2D::Use(const NNUInt& slot)
 	glBindTexture(GL_TEXTURE_2D, mTextureID);
 }
 
-void Texture2D::SetMode(NNTextureMode m)
+void Texture2D::SetSampler(std::shared_ptr<Sampler> sampler)
 {
-	if (m == mMode) {
-		return;
-	}
 	glBindTexture(GL_TEXTURE_2D, mTextureID);
-	switch (m)
 	{
-	case AS_COLOR:
-		// 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		break;
-	case AS_DEPTH:
-		// 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
-		break;
-	case AS_STENCIL:
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_STENCIL_TEXTURE_MODE, GL_DEPTH_COMPONENT);
-		break;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampler->m_mag_filter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampler->m_min_filter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, sampler->m_wrap_u);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, sampler->m_wrap_v);
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 }

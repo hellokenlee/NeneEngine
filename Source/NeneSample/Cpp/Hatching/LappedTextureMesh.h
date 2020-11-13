@@ -24,7 +24,6 @@ public:
 	//
 	void Draw();
 	void DrawDebug(const NNUInt& i);
-	void DrawDebugReaddFaces(const NNUInt& i);
 	void DrawAndSaveLappedCoord();
 	void DrawAndCalcFaceCoverage();
 

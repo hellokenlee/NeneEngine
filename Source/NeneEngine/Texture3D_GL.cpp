@@ -67,18 +67,20 @@ shared_ptr<Texture3D> Texture3D::Create(const std::vector<std::vector<string>>& 
 		for (NNUInt mip = 0; mip < mipmapfilepaths.size(); ++mip)
 		{
 			// Read image data for a mip
-			NNInt width = -1, height = -1, format = -1;
+			NNInt bpp = -1, width = -1, height = -1;
+			NNPixelFormat format = NNPixelFormat::INVALID;
 			vector<shared_ptr<NNByte[]>> images;
 			for (NNUInt idx = 0; idx < mipmapfilepaths[mip].size(); ++idx)
 			{
 				const string& filepath = mipmapfilepaths[mip][idx];
-				NNUInt currwidth, currheight;
-				NNColorFormat currformat;
-				shared_ptr<NNByte[]> currimage = LoadImage(filepath.c_str(), currwidth, currheight, currformat);
+				NNUInt currwidth, currheight, currbpp;
+				NNPixelFormat currformat;
+				shared_ptr<NNByte[]> currimage = LoadImage(filepath.c_str(), currwidth, currheight, currbpp, currformat);
+				bpp = (bpp == -1 ? currbpp : bpp);
 				width = (width == -1 ? currwidth : width);
 				height = (height == -1 ? currheight : height);
-				format = (format == -1 ? currformat : format);
-				if (currimage == nullptr || width != currwidth || height != currheight || format != currformat)
+				format = (format == NNPixelFormat::INVALID ? currformat : format);
+				if (currimage == nullptr || bpp != currbpp ||  width != currwidth || height != currheight || format != currformat)
 				{
 					dLog("[Error] Unaligned image for texture 3d!");
 					return nullptr;
@@ -87,18 +89,16 @@ shared_ptr<Texture3D> Texture3D::Create(const std::vector<std::vector<string>>& 
 			}
 			// Copy all image data
 			NNUInt depth = (NNUInt)images.size();
-			NNUInt byteprepixel = 4;
-			GLenum glimagedataformat = GL_BGRA;
 			//
 			shared_ptr<NNByte[]> imagedata = nullptr;
-			NNUInt datasize = width * height * byteprepixel;
+			NNUInt datasize = width * height * (bpp / 8);
 			imagedata = shared_ptr<NNByte[]>(new NNByte[datasize * depth]);
 			for (NNUInt idx = 0; idx < depth; ++idx)
 			{
 				memcpy(imagedata.get() + datasize * idx, images[idx].get(), datasize);
 			}
 			//
-			glTexImage3D(GL_TEXTURE_3D, mip, GL_RGBA, width, height, depth, 0, GL_BGRA, GL_UNSIGNED_BYTE, imagedata.get());
+			glTexImage3D(GL_TEXTURE_3D, mip, GetGLInternalFormat(format), width, height, depth, 0, GetGLFormat(format), GetGLType(format), imagedata.get());
 		}
 		//
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);

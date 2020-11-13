@@ -6,11 +6,11 @@
 #include "Types.h"
 #include "Debug.h"
 
-// NNPixelFormat: 32 bits = 8 bits (GL Type) + 8 bits (GL format) + 16 bits (GL InternalFormat)
-
+// 32 bits = 8 bits (GL Type) + 8 bits (GL format) + 16 bits (GL InternalFormat)
 #define PixelFormatEnum(ptype, pformat, iformat) MakePixelFormatEnumInternal(GL_##ptype, GL_##pformat, GL_##iformat)	
 
 constexpr GLenum GLPixelFormatTypes[] = {
+	GL_INVALID_VALUE,
 	GL_UNSIGNED_BYTE,
 	GL_BYTE,
 	GL_UNSIGNED_SHORT,
@@ -30,14 +30,20 @@ constexpr GLenum GLPixelFormatTypes[] = {
 };
 
 constexpr GLenum GLPixelFormatFormats[] = {
+	GL_INVALID_VALUE,
 	GL_RED,
-	GL_RED_INTEGER,
 	GL_RG,
-	GL_RG_INTEGER,
 	GL_RGB,
-	GL_RGB_INTEGER,
+	GL_BGR,
 	GL_RGBA,
+	GL_BGRA,
+	GL_RED_INTEGER,
+	GL_RG_INTEGER,
+	GL_RGB_INTEGER,
+	GL_BGR_INTEGER,
 	GL_RGBA_INTEGER,
+	GL_BGRA_INTEGER,
+	GL_STENCIL_INDEX,
 	GL_DEPTH_COMPONENT,
 	GL_DEPTH_STENCIL,
 	GL_LUMINANCE_ALPHA,
@@ -46,6 +52,7 @@ constexpr GLenum GLPixelFormatFormats[] = {
 };
 
 constexpr GLenum GLPixelFormatInternalFormats[] = {
+	GL_INVALID_VALUE,
 	GL_RGB,
 	GL_RGBA,
 	GL_LUMINANCE_ALPHA,

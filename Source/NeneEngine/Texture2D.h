@@ -5,6 +5,7 @@
 #include <vector>
 #include "Pixel.h"
 #include "Texture.h"
+#include "Sampler.h"
 
 //
 //    Texture2D: Single Image Texture Class
@@ -28,7 +29,7 @@ public:
 	// 
 	virtual void Use(const NNUInt& slot = 0);
 	// 
-	virtual void SetMode(NNTextureMode m);
+	virtual void SetSampler(std::shared_ptr<Sampler> sampler);
 	//
 	virtual std::shared_ptr<NNByte[]> GetPixelData();
 	virtual void SavePixelData(const NNChar* filepath);

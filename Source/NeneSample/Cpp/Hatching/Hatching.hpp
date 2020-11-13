@@ -69,8 +69,8 @@ namespace hatching
 		auto cube = Geometry::CreateCube();
 		auto ball = Geometry::CreateSphereUV(30, 30);
 		//
-		auto bunny = StaticMesh::Create("Resource/Mesh/bunny/bunny_with_uv.obj", 30.0f);
-		auto tex_bunny_lapped_coord = Texture2D::Create("LappedCoord.png");
+		auto bunny = StaticMesh::Create("Resource/Mesh/bunny/bunny_with_uv.obj");
+		auto tex_bunny_lapped_coord = Texture2D::Create("LappedCoord.exr");
 		auto tex_lapped_patch = Texture2D::Create("Resource/Texture/splotch_checkboard.png");
 		auto shader_lapped = Shader::Create("Resource/Shader/GLSL/LappedTexture.vert", "Resource/Shader/GLSL/LappedTexture.frag");
 		// <Real-Time Hatching> Praun et al.
@@ -82,6 +82,10 @@ namespace hatching
 		//
 		static const size_t MIPMAP_LEVELS = 4;
 		static const NNUInt MAX_TONE_LEVELS = 64;
+		//
+		auto sampler = Sampler::Create(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+		//
+		tex_bunny_lapped_coord->SetSampler(sampler);
 		//
 		NNChar filepath[256];
 		std::vector<std::vector<std::string>> images(MIPMAP_LEVELS);
@@ -168,7 +172,8 @@ namespace hatching
 
 			{
 				tex_vol->Use(0);
-				tex_bunny_lapped_coord->Use(1);
+				tex_lapped_patch->Use(1);
+				tex_bunny_lapped_coord->Use(2);
 				bunny->Draw(shader_lapped);
 			}
 

@@ -27,8 +27,6 @@ public:
 	void DrawCoverage() const;
 	//
 	void GenerateCoverageMesh();
-	//
-	void UpdateMeshAfterGrowth(bool should) { m_update_mesh_after_growth = should; };
 
 private:
 	//
@@ -53,7 +51,6 @@ private:
 private:
 	//
 	bool m_is_grown;
-	bool m_update_mesh_after_growth;
 	//
 	NNVec3 m_center_position;
 	std::vector<NNUInt> m_patch_indices;

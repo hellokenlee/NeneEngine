@@ -51,7 +51,7 @@ LappedTexturePatch::~LappedTexturePatch()
 {}
 
 LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const std::vector<Vertex>& vertices, const std::vector<std::unordered_map<NNUInt, FaceAdjacency>>& face_adjs, std::unordered_set<NNUInt>& faces):
-	m_source_indices(indices), m_source_vertices(vertices), m_candidate_faces(faces), m_source_face_adjacencies(face_adjs), m_is_grown(false), m_update_mesh_after_growth(true)
+	m_source_indices(indices), m_source_vertices(vertices), m_candidate_faces(faces), m_source_face_adjacencies(face_adjs), m_is_grown(false)
 {
 	// ≥ı º√Ê
 	//int random_pos = rand() % int(m_candidate_faces.size());
@@ -157,10 +157,7 @@ void LappedTexturePatch::Grow()
 	}
 	else
 	{
-		if (m_update_mesh_after_growth)
-		{
-			m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
-		}
+		m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
 	}
 }
 
