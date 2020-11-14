@@ -70,7 +70,7 @@ namespace hatching
 		auto ball = Geometry::CreateSphereUV(30, 30);
 		//
 		auto bunny = StaticMesh::Create("Resource/Mesh/bunny/bunny_with_uv.obj");
-		auto tex_bunny_lapped_coord = Texture2D::Create("LappedCoord.exr");
+		auto tex_bunny_lapped_coord = Texture2D::Create("Resource/Texture/Hatching/LappedCoordPadded.png");
 		auto tex_lapped_patch = Texture2D::Create("Resource/Texture/splotch_checkboard.png");
 		auto shader_lapped = Shader::Create("Resource/Shader/GLSL/LappedTexture.vert", "Resource/Shader/GLSL/LappedTexture.frag");
 		// <Real-Time Hatching> Praun et al.
@@ -84,7 +84,6 @@ namespace hatching
 		static const NNUInt MAX_TONE_LEVELS = 64;
 		//
 		auto sampler = Sampler::Create(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-		//
 		tex_bunny_lapped_coord->SetSampler(sampler);
 		//
 		NNChar filepath[256];
@@ -193,9 +192,7 @@ namespace hatching
 			{
 				g_shader_update = false;
 				printf("========== Compiling Shaders >>> ===========\n");
-				shader_fraud->Recompile();
-				shader_praun->Recompile();
-				shader_praun_scheme1->Recompile();
+				Shader::RecompileAllShaders();
 				printf("========== Compiling Shaders <<< ===========\n");
 			}
 		}

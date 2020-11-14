@@ -18,7 +18,8 @@ in vec3 position_VS_out;
 out vec4 color_FS_out;
 
 layout (binding = 0) uniform sampler3D tex_hacth;
-layout (binding = 1) uniform sampler2D tex_lapped_coord;
+layout (binding = 1) uniform sampler2D tex_patch;
+layout (binding = 2) uniform sampler2D tex_lapped_coord;
 
 layout (std140, binding = 0) uniform UBO0 
 {
@@ -46,17 +47,23 @@ void main() {
 	float tone = clamp(diffuse, 0.0, 1.0);
 	
 	//
-	vec2 uv = texture(tex_lapped_coord, texcoord_VS_out).rg;
+	vec4 lappedcoord = textureLod(tex_lapped_coord, texcoord_VS_out, 0);
 	
 	// Sample Hatching Volume Texture
-	vec2 texcoord = uv * texcoord_scale;
+	vec2 texcoord = lappedcoord.xy;
 	vec3 voltexcoord = vec3(texcoord, 1.0 - tone);
-	vec4 final_color = texture(tex_hacth, voltexcoord);
+	vec4 final_color = textureLod(tex_hacth, voltexcoord, 0);
+	//vec4 final_color = texture(tex_hacth, voltexcoord, 0);
+
+
+	// final_color.a = lappedcoord.b;
+
 
 	//
-	color_FS_out = vec4(final_color.rgb, 1.0);
+	color_FS_out = final_color;
 
-	float level = textureQueryLod(tex_hacth, voltexcoord).y;
-	color_FS_out = vec4(level, level, level, 1.0);
-	color_FS_out = vec4(uv, 0.0, 1.0);
+	// color_FS_out = vec4(lappedcoord.b, 0.0, 0.0, 1.0);
+
+	//float level = textureQueryLod(tex_hacth, voltexcoord).y;
+	//color_FS_out = vec4(level, level, level, 1.0);
 }
