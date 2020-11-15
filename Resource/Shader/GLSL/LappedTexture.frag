@@ -50,10 +50,10 @@ void main() {
 	vec4 lappedcoord = textureLod(tex_lapped_coord, texcoord_VS_out, 0);
 	
 	// Sample Hatching Volume Texture
-	vec2 texcoord = lappedcoord.xy;
+	vec2 texcoord = lappedcoord.xy * texcoord_scale;
 	vec3 voltexcoord = vec3(texcoord, 1.0 - tone);
 	vec4 final_color = textureLod(tex_hacth, voltexcoord, 0);
-	//vec4 final_color = texture(tex_hacth, voltexcoord, 0);
+	//vec4 final_color = texture(tex_hacth, voltexcoord);
 
 
 	// final_color.a = lappedcoord.b;

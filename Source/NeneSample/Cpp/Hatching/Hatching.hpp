@@ -10,7 +10,7 @@ namespace hatching
 {
 	bool g_shader_update = false;
 
-	float g_texcoord_scale = 5.0f;
+	float g_texcoord_scale = 2.0f;
 	float g_light_position[3] = { 3.0f, 4.0f, -4.0f };
 	float g_camera_position[3] = { 0.0f, 0.0f, 0.0f };
 	float g_camera_rotation[2] = { 0.0f, 0.0f };

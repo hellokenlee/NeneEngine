@@ -122,9 +122,9 @@ namespace lappedtexture
 		auto controls = UserInterface::Create(DrawGraphicUserInterfaces);
 		//
 		cc->m_speed = 3.0f;
-		cc->SetYaw(4.1f);
-		cc->SetPitch(-0.4f);
-		cc->SetPosition(NNVec3(3.1f, 6.0f, 5.6f));
+		cc->SetYaw(4.4f);
+		cc->SetPitch(0.4f);
+		cc->SetPosition(NNVec3(1.2f, 0.7f, 3.6f));
 		//
 		auto bunny = StaticMesh::Create("Resource/Mesh/bunny/bunny_with_uv.obj");
 		//
