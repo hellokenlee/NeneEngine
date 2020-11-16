@@ -6,7 +6,7 @@
 
 int main()
 {
-	// hatching::Main();
-	lappedtexture::Main();
+	hatching::Main();
+	//lappedtexture::Main();
 	return 0;
 }

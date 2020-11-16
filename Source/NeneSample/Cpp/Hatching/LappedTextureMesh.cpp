@@ -277,6 +277,12 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 	}
 	m_need_to_update_coverage = false;
 	//
+	if (m_candidate_faces.size() <= 2)
+	{
+		m_candidate_faces.clear();
+		return;
+	}
+	//
 	m_coverage_rtt->Begin();
 	{
 		Utils::Clear(0.0f, 0.0f, 0.0f, 0.0f);
@@ -333,11 +339,6 @@ void LappedTextureMesh::DrawAndCalcFaceCoverage()
 	for (const auto face : faces_to_readd)
 	{
 		m_candidate_faces.insert(face);
-	}
-	//
-	if (m_candidate_faces.size() < 2)
-	{
-		m_candidate_faces.clear();
 	}
 	//
 	// m_coverage_rtt->GetColorTex(0)->SavePixelData("coverage.png");

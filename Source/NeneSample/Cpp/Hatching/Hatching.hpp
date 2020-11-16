@@ -15,6 +15,7 @@ namespace hatching
 	float g_camera_position[3] = { 0.0f, 0.0f, 0.0f };
 	float g_camera_rotation[2] = { 0.0f, 0.0f };
 	float g_light_intensity = 1.0f;
+	float g_model_rotation_speed = 0.0f;
 
 	void KeyboardControl(std::shared_ptr<BaseEvent> eve) 
 	{
@@ -48,6 +49,10 @@ namespace hatching
 			//
 			ImGui::Text("LightIntensity: ");
 			ImGui::SliderFloat("   ", &g_light_intensity, 0.0f, 2.0f);
+			//
+			ImGui::Text("ModelRotation: ");
+			ImGui::SliderFloat("     ", &g_model_rotation_speed, 0.0f, M_PI_TIMES_2);
+
 		}
 		ImGui::End();
 	}
@@ -116,9 +121,9 @@ namespace hatching
 			"Resource/Texture/BTAM/Default_Mip3_Tone345.png"
 		});
 		//
-		cc->SetPosition(NNVec3(4.0f, 5.0f, 4.0f));
-		cc->SetYaw(4.0f);
-		cc->SetPitch(-0.7f);
+		cc->SetPosition(NNVec3(3.6f, 5.4f, -6.0f));
+		cc->SetYaw(2.1f);
+		cc->SetPitch(-0.4f);
 		cc->m_speed = 3.0f;
 		ball->MoveTo(NNVec3(0.0, 1.0, 0.0));
 		//
@@ -143,6 +148,8 @@ namespace hatching
 			LightConstantBuffer.Data().position.y = g_light_position[1];
 			LightConstantBuffer.Data().position.z = g_light_position[2];
 			LightConstantBuffer.Update(NNConstantBufferSlot::CUSTOM_LIGHT_SLOT);
+			//
+			bunny->RotateY(g_model_rotation_speed);
 			//
 			{
 				Utils::Clear();

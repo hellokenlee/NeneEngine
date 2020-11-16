@@ -54,11 +54,11 @@ LappedTexturePatch::LappedTexturePatch(const std::vector<NNUInt>& indices, const
 	m_source_indices(indices), m_source_vertices(vertices), m_candidate_faces(faces), m_source_face_adjacencies(face_adjs), m_is_grown(false)
 {
 	// ≥ı º√Ê
-	//int random_pos = rand() % int(m_candidate_faces.size());
-	//auto random_it = std::next(std::begin(m_candidate_faces), random_pos);
-	//NNUInt sface = *random_it;
+	int random_pos = rand() % int(m_candidate_faces.size());
+	auto random_it = std::next(std::begin(m_candidate_faces), random_pos);
+	NNUInt sface = *random_it;
 	//NNUInt sface = *(m_candidate_faces.begin());
-	NNUInt sface = 1525;
+	//NNUInt sface = 1525;
 	//
 	NNUInt pface = AddSourceFaceToPatch(sface);
 	//
@@ -158,7 +158,7 @@ void LappedTexturePatch::Grow()
 	}
 	else
 	{
-		m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
+		//m_patch_rendering_mesh = Mesh::Create(m_patch_vertices, m_patch_indices, {});
 	}
 }
 
@@ -309,17 +309,16 @@ bool LappedTexturePatch::IsValidAdjacency(const FaceAdjacency& adj)
 	{
 		return false;
 	}
-	//
-	NNVec3 na = m_source_vertices[m_source_indices[IA(adj.src_face)]].m_normal;
-	NNVec3 nb = m_source_vertices[m_source_indices[IB(adj.src_face)]].m_normal;
-	NNVec3 nc = m_source_vertices[m_source_indices[IC(adj.src_face)]].m_normal;
-	//
-	NNVec3 nf_origin = NNNormalize((na + nb + nc) / 3.0f);
-	if(NNDot(nf, nf_origin) < 0.95f)
-	{
-		return false;
-	}
-	dLog("[Patch] Curvature: %f", NNDot(nf, nf_origin));
+	////
+	//NNVec3 na = m_source_vertices[m_source_indices[IA(adj.src_face)]].m_normal;
+	//NNVec3 nb = m_source_vertices[m_source_indices[IB(adj.src_face)]].m_normal;
+	//NNVec3 nc = m_source_vertices[m_source_indices[IC(adj.src_face)]].m_normal;
+	////
+	//NNVec3 nf_origin = NNNormalize((na + nb + nc) / 3.0f);
+	//if(NNDot(nf, nf_origin) < 0.95f)
+	//{
+	//	return false;
+	//}
 	//
 	return true;
 }

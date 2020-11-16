@@ -37,6 +37,17 @@ layout (std140, binding = 2) uniform UBO2
 };
 
 
+float CalcMipLevel(vec3 worldposition)
+{
+	worldposition *= 600.0f;
+	vec3 dx_vtc = dFdx(worldposition);
+    vec3 dy_vtc = dFdy(worldposition);
+    float max_delta = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));
+    float level = 0.5 * log2(max_delta);
+    return level;
+}
+
+
 void main() {
 	// Light Calc
 	vec3 light_dir = normalize(lights[0].position.xyz - position_VS_out);
@@ -52,18 +63,15 @@ void main() {
 	// Sample Hatching Volume Texture
 	vec2 texcoord = lappedcoord.xy * texcoord_scale;
 	vec3 voltexcoord = vec3(texcoord, 1.0 - tone);
-	vec4 final_color = textureLod(tex_hacth, voltexcoord, 0);
-	//vec4 final_color = texture(tex_hacth, voltexcoord);
-
-
-	// final_color.a = lappedcoord.b;
-
+	float level = max(CalcMipLevel(position_VS_out) - 2, 0.0);
+	vec4 final_color = textureLod(tex_hacth, voltexcoord, level);
 
 	//
 	color_FS_out = final_color;
 
-	// color_FS_out = vec4(lappedcoord.b, 0.0, 0.0, 1.0);
-
-	//float level = textureQueryLod(tex_hacth, voltexcoord).y;
-	//color_FS_out = vec4(level, level, level, 1.0);
+	//
+	// color_FS_out = vec4(textureQueryLod(tex_hacth, voltexcoord).y, 0.0, 0.0, 1.0);
+	//
+	//level = clamp(level, 0.0, 3.0) / 3.0;
+	//color_FS_out = vec4(level, 0.0, 0.0, 1.0);
 }

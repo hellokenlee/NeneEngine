@@ -46,7 +46,4 @@ Project/**/*.obj
 *.scc
 debug.png
 coverage.png
-LappedCoord.png
-LappedCoord.exr
-FlattenCoord.png
-LappedCoordPadded.png
+
