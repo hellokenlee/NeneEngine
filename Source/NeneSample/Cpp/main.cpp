@@ -2,11 +2,11 @@
 #include "Simple/Main.hpp"
 #include "Hatching/Hatching.hpp"
 #include "Hatching/LappedTexture.hpp"
+#include "UnitSphere/Main.hpp"
 
 
 int main()
 {
-	hatching::Main();
-	//lappedtexture::Main();
+	UnitSphere::Main();
 	return 0;
 }

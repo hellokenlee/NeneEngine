@@ -1,22 +1,24 @@
 ﻿/*Copyright reserved by KenLee@2018 ken4000kl@gmail.com*/
-#ifndef SIMPLE_MAIN_HPP
-#define SIMPLE_MAIN_HPP
+#ifndef UNIT_SPHERE_MAIN_HPP
+#define UNIT_SPHERE_MAIN_HPP
 
 #include "NeneEngine/Debug.h"
 #include "NeneEngine/Nene.h"
 
-namespace simple
+namespace Simple
 {
-	void MyCallback(std::shared_ptr<BaseEvent> eve) {
+	void MyCallback(std::shared_ptr<BaseEvent> eve) 
+	{
 		std::shared_ptr<KeyboardEvent> k_event = std::dynamic_pointer_cast<KeyboardEvent>(eve);
 		if (k_event->mKey == NNKeyMap(ESCAPE)) {
 			Utils::SetWindowShouldClose(true);
 		}
 	}
 
-	int Main() {
+	int Main() 
+	{
 		// 初始化
-		Utils::Init("Sample1", 800, 600);
+		Utils::Init("UnitSphere", 800, 600);
 		// 背景色
 		Utils::ClearColor(0.1f, 0.1f, 0.1f);
 		// 增加回调
@@ -29,9 +31,9 @@ namespace simple
 		//
 		auto cube = Geometry::CreateCube();
 		auto quad = Geometry::CreateQuad();
-		auto shader = Shader::Create("../../Resource/Shader/GLSL/Common.vert", "../../Resource/Shader/GLSL/Common.frag", POSITION_NORMAL_TEXTURE, true);
-		auto shadowed_shader = Shader::Create("../../Resource/Shader/GLSL/ShadowedCommon.vert", "../../Resource/Shader/GLSL/ShadowedCommon.frag", POSITION_NORMAL_TEXTURE, true);
-		auto tx = Texture2D::Create("../../Resource/Texture/snow.jpg");
+		auto shader = Shader::Create("Resource/Shader/GLSL/Common.vert", "Resource/Shader/GLSL/Common.frag", POSITION_NORMAL_TEXTURE, true);
+		auto shadowed_shader = Shader::Create("Resource/Shader/GLSL/ShadowedCommon.vert", "Resource/Shader/GLSL/ShadowedCommon.frag", POSITION_NORMAL_TEXTURE, true);
+		auto tx = Texture2D::Create("Resource/Texture/hatching01.png");
 		//
 		auto sm = ShadowMap::Create(10.0f, 512, 512);
 		// 主循环
@@ -61,4 +63,4 @@ namespace simple
 	}
 };
 
-#endif // SIMPLE_MAIN_HPP
+#endif //  UNIT_SPHERE_MAIN_HPP

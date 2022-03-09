@@ -163,7 +163,7 @@ namespace hatching
 				ball->Draw(shader_praun);
 			}
 			//*/
-			/* <Real-Time Stroke Textures> Freud. et al.
+			//* <Real-Time Stroke Textures> Freud. et al.
 			{
 				tex_hatch->Use(0);
 				ball->Draw(shader_fraud);
@@ -176,12 +176,14 @@ namespace hatching
 			}
 			//*/
 
+			/* <Hatching With Lapped Texture> Praun et al. Scheme1
 			{
 				tex_vol->Use(0);
 				tex_lapped_patch->Use(1);
 				tex_bunny_lapped_coord->Use(2);
 				bunny->Draw(shader_lapped);
 			}
+			*/
 
 			//
 			{
